@@ -52,7 +52,7 @@ export default function Auth() {
               <Input
                 id="username"
                 type="text"
-                placeholder="Dev, Admin, User ou Financeiro"
+                placeholder="Admin, User ou Financeiro"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
