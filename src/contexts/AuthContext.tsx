@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Dev and Admin have full access
     if (role === 'dev' || role === 'admin') return true;
     
-    // User can only edit Calendar
-    if (role === 'user' && page === 'calendar') return true;
+    // User can edit Dashboard and Calendar
+    if (role === 'user' && (page === 'dashboard' || page === 'calendar')) return true;
     
     // Financeiro cannot edit anything
     return false;
