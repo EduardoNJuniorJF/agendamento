@@ -96,17 +96,7 @@ export function AppSidebar() {
         {!collapsed && (
           <>
             <Separator />
-            <div className="text-xs text-muted-foreground space-y-1 px-2">
-              {user && (
-                <p className="truncate">
-                  <span className="font-medium">Usuário:</span> {user.email}
-                </p>
-              )}
-              {role && (
-                <p className="capitalize">
-                  <span className="font-medium">Perfil:</span> {role}
-                </p>
-              )}
+            <div className="text-xs text-muted-foreground px-2">
               <p>
                 <span className="font-medium">Versão:</span> 1.0
               </p>
