@@ -429,6 +429,9 @@ export default function Vacations() {
                         setVacationForm({ ...vacationForm, ...updates });
                       }}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Não é permitido marcar o início de férias nos 2 dias que antecedem um feriado descanso semanal remunerado.
+                    </p>
                   </div>
 
                   <div>
