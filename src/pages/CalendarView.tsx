@@ -8,6 +8,7 @@ import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { isHoliday, getHolidayName } from '@/lib/holidays';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DndContext,
   DragEndEvent,
@@ -42,6 +43,7 @@ export default function CalendarView() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { canEdit } = useAuth();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
