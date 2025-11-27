@@ -152,6 +152,7 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -161,6 +162,7 @@ export type Database = {
           id: string
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -170,6 +172,7 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -323,6 +326,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_email_from_username: { Args: { _username: string }; Returns: string }
       get_upcoming_vacation_reminders: {
         Args: never
         Returns: {
