@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import logo from '@/assets/logo.svg';
 
 export default function Auth() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -19,7 +19,7 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(username, password);
 
     if (error) {
       toast.error('Erro ao fazer login', {
@@ -48,13 +48,13 @@ export default function Auth() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Usuário</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="Dev, Admin, User ou Financeiro"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={loading}
               />

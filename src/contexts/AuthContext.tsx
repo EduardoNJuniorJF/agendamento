@@ -72,9 +72,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (username: string, password: string) => {
+    // First, get email from username
+    const { data: emailData, error: emailError } = await supabase
+      .rpc('get_email_from_username', { _username: username });
+
+    if (emailError || !emailData) {
+      return { error: { message: 'Usuário não encontrado' } };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: emailData,
       password,
     });
     return { error };
