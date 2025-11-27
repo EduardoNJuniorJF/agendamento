@@ -162,7 +162,8 @@ export default function Vacations() {
     if (isTwoDaysBeforeWeekendOrHoliday(startDate)) {
       toast({
         title: "Data inválida para início de férias",
-        description: "Não é permitido iniciar férias nos dois dias que antecedem um feriado ou fim de semana (dia de descanso semanal remunerado).",
+        description:
+          "Não é permitido iniciar férias nos dois dias que antecedem um feriado ou fim de semana (dia de descanso semanal remunerado).",
         variant: "destructive",
       });
       return;
@@ -433,7 +434,7 @@ export default function Vacations() {
                         }}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        ⚠️ Regras: Férias não podem iniciar em feriados, fins de semana, ou nos 2 dias anteriores a eles.
+                        Regras: Férias não podem iniciar em feriados, fins de semana, ou nos 2 dias anteriores a eles.
                       </p>
                     </div>
 
