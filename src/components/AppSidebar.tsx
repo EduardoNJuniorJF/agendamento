@@ -1,8 +1,8 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key } from 'lucide-react';
-import { NavLink } from '@/components/NavLink';
-import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import logo from '@/assets/logo-dashboard.svg';
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key } from "lucide-react";
+import { NavLink } from "@/components/NavLink";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo-dashboard.svg";
 import {
   Sidebar,
   SidebarContent,
@@ -14,16 +14,16 @@ import {
   SidebarMenuItem,
   useSidebar,
   SidebarFooter,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const menuItems = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard },
-  { title: 'Calendário', url: '/calendar', icon: Calendar },
-  { title: 'Frota', url: '/fleet', icon: Car },
-  { title: 'Equipe', url: '/team', icon: Users },
-  { title: 'Férias e Folgas', url: '/vacations', icon: Umbrella },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Calendário", url: "/calendar", icon: Calendar },
+  { title: "Frota", url: "/fleet", icon: Car },
+  { title: "Equipe", url: "/team", icon: Users },
+  { title: "Férias e Folgas", url: "/vacations", icon: Umbrella },
 ];
 
 export function AppSidebar() {
@@ -33,15 +33,13 @@ export function AppSidebar() {
   const { signOut, user, role } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
-  const collapsed = state === 'collapsed';
+  const collapsed = state === "collapsed";
 
   return (
-    <Sidebar className={collapsed ? 'w-14' : 'w-60'}>
+    <Sidebar className={collapsed ? "w-14" : "w-60"}>
       <SidebarContent>
         <div className="p-4 border-b border-sidebar-border">
-          {!collapsed && (
-            <img src={logo} alt="Agendamento" className="w-full h-auto" />
-          )}
+          {!collapsed && <img src={logo} alt="Agendamento" className="w-full h-auto" />}
         </div>
 
         <SidebarGroup>
@@ -70,7 +68,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 space-y-2">
         <Separator />
-        
+
         <div className="space-y-2">
           <SidebarMenuButton asChild>
             <NavLink
@@ -98,7 +96,7 @@ export function AppSidebar() {
             <Separator />
             <div className="text-xs text-muted-foreground px-2">
               <p>
-                <span className="font-medium">Versão:</span> 1.0
+                <span className="font-medium">Versão:</span> 1.1.0
               </p>
             </div>
           </>
