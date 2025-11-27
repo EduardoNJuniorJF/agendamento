@@ -280,7 +280,7 @@ export default function CalendarView() {
                       {format(day, 'dd/MM', { locale: ptBR })}
                     </div>
                     {isDayHoliday && holidayName && (
-                      <Badge variant="secondary" className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center">
+                      <Badge variant="destructive" className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center">
                         <PartyPopper className="h-3 w-3" />
                         {holidayName}
                       </Badge>
