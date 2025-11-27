@@ -247,6 +247,11 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <CardTitle>Calendário da Semana</CardTitle>
             <div className="flex items-center gap-2">
+              <div className="text-center min-w-[200px]">
+                <p className="text-sm font-medium">
+                  {format(weekDays[0], 'dd/MM', { locale: ptBR })} - {format(weekDays[4], 'dd/MM/yyyy', { locale: ptBR })}
+                </p>
+              </div>
               <Button
                 variant="outline"
                 size="icon"
@@ -254,11 +259,6 @@ export default function Dashboard() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="text-center min-w-[200px]">
-                <p className="text-sm font-medium">
-                  {format(weekDays[0], 'dd/MM', { locale: ptBR })} - {format(weekDays[4], 'dd/MM/yyyy', { locale: ptBR })}
-                </p>
-              </div>
               <Button
                 variant="outline"
                 onClick={() => setCurrentWeek(new Date())}
