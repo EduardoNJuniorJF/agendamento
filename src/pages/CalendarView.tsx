@@ -219,7 +219,9 @@ export default function CalendarView() {
           <h1 className="text-3xl font-bold tracking-tight">Calendário</h1>
           <p className="text-muted-foreground">Visualize todos os agendamentos</p>
         </div>
-        <Button onClick={() => navigate('/new-appointment')}>Novo Agendamento</Button>
+        {canEdit('calendar') && (
+          <Button onClick={() => navigate('/new-appointment')}>Novo Agendamento</Button>
+        )}
       </div>
 
       <div className="flex items-center justify-between bg-card rounded-lg border p-4">
@@ -302,22 +304,26 @@ export default function CalendarView() {
                       borderColor={apt.agents && apt.agents.length > 0 && apt.agents[0].color ? apt.agents[0].color : 'hsl(var(--primary) / 0.2)'}
                     >
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 bg-background/80 hover:bg-background"
-                          onClick={() => handleEditAppointment(apt.id)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                          onClick={() => handleDeleteAppointment(apt.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {canEdit('calendar') && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 bg-background/80 hover:bg-background"
+                              onClick={() => handleEditAppointment(apt.id)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleDeleteAppointment(apt.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                           <div className="grid grid-cols-3 gap-x-3 gap-y-2">
                             <div>
