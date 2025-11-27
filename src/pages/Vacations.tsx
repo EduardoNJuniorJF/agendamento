@@ -141,27 +141,28 @@ export default function Vacations() {
       return;
     }
 
-    // Validação completa do início das férias
+    // Validação completa do início das férias conforme legislação trabalhista
     const startDate = parseISO(vacationForm.start_date);
 
-    // 1. Não pode coincidir com sábado, domingo ou feriado
+    // REGRA 1: Férias não podem iniciar em sábado, domingo ou feriado
     if (isWeekendOrHoliday(startDate)) {
       const holidayName = getHolidayName(startDate);
       toast({
-        title: "Data inválida",
+        title: "Data inválida para início de férias",
         description: holidayName
-          ? `Não é possível iniciar férias em feriado (${holidayName}).`
-          : "Não é possível iniciar férias em fim de semana.",
+          ? `Não é permitido iniciar férias em feriado (${holidayName}). As férias devem começar em dia útil.`
+          : "Não é permitido iniciar férias em fim de semana (sábado ou domingo). As férias devem começar em dia útil.",
         variant: "destructive",
       });
       return;
     }
 
-    // 2. Não pode ocorrer nos dois dias que antecedem o feriado ou dia de repouso semanal remunerado
+    // REGRA 2: Férias não podem iniciar nos 2 dias que antecedem feriado ou dia de descanso semanal remunerado (DSR)
+    // Exemplos: não pode iniciar na quinta-feira (2 dias antes do sábado) ou na quarta-feira (2 dias antes de feriado na sexta)
     if (isTwoDaysBeforeWeekendOrHoliday(startDate)) {
       toast({
-        title: "Data inválida",
-        description: "Não é possível iniciar férias nos dois dias que antecedem um feriado ou fim de semana.",
+        title: "Data inválida para início de férias",
+        description: "Não é permitido iniciar férias nos dois dias que antecedem um feriado ou fim de semana (dia de descanso semanal remunerado).",
         variant: "destructive",
       });
       return;
@@ -432,8 +433,7 @@ export default function Vacations() {
                         }}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Não é permitido marcar o início de férias nos 2 dias que antecedem um feriado ou dia de descanso
-                        semanal remunerado.
+                        ⚠️ Regras: Férias não podem iniciar em feriados, fins de semana, ou nos 2 dias anteriores a eles.
                       </p>
                     </div>
 
