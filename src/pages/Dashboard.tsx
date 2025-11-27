@@ -299,7 +299,7 @@ export default function Dashboard() {
                       {format(day, 'MMM', { locale: ptBR })}
                     </div>
                     {isDayHoliday && holidayName && (
-                      <Badge variant="secondary" className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center w-full">
+                      <Badge variant="destructive" className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center w-full">
                         <PartyPopper className="h-3 w-3" />
                         {holidayName}
                       </Badge>
