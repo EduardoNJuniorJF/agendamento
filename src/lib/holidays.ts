@@ -73,6 +73,17 @@ export function isHoliday(date: Date): boolean {
   return false;
 }
 
+export function isWeekendOrHoliday(date: Date): boolean {
+  // Verifica se é fim de semana (sábado ou domingo)
+  const dayOfWeek = date.getDay();
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return true;
+  }
+
+  // Verifica se é feriado
+  return isHoliday(date);
+}
+
 export function isBeforeWeekendOrHoliday(date: Date): boolean {
   // Verifica se é sexta-feira (dia antes do fim de semana)
   const dayOfWeek = date.getDay();
@@ -84,6 +95,24 @@ export function isBeforeWeekendOrHoliday(date: Date): boolean {
   // Verifica se o dia seguinte é feriado
   const nextDay = addDays(date, 1);
   if (isHoliday(nextDay)) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isTwoDaysBeforeWeekendOrHoliday(date: Date): boolean {
+  // Verifica o dia seguinte
+  const nextDay = addDays(date, 1);
+  
+  // Verifica se o dia seguinte é feriado ou fim de semana
+  if (isWeekendOrHoliday(nextDay)) {
+    return true;
+  }
+
+  // Verifica dois dias depois (se amanhã é sexta e depois é sábado, ou se depois de amanhã é feriado)
+  const twoDaysAfter = addDays(date, 2);
+  if (isWeekendOrHoliday(twoDaysAfter)) {
     return true;
   }
 
