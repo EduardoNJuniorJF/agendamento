@@ -244,40 +244,46 @@ export default function Dashboard() {
       {/* Calendário da Semana - Primeira linha */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Calendário da Semana</CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="text-center min-w-[280px]">
-                <p className="text-sm font-medium">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <CardTitle className="text-lg md:text-xl">Calendário da Semana</CardTitle>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="text-center">
+                <p className="text-xs md:text-sm font-medium">
                   Semana de {format(weekDays[0], 'dd/MM/yyyy', { locale: ptBR })} a {format(weekDays[4], 'dd/MM/yyyy', { locale: ptBR })}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentWeek(new Date())}
-                size="sm"
-              >
-                Hoje
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentWeek(new Date())}
+                  size="sm"
+                  className="h-8"
+                >
+                  Hoje
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-5 gap-4">
+        <CardContent className="px-2 md:px-6">
+          <div className="overflow-x-auto pb-4 -mx-2 px-2">
+            <div className="grid grid-cols-5 gap-2 md:gap-4 min-w-[640px]">
             {weekDays.map((day) => {
               const dayAppointments = getAppointmentsForDay(day);
               const isDayHoliday = isHoliday(day);
@@ -286,28 +292,28 @@ export default function Dashboard() {
                 <DroppableDay 
                   key={day.toISOString()} 
                   id={format(day, 'yyyy-MM-dd')}
-                  className="border rounded-lg p-3 min-h-[300px]"
+                  className="border rounded-lg p-2 md:p-3 min-h-[280px] md:min-h-[300px]"
                 >
-                  <div className="text-center mb-3">
-                    <div className="font-semibold text-sm">
+                  <div className="text-center mb-2 md:mb-3">
+                    <div className="font-semibold text-xs md:text-sm">
                       {format(day, 'EEEE', { locale: ptBR })}
                     </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-xl md:text-2xl font-bold">
                       {format(day, 'dd', { locale: ptBR })}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] md:text-xs text-muted-foreground">
                       {format(day, 'MMM', { locale: ptBR })}
                     </div>
                     {isDayHoliday && holidayName && (
-                      <Badge variant="destructive" className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center w-full">
-                        <PartyPopper className="h-3 w-3" />
-                        {holidayName}
+                      <Badge variant="destructive" className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center w-full">
+                        <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                        <span className="truncate">{holidayName}</span>
                       </Badge>
                     )}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 md:space-y-2">
                     {dayAppointments.length === 0 ? (
-                      <p className="text-xs text-muted-foreground text-center py-4">
+                      <p className="text-[10px] md:text-xs text-muted-foreground text-center py-3 md:py-4">
                         Nenhum agendamento
                       </p>
                     ) : (
@@ -318,46 +324,46 @@ export default function Dashboard() {
                           backgroundColor={apt.agents && apt.agents.length > 0 && apt.agents[0].color ? `${apt.agents[0].color}15` : 'hsl(var(--primary) / 0.1)'}
                           borderColor={apt.agents && apt.agents.length > 0 && apt.agents[0].color ? apt.agents[0].color : 'hsl(var(--primary) / 0.2)'}
                         >
-                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 bg-background/80 hover:bg-background"
+                              className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
                               onClick={() => handleEditAppointment(apt.id)}
                             >
-                              <Edit className="h-3 w-3" />
+                              <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                              className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
                               onClick={() => handleDeleteAppointment(apt.id)}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
                             </Button>
                           </div>
-                          <div className="grid grid-cols-3 gap-x-3 gap-y-2">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-3 gap-y-1.5 md:gap-y-2">
                             <div>
-                              <div className="font-medium text-[11px]">Cliente / Ticket:</div>
-                              <div className="font-semibold truncate">{apt.title}</div>
+                              <div className="font-medium text-[9px] md:text-[11px]">Cliente / Ticket:</div>
+                              <div className="font-semibold truncate text-xs md:text-sm">{apt.title}</div>
                             </div>
                             <div>
-                              <div className="font-medium text-[11px]">Cidade:</div>
-                              <div className="text-muted-foreground truncate">{apt.city}</div>
+                              <div className="font-medium text-[9px] md:text-[11px]">Cidade:</div>
+                              <div className="text-muted-foreground truncate text-xs md:text-sm">{apt.city}</div>
                             </div>
                             <div>
-                              <div className="font-medium text-[11px]">Data:</div>
-                              <div className="text-muted-foreground">
+                              <div className="font-medium text-[9px] md:text-[11px]">Data:</div>
+                              <div className="text-muted-foreground text-xs md:text-sm">
                                 {format(parseISO(apt.date), 'dd/MM/yyyy', { locale: ptBR })}
                               </div>
                             </div>
                             <div>
-                              <div className="font-medium text-[11px]">Horário:</div>
-                              <div className="text-muted-foreground">{apt.time}</div>
+                              <div className="font-medium text-[9px] md:text-[11px]">Horário:</div>
+                              <div className="text-muted-foreground text-xs md:text-sm">{apt.time}</div>
                             </div>
                             <div>
-                              <div className="font-medium text-[11px]">Agente:</div>
-                              <div className="text-muted-foreground space-y-0.5">
+                              <div className="font-medium text-[9px] md:text-[11px]">Agente:</div>
+                              <div className="text-muted-foreground space-y-0.5 text-xs md:text-sm">
                                 {apt.agents && apt.agents.length > 0
                                   ? apt.agents.map((agent, idx) => (
                                       <div key={idx} className="truncate">{agent.name}</div>
@@ -366,21 +372,21 @@ export default function Dashboard() {
                               </div>
                             </div>
                             <div>
-                              <div className="font-medium text-[11px]">Veículo:</div>
-                              <div className="text-muted-foreground truncate">
+                              <div className="font-medium text-[9px] md:text-[11px]">Veículo:</div>
+                              <div className="text-muted-foreground truncate text-xs md:text-sm">
                                 {apt.vehicles ? `${apt.vehicles.model}` : 'N/A'}
                               </div>
                             </div>
-                            <div className="col-span-2">
-                              <div className="font-medium text-[11px]">Despesas:</div>
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 mt-0.5">
+                            <div className="md:col-span-2">
+                              <div className="font-medium text-[9px] md:text-[11px]">Despesas:</div>
+                              <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 md:px-1.5 py-0.5 mt-0.5">
                                 {getExpenseLabel(apt.expense_status)}
                               </Badge>
                             </div>
                             {apt.description && (
-                              <div className="col-span-3">
-                                <div className="font-medium text-[11px]">Observações:</div>
-                                <div className="text-muted-foreground line-clamp-1">{apt.description}</div>
+                              <div className="md:col-span-3">
+                                <div className="font-medium text-[9px] md:text-[11px]">Observações:</div>
+                                <div className="text-muted-foreground line-clamp-1 text-xs md:text-sm">{apt.description}</div>
                               </div>
                             )}
                           </div>
@@ -391,51 +397,52 @@ export default function Dashboard() {
                 </DroppableDay>
               );
             })}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Segunda linha: Folgas (1/3) + Cards de estatísticas (2/3) */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Folgas da Semana - 1/3 da largura */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Umbrella className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+              <Umbrella className="h-4 w-4 md:h-5 md:w-5" />
               Folgas da Semana
             </CardTitle>
           </CardHeader>
           <CardContent>
             {stats.weekTimeOffs.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
+              <p className="text-xs md:text-sm text-muted-foreground text-center py-6 md:py-8">
                 Nenhuma folga cadastrada para esta semana
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5 md:space-y-2">
                 {weekDays.map((day) => {
                   const dayTimeOffs = getTimeOffsForDay(day);
                   if (dayTimeOffs.length === 0) return null;
                   
                   return (
-                    <div key={day.toISOString()} className="border rounded-lg p-3">
-                      <div className="font-semibold text-sm mb-2">
+                    <div key={day.toISOString()} className="border rounded-lg p-2 md:p-3">
+                      <div className="font-semibold text-xs md:text-sm mb-1.5 md:mb-2">
                         {format(day, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1.5 md:space-y-2">
                         {dayTimeOffs.map((timeOff) => (
                           <div 
                             key={timeOff.id} 
-                            className="border border-dashed rounded p-2 text-xs bg-muted/30"
+                            className="border border-dashed rounded p-1.5 md:p-2 text-xs bg-muted/30"
                           >
-                            <div className="flex items-center gap-2 mb-1">
-                              <Umbrella className="h-3 w-3 flex-shrink-0" />
-                              <span className="font-medium">
+                            <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                              <Umbrella className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
+                              <span className="font-medium text-[10px] md:text-xs">
                                 {timeOff.agents?.name || 'Geral'}
                               </span>
                             </div>
                             <Badge 
                               variant={timeOff.type === 'completa' ? 'default' : 'secondary'} 
-                              className="text-[10px]"
+                              className="text-[9px] md:text-[10px]"
                             >
                               {timeOff.type === 'completa' ? 'Folga Completa' : 'Folga Parcial'}
                             </Badge>
