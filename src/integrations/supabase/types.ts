@@ -211,6 +211,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vacations: {
         Row: {
           agent_id: string
@@ -312,12 +333,24 @@ export type Database = {
           start_date: string
         }[]
       }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_agent_on_vacation: {
         Args: { p_agent_id: string; p_date: string }
         Returns: boolean
       }
     }
     Enums: {
+      app_role: "dev" | "admin" | "user" | "financeiro"
       appointment_status:
         | "scheduled"
         | "in_progress"
@@ -456,6 +489,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["dev", "admin", "user", "financeiro"],
       appointment_status: [
         "scheduled",
         "in_progress",
