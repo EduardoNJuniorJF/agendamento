@@ -332,12 +332,13 @@ export default function Vacations() {
 
         {/* Vacations Tab */}
         <TabsContent value="vacations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {editingVacationId ? 'Editar Férias' : 'Cadastrar Férias'}
-              </CardTitle>
-            </CardHeader>
+          {canEdit('vacations') && (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {editingVacationId ? 'Editar Férias' : 'Cadastrar Férias'}
+                </CardTitle>
+              </CardHeader>
             <CardContent>
               <form onSubmit={handleVacationSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -488,6 +489,7 @@ export default function Vacations() {
               </form>
             </CardContent>
           </Card>
+          )}
 
           <Card>
             <CardHeader>
@@ -549,12 +551,13 @@ export default function Vacations() {
 
         {/* Time Off Tab */}
         <TabsContent value="time-off" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {editingTimeOffId ? 'Editar Folga' : 'Cadastrar Folga'}
-              </CardTitle>
-            </CardHeader>
+          {canEdit('vacations') && (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {editingTimeOffId ? 'Editar Folga' : 'Cadastrar Folga'}
+                </CardTitle>
+              </CardHeader>
             <CardContent>
               <form onSubmit={handleTimeOffSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -641,6 +644,7 @@ export default function Vacations() {
               </form>
             </CardContent>
           </Card>
+          )}
 
           <Card>
             <CardHeader>

@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, X } from 'lucide-react';
 import type { Database } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Agent = Database['public']['Tables']['agents']['Row'];
 type Vehicle = Database['public']['Tables']['vehicles']['Row'];
@@ -53,15 +54,27 @@ export default function NewAppointment() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { canEdit } = useAuth();
 
   useEffect(() => {
+    // Check permissions
+    if (!canEdit('calendar')) {
+      toast({
+        title: 'Acesso negado',
+        description: 'Você não tem permissão para acessar esta página.',
+        variant: 'destructive',
+      });
+      navigate('/calendar');
+      return;
+    }
+    
     loadData();
     const editId = searchParams.get('edit');
     if (editId) {
       setEditingId(editId);
       loadAppointment(editId);
     }
-  }, [searchParams]);
+  }, [searchParams, canEdit, navigate]);
 
   const loadData = async () => {
     const [agentsRes, vehiclesRes] = await Promise.all([
