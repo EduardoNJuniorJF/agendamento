@@ -247,9 +247,9 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <CardTitle>Calendário da Semana</CardTitle>
             <div className="flex items-center gap-2">
-              <div className="text-center min-w-[200px]">
+              <div className="text-center min-w-[280px]">
                 <p className="text-sm font-medium">
-                  {format(weekDays[0], 'dd/MM', { locale: ptBR })} - {format(weekDays[4], 'dd/MM/yyyy', { locale: ptBR })}
+                  Semana de {format(weekDays[0], 'dd/MM/yyyy', { locale: ptBR })} a {format(weekDays[4], 'dd/MM/yyyy', { locale: ptBR })}
                 </p>
               </div>
               <Button
