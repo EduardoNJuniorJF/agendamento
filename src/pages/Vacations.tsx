@@ -13,7 +13,8 @@ import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { isBeforeWeekendOrHoliday, calculateReturnDate, getHolidayName } from '@/lib/holidays';
+import { isBeforeWeekendOrHoliday, calculateReturnDate, getHolidayName, isWeekendOrHoliday, isTwoDaysBeforeWeekendOrHoliday } from '@/lib/holidays';
+import { addMonths } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Agent {
@@ -134,15 +135,27 @@ export default function Vacations() {
       return;
     }
 
-    // Validação: não permitir início em véspera de fim de semana ou feriado
+    // Validação completa do início das férias
     const startDate = parseISO(vacationForm.start_date);
-    if (isBeforeWeekendOrHoliday(startDate)) {
+    
+    // 1. Não pode coincidir com sábado, domingo ou feriado
+    if (isWeekendOrHoliday(startDate)) {
       const holidayName = getHolidayName(startDate);
       toast({
         title: 'Data inválida',
         description: holidayName 
-          ? `Não é possível iniciar férias em véspera de feriado (${holidayName} no dia seguinte).`
-          : 'Não é possível iniciar férias em véspera de fim de semana ou feriado.',
+          ? `Não é possível iniciar férias em feriado (${holidayName}).`
+          : 'Não é possível iniciar férias em fim de semana.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // 2. Não pode ocorrer nos dois dias que antecedem o feriado ou dia de repouso semanal remunerado
+    if (isTwoDaysBeforeWeekendOrHoliday(startDate)) {
+      toast({
+        title: 'Data inválida',
+        description: 'Não é possível iniciar férias nos dois dias que antecedem um feriado ou fim de semana.',
         variant: 'destructive',
       });
       return;
@@ -430,23 +443,40 @@ export default function Vacations() {
                   </div>
 
                   <div>
-                    <Label htmlFor="expiry_date">Vencimento</Label>
+                    <Label htmlFor="expiry_date">Vencimento (Período Aquisitivo)</Label>
                     <Input
                       id="expiry_date"
                       type="date"
                       value={vacationForm.expiry_date}
-                      onChange={(e) => setVacationForm({ ...vacationForm, expiry_date: e.target.value })}
+                      onChange={(e) => {
+                        const updates: any = { expiry_date: e.target.value };
+                        
+                        // Calcula automaticamente a data limite (12 meses após o vencimento)
+                        if (e.target.value) {
+                          const expiryDate = parseISO(e.target.value);
+                          const deadlineDate = addMonths(expiryDate, 12);
+                          updates.deadline = format(deadlineDate, 'yyyy-MM-dd');
+                        } else {
+                          updates.deadline = '';
+                        }
+                        
+                        setVacationForm({ ...vacationForm, ...updates });
+                      }}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="deadline">Data Limite</Label>
+                    <Label htmlFor="deadline">Data Limite (Período Concessivo - calculada automaticamente)</Label>
                     <Input
                       id="deadline"
                       type="date"
                       value={vacationForm.deadline}
-                      onChange={(e) => setVacationForm({ ...vacationForm, deadline: e.target.value })}
+                      disabled
+                      className="bg-muted cursor-not-allowed"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Prazo de 12 meses após o vencimento para conceder as férias
+                    </p>
                   </div>
 
                   <div className="md:col-span-2">
