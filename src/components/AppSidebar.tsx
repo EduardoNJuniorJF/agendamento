@@ -2,7 +2,7 @@ import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key } from 'lu
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import logo from '@/assets/logo.svg';
+import logo from '@/assets/logo-dashboard.svg';
 import {
   Sidebar,
   SidebarContent,
