@@ -132,7 +132,7 @@ export default function Vacations() {
   const handleVacationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!vacationForm.agent_id || !vacationForm.start_date) {
+    if (!vacationForm.agent_id || !vacationForm.start_date || !vacationForm.expiry_date) {
       toast({
         title: "Erro",
         description: "Preencha os campos obrigatórios",
@@ -449,7 +449,7 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="expiry_date">Vencimento (Período Aquisitivo)</Label>
+                      <Label htmlFor="expiry_date">Vencimento (Período Aquisitivo) *</Label>
                       <Input
                         id="expiry_date"
                         type="date"
