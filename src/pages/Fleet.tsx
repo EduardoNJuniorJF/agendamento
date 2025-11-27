@@ -29,6 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { Database } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Vehicle = Database['public']['Tables']['vehicles']['Row'];
 type VehicleInsert = Database['public']['Tables']['vehicles']['Insert'];
@@ -55,6 +56,7 @@ export default function Fleet() {
     status: 'available',
   });
   const { toast } = useToast();
+  const { canEdit } = useAuth();
 
   useEffect(() => {
     loadVehicles();
@@ -151,13 +153,14 @@ export default function Fleet() {
           <h1 className="text-3xl font-bold tracking-tight">Gestão de Frota</h1>
           <p className="text-muted-foreground">Gerencie os veículos da empresa</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNewDialog}>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Veículo
-            </Button>
-          </DialogTrigger>
+        {canEdit('fleet') && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNewDialog}>
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Veículo
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -210,6 +213,7 @@ export default function Fleet() {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="bg-card rounded-lg border">
@@ -233,20 +237,24 @@ export default function Fleet() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openEditDialog(vehicle)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(vehicle.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {canEdit('fleet') && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditDialog(vehicle)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(vehicle.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

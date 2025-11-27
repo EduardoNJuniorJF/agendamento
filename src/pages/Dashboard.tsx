@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { isHoliday, getHolidayName } from '@/lib/holidays';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DndContext,
   DragEndEvent,
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { canEdit } = useAuth();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -325,22 +327,26 @@ export default function Dashboard() {
                           borderColor={apt.agents && apt.agents.length > 0 && apt.agents[0].color ? apt.agents[0].color : 'hsl(var(--primary) / 0.2)'}
                         >
                           <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
-                              onClick={() => handleEditAppointment(apt.id)}
-                            >
-                              <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={() => handleDeleteAppointment(apt.id)}
-                            >
-                              <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                            </Button>
+                            {canEdit('dashboard') && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
+                                  onClick={() => handleEditAppointment(apt.id)}
+                                >
+                                  <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                                  onClick={() => handleDeleteAppointment(apt.id)}
+                                >
+                                  <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-3 gap-y-1.5 md:gap-y-2">
                             <div>

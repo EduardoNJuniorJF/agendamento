@@ -14,6 +14,7 @@ import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { isBeforeWeekendOrHoliday, calculateReturnDate, getHolidayName } from '@/lib/holidays';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Agent {
   id: string;
@@ -59,6 +60,7 @@ export default function Vacations() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('vacations');
   const { toast } = useToast();
+  const { canEdit } = useAuth();
 
   // Vacation form
   const [vacationForm, setVacationForm] = useState({
@@ -526,14 +528,16 @@ export default function Vacations() {
                         {vacation.expiry_date ? format(parseISO(vacation.expiry_date), 'dd/MM/yyyy') : '-'}
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" onClick={() => editVacation(vacation)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => handleDeleteVacation(vacation.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {canEdit('vacations') && (
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => editVacation(vacation)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteVacation(vacation.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -681,14 +685,16 @@ export default function Vacations() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" onClick={() => editTimeOff(timeOff)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => handleDeleteTimeOff(timeOff.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {canEdit('vacations') && (
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => editTimeOff(timeOff)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteTimeOff(timeOff.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

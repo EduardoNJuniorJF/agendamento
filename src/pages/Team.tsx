@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Calendar } from 'lucide-react';
 import type { Database } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Agent = Database['public']['Tables']['agents']['Row'];
 type AgentInsert = Database['public']['Tables']['agents']['Insert'];
@@ -47,6 +48,7 @@ export default function Team() {
     end_date: '',
   });
   const { toast } = useToast();
+  const { canEdit } = useAuth();
 
   useEffect(() => {
     loadAgents();
@@ -171,13 +173,14 @@ export default function Team() {
           <h1 className="text-3xl font-bold tracking-tight">Gestão de Equipe</h1>
           <p className="text-muted-foreground">Gerencie os agentes e suas férias</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openNewDialog}>
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Agente
-            </Button>
-          </DialogTrigger>
+        {canEdit('team') && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openNewDialog}>
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Agente
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -234,6 +237,7 @@ export default function Team() {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Dialog open={vacationOpen} onOpenChange={setVacationOpen}>
@@ -301,28 +305,32 @@ export default function Team() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openVacationDialog(agent)}
-                    title="Adicionar Férias"
-                  >
-                    <Calendar className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openEditDialog(agent)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(agent.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {canEdit('team') && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openVacationDialog(agent)}
+                        title="Adicionar Férias"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditDialog(agent)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(agent.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
