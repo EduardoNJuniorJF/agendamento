@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key } from "lucide-react";
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,7 +24,7 @@ const menuItems = [
   { title: "Frota", url: "/fleet", icon: Car },
   { title: "Equipe", url: "/team", icon: Users },
   { title: "Férias e Folgas", url: "/vacations", icon: Umbrella },
-  { title: "Bonificação", url: "/bonus", icon: Coin },
+  { title: "Bonificação", url: "/bonus", icon: Receipt },
 ];
 
 export function AppSidebar() {
