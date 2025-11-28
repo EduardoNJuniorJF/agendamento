@@ -24,7 +24,7 @@ const menuItems = [
   { title: "Frota", url: "/fleet", icon: Car },
   { title: "Equipe", url: "/team", icon: Users },
   { title: "Férias e Folgas", url: "/vacations", icon: Umbrella },
-  { title: "Bonificação", url: "/bonus", icon: Umbrella },
+  { title: "Bonificação", url: "/bonus", icon: Money },
 ];
 
 export function AppSidebar() {
