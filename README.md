@@ -141,8 +141,6 @@ Contribuições são bem-vindas! Sinta-se livre para:
 
 ## 📝 Licença
 
-Projeto de uso livre. Customize conforme necessário.
+Projeto Privado de uso exclusivo da Zaal Tecnologia.
 
 ---
-
-Desenvolvido com ❤️ usando React, TypeScript e Supabase
