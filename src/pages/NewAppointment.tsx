@@ -1,28 +1,22 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, X } from 'lucide-react';
-import type { Database } from '@/types/database';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, X } from "lucide-react";
+import type { Database } from "@/types/database";
+import { useAuth } from "@/contexts/AuthContext";
 
-type Agent = Database['public']['Tables']['agents']['Row'];
-type Vehicle = Database['public']['Tables']['vehicles']['Row'];
+type Agent = Database["public"]["Tables"]["agents"]["Row"];
+type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
 
 interface FormData {
   title: string;
@@ -31,8 +25,8 @@ interface FormData {
   city: string;
   vehicle_id: string | null;
   description: string | null;
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  expense_status: 'não_separar' | 'separar_dinheiro' | 'separar_dia_anterior';
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
+  expense_status: "não_separar" | "separar_dinheiro" | "separar_dia_anterior";
 }
 
 export default function NewAppointment() {
@@ -41,14 +35,14 @@ export default function NewAppointment() {
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [agentsOnVacation, setAgentsOnVacation] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    date: '',
-    time: '',
-    city: '',
+    title: "",
+    date: "",
+    time: "",
+    city: "",
     vehicle_id: null,
-    description: '',
-    status: 'scheduled',
-    expense_status: 'não_separar',
+    description: "",
+    status: "scheduled",
+    expense_status: "não_separar",
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -59,18 +53,18 @@ export default function NewAppointment() {
 
   useEffect(() => {
     // Check permissions
-    if (!canEdit('calendar')) {
+    if (!canEdit("calendar")) {
       toast({
-        title: 'Acesso negado',
-        description: 'Você não tem permissão para acessar esta página.',
-        variant: 'destructive',
+        title: "Acesso negado",
+        description: "Você não tem permissão para acessar esta página.",
+        variant: "destructive",
       });
-      navigate('/calendar');
+      navigate("/calendar");
       return;
     }
-    
+
     loadData();
-    const editId = searchParams.get('edit');
+    const editId = searchParams.get("edit");
     if (editId) {
       setEditingId(editId);
       loadAppointment(editId);
@@ -79,8 +73,8 @@ export default function NewAppointment() {
 
   const loadData = async () => {
     const [agentsRes, vehiclesRes] = await Promise.all([
-      supabase.from('agents').select('*').eq('is_active', true).order('name'),
-      supabase.from('vehicles').select('*').eq('status', 'available').order('model'),
+      supabase.from("agents").select("*").eq("is_active", true).order("name"),
+      supabase.from("vehicles").select("*").eq("status", "available").order("model"),
     ]);
 
     if (agentsRes.data) setAgents(agentsRes.data);
@@ -88,26 +82,22 @@ export default function NewAppointment() {
   };
 
   const loadAppointment = async (id: string) => {
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single();
 
     if (error || !data) {
-      toast({ title: 'Erro ao carregar agendamento', variant: 'destructive' });
-      navigate('/calendar');
+      toast({ title: "Erro ao carregar agendamento", variant: "destructive" });
+      navigate("/calendar");
       return;
     }
 
     // Load agents for this appointment
     const { data: appointmentAgents } = await supabase
-      .from('appointment_agents')
-      .select('agent_id')
-      .eq('appointment_id', id);
+      .from("appointment_agents")
+      .select("agent_id")
+      .eq("appointment_id", id);
 
     if (appointmentAgents && appointmentAgents.length > 0) {
-      setSelectedAgentIds(appointmentAgents.map(aa => aa.agent_id));
+      setSelectedAgentIds(appointmentAgents.map((aa) => aa.agent_id));
     } else if (data.agent_id) {
       // Fallback for legacy appointments
       setSelectedAgentIds([data.agent_id]);
@@ -126,13 +116,13 @@ export default function NewAppointment() {
   };
 
   const checkVacation = async (agentId: string, date: string): Promise<boolean> => {
-    const { data, error } = await supabase.rpc('is_agent_on_vacation', {
+    const { data, error } = await supabase.rpc("is_agent_on_vacation", {
       p_agent_id: agentId,
       p_date: date,
     });
 
     if (error) {
-      console.error('Error checking vacation:', error);
+      console.error("Error checking vacation:", error);
       return false;
     }
 
@@ -149,21 +139,15 @@ export default function NewAppointment() {
       agents.map(async (agent) => {
         const onVacation = await checkVacation(agent.id, date);
         return { agentId: agent.id, onVacation };
-      })
+      }),
     );
 
-    const vacationSet = new Set(
-      vacationChecks
-        .filter(check => check.onVacation)
-        .map(check => check.agentId)
-    );
+    const vacationSet = new Set(vacationChecks.filter((check) => check.onVacation).map((check) => check.agentId));
 
     setAgentsOnVacation(vacationSet);
 
     // Remove agents on vacation from selection
-    setSelectedAgentIds(prev => 
-      prev.filter(id => !vacationSet.has(id))
-    );
+    setSelectedAgentIds((prev) => prev.filter((id) => !vacationSet.has(id)));
   };
 
   useEffect(() => {
@@ -173,14 +157,14 @@ export default function NewAppointment() {
   }, [formData.date, agents]);
 
   const checkVehicleAvailability = async (vehicleId: string, date: string, time: string): Promise<boolean> => {
-    const { data, error } = await supabase.rpc('check_vehicle_availability', {
+    const { data, error } = await supabase.rpc("check_vehicle_availability", {
       p_vehicle_id: vehicleId,
       p_date: date,
       p_time: time,
     });
 
     if (error) {
-      console.error('Error checking availability:', error);
+      console.error("Error checking availability:", error);
       return false;
     }
 
@@ -197,11 +181,11 @@ export default function NewAppointment() {
         for (const agentId of selectedAgentIds) {
           const onVacation = await checkVacation(agentId, formData.date);
           if (onVacation) {
-            const agent = agents.find(a => a.id === agentId);
+            const agent = agents.find((a) => a.id === agentId);
             toast({
-              title: 'Agente em férias',
-              description: `${agent?.name || 'Um agente selecionado'} está de férias nesta data`,
-              variant: 'destructive',
+              title: "Agente em férias",
+              description: `${agent?.name || "Um agente selecionado"} está de férias nesta data`,
+              variant: "destructive",
             });
             setLoading(false);
             return;
@@ -209,27 +193,13 @@ export default function NewAppointment() {
         }
       }
 
-      if (formData.vehicle_id && formData.date && formData.time) {
-        const available = await checkVehicleAvailability(
-          formData.vehicle_id,
-          formData.date,
-          formData.time
-        );
-        if (!available) {
-          toast({
-            title: 'Veículo indisponível',
-            description: 'Este veículo já está agendado para este horário',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-      }
+      // --- Validação de Veículo ---
+      // Regra de disponibilidade de veículo removida a pedido do usuário.
 
       if (editingId) {
         // Atualizar agendamento existente
         const { error } = await supabase
-          .from('appointments')
+          .from("appointments")
           .update({
             title: formData.title,
             date: formData.date,
@@ -240,33 +210,30 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
           })
-          .eq('id', editingId);
+          .eq("id", editingId);
 
         if (error) throw error;
 
         // Delete old agent assignments
-        await supabase
-          .from('appointment_agents')
-          .delete()
-          .eq('appointment_id', editingId);
+        await supabase.from("appointment_agents").delete().eq("appointment_id", editingId);
 
         // Insert new agent assignments
         if (selectedAgentIds.length > 0) {
-          const { error: agentError } = await supabase
-            .from('appointment_agents')
-            .insert(selectedAgentIds.map(agentId => ({
+          const { error: agentError } = await supabase.from("appointment_agents").insert(
+            selectedAgentIds.map((agentId) => ({
               appointment_id: editingId,
               agent_id: agentId,
-            })));
+            })),
+          );
 
           if (agentError) throw agentError;
         }
 
-        toast({ title: 'Agendamento atualizado com sucesso!' });
+        toast({ title: "Agendamento atualizado com sucesso!" });
       } else {
         // Criar novo agendamento
         const { data: newAppointment, error } = await supabase
-          .from('appointments')
+          .from("appointments")
           .insert({
             title: formData.title,
             date: formData.date,
@@ -284,24 +251,24 @@ export default function NewAppointment() {
 
         // Insert agent assignments
         if (selectedAgentIds.length > 0 && newAppointment) {
-          const { error: agentError } = await supabase
-            .from('appointment_agents')
-            .insert(selectedAgentIds.map(agentId => ({
+          const { error: agentError } = await supabase.from("appointment_agents").insert(
+            selectedAgentIds.map((agentId) => ({
               appointment_id: newAppointment.id,
               agent_id: agentId,
-            })));
+            })),
+          );
 
           if (agentError) throw agentError;
         }
 
-        toast({ title: 'Agendamento criado com sucesso!' });
+        toast({ title: "Agendamento criado com sucesso!" });
       }
-      navigate('/calendar');
+      navigate("/calendar");
     } catch (error: any) {
       toast({
-        title: editingId ? 'Erro ao atualizar agendamento' : 'Erro ao criar agendamento',
+        title: editingId ? "Erro ao atualizar agendamento" : "Erro ao criar agendamento",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -314,9 +281,9 @@ export default function NewAppointment() {
       return;
     }
 
-    setSelectedAgentIds(prev => {
+    setSelectedAgentIds((prev) => {
       if (prev.includes(agentId)) {
-        return prev.filter(id => id !== agentId);
+        return prev.filter((id) => id !== agentId);
       } else {
         return [...prev, agentId];
       }
@@ -324,7 +291,7 @@ export default function NewAppointment() {
   };
 
   const removeAgent = (agentId: string) => {
-    setSelectedAgentIds(prev => prev.filter(id => id !== agentId));
+    setSelectedAgentIds((prev) => prev.filter((id) => id !== agentId));
   };
 
   return (
@@ -334,11 +301,9 @@ export default function NewAppointment() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {editingId ? 'Editar Agendamento' : 'Novo Agendamento'}
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h1>
           <p className="text-muted-foreground">
-            {editingId ? 'Atualize os dados do atendimento' : 'Crie um novo atendimento'}
+            {editingId ? "Atualize os dados do atendimento" : "Crie um novo atendimento"}
           </p>
         </div>
       </div>
@@ -399,13 +364,9 @@ export default function NewAppointment() {
                 <Label htmlFor="agents">Agentes</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      {selectedAgentIds.length === 0 
-                        ? 'Selecione agentes' 
+                    <Button type="button" variant="outline" className="w-full justify-start text-left font-normal">
+                      {selectedAgentIds.length === 0
+                        ? "Selecione agentes"
                         : `${selectedAgentIds.length} agente(s) selecionado(s)`}
                     </Button>
                   </PopoverTrigger>
@@ -424,15 +385,11 @@ export default function NewAppointment() {
                             <label
                               htmlFor={agent.id}
                               className={`text-sm font-medium leading-none cursor-pointer flex-1 ${
-                                isOnVacation 
-                                  ? 'opacity-50 cursor-not-allowed line-through' 
-                                  : ''
+                                isOnVacation ? "opacity-50 cursor-not-allowed line-through" : ""
                               }`}
                             >
                               {agent.name}
-                              {isOnVacation && (
-                                <span className="ml-2 text-xs text-muted-foreground">(de férias)</span>
-                              )}
+                              {isOnVacation && <span className="ml-2 text-xs text-muted-foreground">(de férias)</span>}
                             </label>
                           </div>
                         );
@@ -442,15 +399,12 @@ export default function NewAppointment() {
                 </Popover>
                 {selectedAgentIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {selectedAgentIds.map(agentId => {
-                      const agent = agents.find(a => a.id === agentId);
+                    {selectedAgentIds.map((agentId) => {
+                      const agent = agents.find((a) => a.id === agentId);
                       return agent ? (
                         <Badge key={agentId} variant="secondary" className="gap-1">
                           {agent.name}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => removeAgent(agentId)}
-                          />
+                          <X className="h-3 w-3 cursor-pointer" onClick={() => removeAgent(agentId)} />
                         </Badge>
                       ) : null;
                     })}
@@ -480,7 +434,7 @@ export default function NewAppointment() {
             <div>
               <Label htmlFor="expenses">Despesas</Label>
               <Select
-                value={formData.expense_status || 'não_separar'}
+                value={formData.expense_status || "não_separar"}
                 onValueChange={(value: any) => setFormData({ ...formData, expense_status: value })}
               >
                 <SelectTrigger>
@@ -498,7 +452,7 @@ export default function NewAppointment() {
               <Label htmlFor="description">Observações</Label>
               <Textarea
                 id="description"
-                value={formData.description || ''}
+                value={formData.description || ""}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
               />
@@ -509,10 +463,13 @@ export default function NewAppointment() {
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading 
-                  ? (editingId ? 'Salvando...' : 'Criando...') 
-                  : (editingId ? 'Salvar Alterações' : 'Criar Agendamento')
-                }
+                {loading
+                  ? editingId
+                    ? "Salvando..."
+                    : "Criando..."
+                  : editingId
+                    ? "Salvar Alterações"
+                    : "Criar Agendamento"}
               </Button>
             </div>
           </form>
