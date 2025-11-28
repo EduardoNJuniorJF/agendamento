@@ -136,10 +136,13 @@ export default function NewAppointment() {
       return false;
     }
 
+    console.log(`Agent ${agentId} on vacation for ${date}:`, data);
     return data === true;
   };
 
   const checkAllAgentsVacations = async (date: string) => {
+    console.log('Checking vacations for date:', date, 'Agents count:', agents.length);
+    
     if (!date || agents.length === 0) {
       setAgentsOnVacation(new Set());
       return;
@@ -148,7 +151,8 @@ export default function NewAppointment() {
     const vacationChecks = await Promise.all(
       agents.map(async (agent) => {
         const onVacation = await checkVacation(agent.id, date);
-        return { agentId: agent.id, onVacation };
+        console.log(`Agent ${agent.name} (${agent.id}) on vacation:`, onVacation);
+        return { agentId: agent.id, agentName: agent.name, onVacation };
       })
     );
 
@@ -158,6 +162,7 @@ export default function NewAppointment() {
         .map(check => check.agentId)
     );
 
+    console.log('Agents on vacation:', Array.from(vacationSet), vacationChecks);
     setAgentsOnVacation(vacationSet);
 
     // Remove agents on vacation from selection
@@ -167,6 +172,7 @@ export default function NewAppointment() {
   };
 
   useEffect(() => {
+    console.log('UseEffect triggered - Date:', formData.date, 'Agents:', agents.length);
     if (formData.date && agents.length > 0) {
       checkAllAgentsVacations(formData.date);
     }
