@@ -58,6 +58,14 @@ All colors MUST be HSL.
     --chart-3: 35 90% 55%;
     --chart-4: 280 65% 55%;
     --chart-5: 340 75% 55%;
+
+    --expense-previous-day: 152 75% 26%;
+    --expense-previous-day-foreground: 0 0% 100%;
+    --expense-money: 88 56% 83%;
+    --expense-money-foreground: 88 56% 20%;
+    --expense-no-separate: 6 100% 89%;
+    --expense-no-separate-foreground: 6 100% 30%;
+    --vehicle-name: 38 100% 50%;
   }
 
   .dark {
@@ -109,6 +117,14 @@ All colors MUST be HSL.
     --chart-3: 35 90% 60%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 60%;
+
+    --expense-previous-day: 152 75% 26%;
+    --expense-previous-day-foreground: 0 0% 100%;
+    --expense-money: 88 56% 83%;
+    --expense-money-foreground: 88 56% 20%;
+    --expense-no-separate: 6 100% 89%;
+    --expense-no-separate-foreground: 6 100% 30%;
+    --vehicle-name: 38 100% 50%;
   }
 }
 

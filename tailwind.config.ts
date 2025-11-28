@@ -75,6 +75,19 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        "expense-previous-day": {
+          DEFAULT: "hsl(var(--expense-previous-day))",
+          foreground: "hsl(var(--expense-previous-day-foreground))",
+        },
+        "expense-money": {
+          DEFAULT: "hsl(var(--expense-money))",
+          foreground: "hsl(var(--expense-money-foreground))",
+        },
+        "expense-no-separate": {
+          DEFAULT: "hsl(var(--expense-no-separate))",
+          foreground: "hsl(var(--expense-no-separate-foreground))",
+        },
+        "vehicle-name": "hsl(var(--vehicle-name))",
       },
       borderRadius: {
         lg: "var(--radius)",
