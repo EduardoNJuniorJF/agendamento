@@ -356,13 +356,21 @@ export default function CalendarView() {
                                   </div>
                                   <div>
                                     <div className="font-medium text-[11px]">Veículo:</div>
-                                    <div className="text-muted-foreground truncate">
+                                    <div className="truncate text-vehicle-name font-semibold">
                                       {apt.vehicles ? `${apt.vehicles.model}` : "N/A"}
                                     </div>
                                   </div>
                                   <div className="col-span-2">
                                     <div className="font-medium text-[11px]">Despesas:</div>
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 mt-0.5">
+                                    <Badge 
+                                      className={`text-[10px] px-1.5 py-0.5 mt-0.5 border-0 ${
+                                        apt.expense_status === 'separar_dia_anterior' 
+                                          ? 'bg-expense-previous-day text-expense-previous-day-foreground' 
+                                          : apt.expense_status === 'separar_dinheiro'
+                                          ? 'bg-expense-money text-expense-money-foreground'
+                                          : 'bg-expense-no-separate text-expense-no-separate-foreground'
+                                      }`}
+                                    >
                                       {getExpenseLabel(apt.expense_status)}
                                     </Badge>
                                   </div>
