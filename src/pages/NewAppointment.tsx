@@ -39,6 +39,7 @@ export default function NewAppointment() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
+  const [agentsOnVacation, setAgentsOnVacation] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState<FormData>({
     title: '',
     date: '',
@@ -137,6 +138,39 @@ export default function NewAppointment() {
 
     return data === true;
   };
+
+  const checkAllAgentsVacations = async (date: string) => {
+    if (!date || agents.length === 0) {
+      setAgentsOnVacation(new Set());
+      return;
+    }
+
+    const vacationChecks = await Promise.all(
+      agents.map(async (agent) => {
+        const onVacation = await checkVacation(agent.id, date);
+        return { agentId: agent.id, onVacation };
+      })
+    );
+
+    const vacationSet = new Set(
+      vacationChecks
+        .filter(check => check.onVacation)
+        .map(check => check.agentId)
+    );
+
+    setAgentsOnVacation(vacationSet);
+
+    // Remove agents on vacation from selection
+    setSelectedAgentIds(prev => 
+      prev.filter(id => !vacationSet.has(id))
+    );
+  };
+
+  useEffect(() => {
+    if (formData.date && agents.length > 0) {
+      checkAllAgentsVacations(formData.date);
+    }
+  }, [formData.date, agents]);
 
   const checkVehicleAvailability = async (vehicleId: string, date: string, time: string): Promise<boolean> => {
     const { data, error } = await supabase.rpc('check_vehicle_availability', {
@@ -275,6 +309,11 @@ export default function NewAppointment() {
   };
 
   const toggleAgentSelection = (agentId: string) => {
+    // Prevent selection if agent is on vacation
+    if (agentsOnVacation.has(agentId)) {
+      return;
+    }
+
     setSelectedAgentIds(prev => {
       if (prev.includes(agentId)) {
         return prev.filter(id => id !== agentId);
@@ -372,21 +411,32 @@ export default function NewAppointment() {
                   </PopoverTrigger>
                   <PopoverContent className="w-full p-0" align="start">
                     <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto">
-                      {agents.map((agent) => (
-                        <div key={agent.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={agent.id}
-                            checked={selectedAgentIds.includes(agent.id)}
-                            onCheckedChange={() => toggleAgentSelection(agent.id)}
-                          />
-                          <label
-                            htmlFor={agent.id}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                          >
-                            {agent.name}
-                          </label>
-                        </div>
-                      ))}
+                      {agents.map((agent) => {
+                        const isOnVacation = agentsOnVacation.has(agent.id);
+                        return (
+                          <div key={agent.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={agent.id}
+                              checked={selectedAgentIds.includes(agent.id)}
+                              onCheckedChange={() => toggleAgentSelection(agent.id)}
+                              disabled={isOnVacation}
+                            />
+                            <label
+                              htmlFor={agent.id}
+                              className={`text-sm font-medium leading-none cursor-pointer flex-1 ${
+                                isOnVacation 
+                                  ? 'opacity-50 cursor-not-allowed line-through' 
+                                  : ''
+                              }`}
+                            >
+                              {agent.name}
+                              {isOnVacation && (
+                                <span className="ml-2 text-xs text-muted-foreground">(de férias)</span>
+                              )}
+                            </label>
+                          </div>
+                        );
+                      })}
                     </div>
                   </PopoverContent>
                 </Popover>
