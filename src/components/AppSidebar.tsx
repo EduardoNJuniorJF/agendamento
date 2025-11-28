@@ -96,7 +96,7 @@ export function AppSidebar() {
             <Separator />
             <div className="text-xs text-muted-foreground px-2">
               <p>
-                <span className="font-medium">Versão:</span> 1.1.0
+                <span className="font-medium">Versão:</span> 1.2.3
               </p>
             </div>
           </>
