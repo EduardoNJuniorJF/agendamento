@@ -147,11 +147,11 @@ export default function Fleet() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Frota</h1>
-          <p className="text-muted-foreground">Gerencie os veículos da empresa</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Frota</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Gerencie os veículos da empresa</p>
         </div>
         {canEdit('fleet') && (
           <Dialog open={open} onOpenChange={setOpen}>
@@ -216,50 +216,54 @@ export default function Fleet() {
         )}
       </div>
 
-      <div className="bg-card rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Modelo</TableHead>
-              <TableHead>Placa</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {vehicles.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell className="font-medium">{vehicle.model}</TableCell>
-                <TableCell>{vehicle.plate}</TableCell>
-                <TableCell>
-                  <Badge variant={statusVariants[vehicle.status]}>
-                    {statusLabels[vehicle.status]}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  {canEdit('fleet') && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(vehicle)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(vehicle.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </TableCell>
+      <div className="bg-card rounded-lg border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[120px]">Modelo</TableHead>
+                <TableHead className="min-w-[100px]">Placa</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
+                <TableHead className="text-right min-w-[100px]">Ações</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {vehicles.map((vehicle) => (
+                <TableRow key={vehicle.id}>
+                  <TableCell className="font-medium">{vehicle.model}</TableCell>
+                  <TableCell>{vehicle.plate}</TableCell>
+                  <TableCell>
+                    <Badge variant={statusVariants[vehicle.status]}>
+                      {statusLabels[vehicle.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {canEdit('fleet') && (
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(vehicle)}
+                        >
+                          <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleDelete(vehicle.id)}
+                        >
+                          <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

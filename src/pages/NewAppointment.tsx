@@ -295,14 +295,14 @@ export default function NewAppointment() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex items-center gap-3 md:gap-4">
+        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-3 w-3 md:h-4 md:w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">
             {editingId ? "Atualize os dados do atendimento" : "Crie um novo atendimento"}
           </p>
         </div>
@@ -310,12 +310,12 @@ export default function NewAppointment() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Agendamento</CardTitle>
-          <CardDescription>Preencha os dados do atendimento</CardDescription>
+          <CardTitle className="text-base md:text-lg">Informações do Agendamento</CardTitle>
+          <CardDescription className="text-xs md:text-sm">Preencha os dados do atendimento</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="title">Cliente / Ticket *</Label>
                 <Input
@@ -336,7 +336,7 @@ export default function NewAppointment() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="date">Data *</Label>
                 <Input
@@ -359,7 +359,7 @@ export default function NewAppointment() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="agents">Agentes</Label>
                 <Popover>
@@ -398,13 +398,13 @@ export default function NewAppointment() {
                   </PopoverContent>
                 </Popover>
                 {selectedAgentIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2">
                     {selectedAgentIds.map((agentId) => {
                       const agent = agents.find((a) => a.id === agentId);
                       return agent ? (
-                        <Badge key={agentId} variant="secondary" className="gap-1">
+                        <Badge key={agentId} variant="secondary" className="gap-1 text-xs">
                           {agent.name}
-                          <X className="h-3 w-3 cursor-pointer" onClick={() => removeAgent(agentId)} />
+                          <X className="h-2.5 w-2.5 md:h-3 md:w-3 cursor-pointer" onClick={() => removeAgent(agentId)} />
                         </Badge>
                       ) : null;
                     })}
@@ -458,11 +458,11 @@ export default function NewAppointment() {
               />
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => navigate(-1)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                 {loading
                   ? editingId
                     ? "Salvando..."
