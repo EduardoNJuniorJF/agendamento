@@ -217,48 +217,49 @@ export default function CalendarView() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Calendário</h1>
-            <p className="text-muted-foreground">Visualize todos os agendamentos</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Calendário</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Visualize todos os agendamentos</p>
           </div>
-          {canEdit("calendar") && <Button onClick={() => navigate("/new-appointment")}>Novo Agendamento</Button>}
+          {canEdit("calendar") && <Button onClick={() => navigate("/new-appointment")} size="sm" className="w-full sm:w-auto">Novo Agendamento</Button>}
         </div>
 
-        <div className="flex items-center justify-between bg-card rounded-lg border p-4">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Mês de</p>
-            <p className="font-semibold text-lg">{format(currentMonth, "MMMM yyyy", { locale: ptBR })}</p>
+        <div className="flex flex-col sm:flex-row items-center justify-between bg-card rounded-lg border p-3 md:p-4 gap-3">
+          <div className="text-center flex-1">
+            <p className="text-xs md:text-sm text-muted-foreground">Mês de</p>
+            <p className="font-semibold text-base md:text-lg">{format(currentMonth, "MMMM yyyy", { locale: ptBR })}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
-              <ChevronLeft className="h-4 w-4" />
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}>
+              <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
-            <Button variant="outline" onClick={() => setCurrentMonth(new Date())}>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>
               Hoje
             </Button>
-            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-              <ChevronRight className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+              <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {monthWeeks.map((weekDays, weekIndex) => {
             if (weekDays.length === 0) return null;
             return (
-              <div key={weekIndex} className="space-y-3">
-                <div className="bg-muted/50 rounded-lg px-4 py-2">
-                  <h3 className="font-semibold text-sm">
+              <div key={weekIndex} className="space-y-2 md:space-y-3">
+                <div className="bg-muted/50 rounded-lg px-3 md:px-4 py-1.5 md:py-2">
+                  <h3 className="font-semibold text-xs md:text-sm">
                     Semana {weekIndex + 1} - de {format(weekDays[0], "dd/MM", { locale: ptBR })} a{" "}
                     {format(weekDays[weekDays.length - 1], "dd/MM", { locale: ptBR })}
                   </h3>
                 </div>
-                <div
-                  className="grid gap-4"
-                  style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}
-                >
+                <div className="overflow-x-auto pb-2">
+                  <div
+                    className="grid gap-2 md:gap-4 min-w-[640px]"
+                    style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}
+                  >
                   {weekDays.map((day) => {
                     const dayAppointments = getAppointmentsForDay(day);
                     const isDayHoliday = isHoliday(day);
@@ -267,24 +268,24 @@ export default function CalendarView() {
                       <DroppableDay
                         key={day.toISOString()}
                         id={format(day, "yyyy-MM-dd")}
-                        className="bg-card rounded-lg border p-4"
+                        className="bg-card rounded-lg border p-2 md:p-4 min-h-[200px]"
                       >
-                        <div className="mb-4 text-center">
-                          <div className="text-sm text-muted-foreground">{format(day, "EEEE", { locale: ptBR })}</div>
-                          <div className="text-lg font-semibold">{format(day, "dd/MM", { locale: ptBR })}</div>
+                        <div className="mb-2 md:mb-4 text-center">
+                          <div className="text-xs md:text-sm text-muted-foreground">{format(day, "EEEE", { locale: ptBR })}</div>
+                          <div className="text-base md:text-lg font-semibold">{format(day, "dd/MM", { locale: ptBR })}</div>
                           {isDayHoliday && holidayName && (
                             <Badge
                               variant="destructive"
-                              className="mt-2 text-[10px] px-2 py-0.5 flex items-center gap-1 justify-center"
+                              className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center"
                             >
-                              <PartyPopper className="h-3 w-3" />
-                              {holidayName}
+                              <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                              <span className="truncate">{holidayName}</span>
                             </Badge>
                           )}
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-2 md:space-y-3">
                           {dayAppointments.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center py-4">Sem agendamentos</p>
+                            <p className="text-xs md:text-sm text-muted-foreground text-center py-3 md:py-4">Sem agendamentos</p>
                           ) : (
                             dayAppointments.map((apt) => (
                               <DraggableAppointmentCard
@@ -301,50 +302,50 @@ export default function CalendarView() {
                                     : "hsl(var(--primary) / 0.2)"
                                 }
                               >
-                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                   {canEdit("calendar") && (
                                     <>
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-6 w-6 bg-background/80 hover:bg-background"
+                                        className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
                                         onClick={() => handleEditAppointment(apt.id)}
                                       >
-                                        <Edit className="h-3 w-3" />
+                                        <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                       </Button>
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                                        className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
                                         onClick={() => handleDeleteAppointment(apt.id)}
                                       >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                       </Button>
                                     </>
                                   )}
                                 </div>
-                                <div className="grid grid-cols-3 gap-x-3 gap-y-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-3 gap-y-1.5 md:gap-y-2">
                                   <div>
-                                    <div className="font-medium text-[11px]">Cliente / Ticket:</div>
-                                    <div className="font-semibold truncate">{apt.title}</div>
+                                    <div className="font-medium text-[9px] md:text-[11px]">Cliente / Ticket:</div>
+                                    <div className="font-semibold truncate text-xs md:text-sm">{apt.title}</div>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-[11px]">Cidade:</div>
-                                    <div className="text-muted-foreground truncate">{apt.city}</div>
+                                    <div className="font-medium text-[9px] md:text-[11px]">Cidade:</div>
+                                    <div className="text-muted-foreground truncate text-xs md:text-sm">{apt.city}</div>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-[11px]">Data:</div>
-                                    <div className="text-muted-foreground">
+                                    <div className="font-medium text-[9px] md:text-[11px]">Data:</div>
+                                    <div className="text-muted-foreground text-xs md:text-sm">
                                       {format(parseISO(apt.date), "dd/MM/yyyy", { locale: ptBR })}
                                     </div>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-[11px]">Horário:</div>
-                                    <div className="text-muted-foreground">{apt.time}</div>
+                                    <div className="font-medium text-[9px] md:text-[11px]">Horário:</div>
+                                    <div className="text-muted-foreground text-xs md:text-sm">{apt.time}</div>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-[11px]">Agente:</div>
-                                    <div className="text-muted-foreground space-y-0.5">
+                                    <div className="font-medium text-[9px] md:text-[11px]">Agente:</div>
+                                    <div className="text-muted-foreground space-y-0.5 text-xs md:text-sm">
                                       {apt.agents && apt.agents.length > 0
                                         ? apt.agents.map((agent, idx) => (
                                             <div key={idx} className="truncate">
@@ -355,15 +356,15 @@ export default function CalendarView() {
                                     </div>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-[11px]">Veículo:</div>
-                                    <div className="truncate text-vehicle-name font-semibold">
+                                    <div className="font-medium text-[9px] md:text-[11px]">Veículo:</div>
+                                    <div className="truncate text-xs md:text-sm text-vehicle-name font-semibold">
                                       {apt.vehicles ? `${apt.vehicles.model}` : "N/A"}
                                     </div>
                                   </div>
-                                  <div className="col-span-2">
-                                    <div className="font-medium text-[11px]">Despesas:</div>
+                                  <div className="md:col-span-2">
+                                    <div className="font-medium text-[9px] md:text-[11px]">Despesas:</div>
                                     <Badge 
-                                      className={`text-[10px] px-1.5 py-0.5 mt-0.5 border-0 ${
+                                      className={`text-[9px] md:text-[10px] px-1 md:px-1.5 py-0.5 mt-0.5 border-0 ${
                                         apt.expense_status === 'separar_dia_anterior' 
                                           ? 'bg-expense-previous-day text-expense-previous-day-foreground' 
                                           : apt.expense_status === 'separar_dinheiro'
@@ -375,9 +376,9 @@ export default function CalendarView() {
                                     </Badge>
                                   </div>
                                   {apt.description && (
-                                    <div className="col-span-3">
-                                      <div className="font-medium text-[11px]">Observações:</div>
-                                      <div className="text-muted-foreground line-clamp-1">{apt.description}</div>
+                                    <div className="md:col-span-3">
+                                      <div className="font-medium text-[9px] md:text-[11px]">Observações:</div>
+                                      <div className="text-muted-foreground line-clamp-1 text-xs md:text-sm">{apt.description}</div>
                                     </div>
                                   )}
                                 </div>
@@ -388,6 +389,7 @@ export default function CalendarView() {
                       </DroppableDay>
                     );
                   })}
+                  </div>
                 </div>
               </div>
             );

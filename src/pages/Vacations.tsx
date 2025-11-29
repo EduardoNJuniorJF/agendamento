@@ -310,9 +310,9 @@ export default function Vacations() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Férias e Folgas</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">Férias e Folgas</h1>
       </div>
 
       {/* Vacation Reminders */}
@@ -357,8 +357,8 @@ export default function Vacations() {
                 <CardTitle>{editingVacationId ? "Editar Férias" : "Cadastrar Férias"}</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleVacationSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleVacationSubmit} className="space-y-3 md:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="agent">Funcionário *</Label>
                       <Select
@@ -528,58 +528,60 @@ export default function Vacations() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Férias Cadastradas</CardTitle>
+              <CardTitle className="text-base md:text-lg">Férias Cadastradas</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Funcionário</TableHead>
-                    <TableHead>Período</TableHead>
-                    <TableHead>Data Saída</TableHead>
-                    <TableHead>Data Volta</TableHead>
-                    <TableHead>Dias</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vacations.map((vacation) => (
-                    <TableRow key={vacation.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: vacation.agents.color || "#3b82f6" }}
-                          />
-                          {vacation.agents.name}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{vacation.period_number}º Período</Badge>
-                      </TableCell>
-                      <TableCell>{format(parseISO(vacation.start_date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{format(parseISO(vacation.end_date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{vacation.days} dias</TableCell>
-                      <TableCell>
-                        {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {canEdit("vacations") && (
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="ghost" onClick={() => editVacation(vacation)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDeleteVacation(vacation.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[140px]">Funcionário</TableHead>
+                      <TableHead className="min-w-[100px]">Período</TableHead>
+                      <TableHead className="min-w-[100px]">Data Saída</TableHead>
+                      <TableHead className="min-w-[100px]">Data Volta</TableHead>
+                      <TableHead className="min-w-[80px]">Dias</TableHead>
+                      <TableHead className="min-w-[100px]">Vencimento</TableHead>
+                      <TableHead className="min-w-[100px]">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {vacations.map((vacation) => (
+                      <TableRow key={vacation.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: vacation.agents.color || "#3b82f6" }}
+                            />
+                            <span className="text-xs md:text-sm">{vacation.agents.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{vacation.period_number}º Período</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs md:text-sm">{format(parseISO(vacation.start_date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-xs md:text-sm">{format(parseISO(vacation.end_date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
+                        <TableCell className="text-xs md:text-sm">
+                          {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {canEdit("vacations") && (
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => editVacation(vacation)}>
+                                <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDeleteVacation(vacation.id)}>
+                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -592,8 +594,8 @@ export default function Vacations() {
                 <CardTitle>{editingTimeOffId ? "Editar Folga" : "Cadastrar Folga"}</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleTimeOffSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleTimeOffSubmit} className="space-y-3 md:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <Label htmlFor="date">Data *</Label>
                       <Input
@@ -654,12 +656,13 @@ export default function Vacations() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button type="submit">{editingTimeOffId ? "Atualizar" : "Cadastrar"}</Button>
+                   <div className="flex flex-col sm:flex-row gap-2">
+                    <Button type="submit" className="w-full sm:w-auto">{editingTimeOffId ? "Atualizar" : "Cadastrar"}</Button>
                     {editingTimeOffId && (
                       <Button
                         type="button"
                         variant="outline"
+                        className="w-full sm:w-auto"
                         onClick={() => {
                           setEditingTimeOffId(null);
                           setTimeOffForm({
@@ -681,62 +684,64 @@ export default function Vacations() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Folgas Cadastradas</CardTitle>
+              <CardTitle className="text-base md:text-lg">Folgas Cadastradas</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Agente</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {timeOffs.map((timeOff) => (
-                    <TableRow key={timeOff.id}>
-                      <TableCell>{format(parseISO(timeOff.date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>
-                        {timeOff.agents ? (
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: timeOff.agents.color || "#3b82f6" }}
-                            />
-                            {timeOff.agents.name}
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={timeOff.type === "completa" ? "default" : "secondary"}>
-                          {timeOff.type === "completa" ? "Completa" : "Parcial"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={timeOff.approved ? "default" : "outline"}>
-                          {timeOff.approved ? "Liberado" : "Pendente"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {canEdit("vacations") && (
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="ghost" onClick={() => editTimeOff(timeOff)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDeleteTimeOff(timeOff.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[100px]">Data</TableHead>
+                      <TableHead className="min-w-[120px]">Agente</TableHead>
+                      <TableHead className="min-w-[100px]">Tipo</TableHead>
+                      <TableHead className="min-w-[100px]">Status</TableHead>
+                      <TableHead className="min-w-[100px]">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {timeOffs.map((timeOff) => (
+                      <TableRow key={timeOff.id}>
+                        <TableCell className="text-xs md:text-sm">{format(parseISO(timeOff.date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell>
+                          {timeOff.agents ? (
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: timeOff.agents.color || "#3b82f6" }}
+                              />
+                              <span className="text-xs md:text-sm">{timeOff.agents.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs md:text-sm">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
+                            {timeOff.type === "completa" ? "Completa" : "Parcial"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
+                            {timeOff.approved ? "Liberado" : "Pendente"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {canEdit("vacations") && (
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => editTimeOff(timeOff)}>
+                                <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDeleteTimeOff(timeOff.id)}>
+                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
