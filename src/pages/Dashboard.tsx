@@ -348,45 +348,41 @@ export default function Dashboard() {
                               </>
                             )}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-3 gap-y-1.5 md:gap-y-2">
+                          <div className="space-y-1.5">
                             <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Cliente / Ticket:</div>
-                              <div className="font-semibold truncate text-xs md:text-sm">{apt.title}</div>
+                              <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                              <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
                             </div>
-                            <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Cidade:</div>
-                              <div className="text-muted-foreground truncate text-xs md:text-sm">{apt.city}</div>
-                            </div>
-                            <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Data:</div>
-                              <div className="text-muted-foreground text-xs md:text-sm">
-                                {format(parseISO(apt.date), 'dd/MM/yyyy', { locale: ptBR })}
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                              <div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
+                              </div>
+                              <div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Horário:</div>
+                                <div className="text-muted-foreground text-[10px] md:text-xs">{apt.time}</div>
+                              </div>
+                              <div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
+                                <div className="text-muted-foreground text-[10px] md:text-xs">
+                                  {apt.agents && apt.agents.length > 0
+                                    ? apt.agents.map((agent, idx) => (
+                                        <div key={idx} className="truncate">{agent.name}</div>
+                                      ))
+                                    : 'Não atribuído'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Veículo:</div>
+                                <div className="truncate text-[10px] md:text-xs text-vehicle-name font-semibold">
+                                  {apt.vehicles ? `${apt.vehicles.model}` : 'N/A'}
+                                </div>
                               </div>
                             </div>
                             <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Horário:</div>
-                              <div className="text-muted-foreground text-xs md:text-sm">{apt.time}</div>
-                            </div>
-                            <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Agente:</div>
-                              <div className="text-muted-foreground space-y-0.5 text-xs md:text-sm">
-                                {apt.agents && apt.agents.length > 0
-                                  ? apt.agents.map((agent, idx) => (
-                                      <div key={idx} className="truncate">{agent.name}</div>
-                                    ))
-                                  : 'Não atribuído'}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="font-medium text-[9px] md:text-[11px]">Veículo:</div>
-                              <div className="truncate text-xs md:text-sm text-vehicle-name font-semibold">
-                                {apt.vehicles ? `${apt.vehicles.model}` : 'N/A'}
-                              </div>
-                            </div>
-                            <div className="md:col-span-2">
-                              <div className="font-medium text-[9px] md:text-[11px]">Despesas:</div>
+                              <div className="font-medium text-[9px] md:text-[10px]">Despesas:</div>
                               <Badge 
-                                className={`text-[9px] md:text-[10px] px-1 md:px-1.5 py-0.5 mt-0.5 border-0 ${
+                                className={`text-[8px] md:text-[9px] px-1 py-0.5 mt-0.5 border-0 ${
                                   apt.expense_status === 'separar_dia_anterior' 
                                     ? 'bg-expense-previous-day text-expense-previous-day-foreground' 
                                     : apt.expense_status === 'separar_dinheiro'
@@ -398,9 +394,9 @@ export default function Dashboard() {
                               </Badge>
                             </div>
                             {apt.description && (
-                              <div className="md:col-span-3">
-                                <div className="font-medium text-[9px] md:text-[11px]">Observações:</div>
-                                <div className="text-muted-foreground line-clamp-1 text-xs md:text-sm">{apt.description}</div>
+                              <div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Observações:</div>
+                                <div className="text-muted-foreground line-clamp-2 text-[10px] md:text-xs">{apt.description}</div>
                               </div>
                             )}
                           </div>
