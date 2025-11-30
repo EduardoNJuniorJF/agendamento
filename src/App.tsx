@@ -14,6 +14,7 @@ import NewAppointment from "./pages/NewAppointment";
 import Vacations from "./pages/Vacations";
 import Auth from "./pages/Auth";
 import ChangePassword from "./pages/ChangePassword";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout><ChangePassword /></Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <Layout><UserManagement /></Layout>
                 </ProtectedRoute>
               }
             />
