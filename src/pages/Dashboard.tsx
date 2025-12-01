@@ -243,7 +243,54 @@ export default function Dashboard() {
         <p className="text-sm md:text-base text-muted-foreground">Visão geral do sistema de gestão de frota</p>
       </div>
 
-      {/* Calendário da Semana - Primeira linha */}
+      {/* Cards de estatísticas - Primeira linha */}
+      <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalAppointments}</div>
+            <p className="text-xs text-muted-foreground">Total de atendimentos</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Veículos</CardTitle>
+            <Car className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+            <p className="text-xs text-muted-foreground">Frota ativa</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Agentes</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalAgents}</div>
+            <p className="text-xs text-muted-foreground">Equipe ativa</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Folgas</CardTitle>
+            <Umbrella className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
+            <p className="text-xs text-muted-foreground">Esta semana</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Calendário da Semana - Segunda linha */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -412,10 +459,8 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Segunda linha: Folgas (1/3) + Cards de estatísticas (2/3) */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
-        {/* Folgas da Semana - 1/3 da largura */}
-        <Card className="lg:col-span-1">
+      {/* Folgas da Semana - Terceira linha */}
+      <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm md:text-base">
               <Umbrella className="h-4 w-4 md:h-5 md:w-5" />
@@ -466,54 +511,6 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-
-        {/* Cards de estatísticas - 2/3 da largura */}
-        <div className="lg:col-span-2 grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalAppointments}</div>
-              <p className="text-xs text-muted-foreground">Total de atendimentos</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Veículos</CardTitle>
-              <Car className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalVehicles}</div>
-              <p className="text-xs text-muted-foreground">Frota ativa</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Agentes</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalAgents}</div>
-              <p className="text-xs text-muted-foreground">Equipe ativa</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Folgas</CardTitle>
-              <Umbrella className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
-              <p className="text-xs text-muted-foreground">Esta semana</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
     </div>
     </DndContext>
   );
