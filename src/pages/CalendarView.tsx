@@ -15,7 +15,7 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isHoliday, getHolidayName } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +43,10 @@ interface Appointment {
   description?: string;
   expense_status: string;
   is_penalized?: boolean;
+  created_by_name?: string;
+  updated_by_name?: string;
+  last_action?: string;
+  last_action_at?: string;
   agents?: Array<{ name: string; color: string | null }>;
   vehicles?: { model: string; plate: string };
 }
@@ -422,6 +426,19 @@ export default function CalendarView() {
                                         Não
                                       </Badge>
                                     )}
+                                  </div>
+                                  {/* Audit Info */}
+                                  <div className="mt-2 pt-2 border-t border-dashed border-muted-foreground/30">
+                                    <div className="flex items-center gap-1 text-[8px] md:text-[9px] text-muted-foreground">
+                                      <User className="h-2.5 w-2.5" />
+                                      {apt.last_action === "updated" && apt.updated_by_name ? (
+                                        <span>Alterado por <strong>{apt.updated_by_name}</strong></span>
+                                      ) : apt.created_by_name ? (
+                                        <span>Incluído por <strong>{apt.created_by_name}</strong></span>
+                                      ) : (
+                                        <span>Sem informação de autor</span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </DraggableAppointmentCard>

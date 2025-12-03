@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, Loader2, Pencil, Trash2, Users } from 'lucide-react';
+import { UserPlus, Loader2, Pencil, Trash2, Users, UserCheck } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface User {
   id: string;
@@ -34,7 +35,9 @@ export default function UserManagement() {
     email: '',
     password: '',
     fullName: '',
-    role: 'user' as 'admin' | 'user' | 'financeiro'
+    role: 'user' as 'admin' | 'user' | 'financeiro',
+    isAgent: false,
+    agentColor: '#3b82f6'
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -116,7 +119,9 @@ export default function UserManagement() {
         email: '',
         password: '',
         fullName: '',
-        role: 'user'
+        role: 'user',
+        isAgent: false,
+        agentColor: '#3b82f6'
       });
       
       await loadUsers();
@@ -327,6 +332,39 @@ export default function UserManagement() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg bg-muted/30">
+                    <Checkbox
+                      id="isAgent"
+                      checked={formData.isAgent}
+                      onCheckedChange={(checked) => setFormData({ ...formData, isAgent: checked === true })}
+                      disabled={loading}
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="isAgent" className="font-medium cursor-pointer flex items-center gap-2">
+                        <UserCheck className="h-4 w-4" />
+                        Este usuário também é um Agente
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Marque se o usuário realizará atendimentos e aparecerá na lista de agentes
+                      </p>
+                    </div>
+                    {formData.isAgent && (
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="agentColor" className="text-xs">Cor:</Label>
+                        <Input
+                          id="agentColor"
+                          type="color"
+                          value={formData.agentColor}
+                          onChange={(e) => setFormData({ ...formData, agentColor: e.target.value })}
+                          className="w-10 h-8 p-0 border-0"
+                          disabled={loading}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

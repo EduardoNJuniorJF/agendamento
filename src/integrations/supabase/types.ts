@@ -23,6 +23,7 @@ export type Database = {
           name: string
           sector: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           color?: string | null
@@ -32,6 +33,7 @@ export type Database = {
           name: string
           sector?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           color?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           name?: string
           sector?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -86,15 +89,19 @@ export type Database = {
           city: string
           created_at: string | null
           created_by: string | null
+          created_by_name: string | null
           date: string
           description: string | null
           expense_status: Database["public"]["Enums"]["expense_status"] | null
           id: string
           is_penalized: boolean | null
+          last_action: string | null
+          last_action_at: string | null
           status: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
           updated_at: string | null
+          updated_by_name: string | null
           vehicle_id: string | null
         }
         Insert: {
@@ -102,15 +109,19 @@ export type Database = {
           city: string
           created_at?: string | null
           created_by?: string | null
+          created_by_name?: string | null
           date: string
           description?: string | null
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
           is_penalized?: boolean | null
+          last_action?: string | null
+          last_action_at?: string | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
           updated_at?: string | null
+          updated_by_name?: string | null
           vehicle_id?: string | null
         }
         Update: {
@@ -118,15 +129,19 @@ export type Database = {
           city?: string
           created_at?: string | null
           created_by?: string | null
+          created_by_name?: string | null
           date?: string
           description?: string | null
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
           is_penalized?: boolean | null
+          last_action?: string | null
+          last_action_at?: string | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time?: string
           title?: string
           updated_at?: string | null
+          updated_by_name?: string | null
           vehicle_id?: string | null
         }
         Relationships: [
