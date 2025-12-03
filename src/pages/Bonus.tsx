@@ -166,7 +166,6 @@ export default function Bonus() {
           );
 
           if (settings && cityConfig) {
-            const baseValue = Number(settings.base_value) || 0;
             let levelValue = 0;
             
             switch (cityConfig.level) {
@@ -181,11 +180,9 @@ export default function Bonus() {
                 break;
             }
             
-            totalBonus += baseValue + levelValue;
-          } else if (settings) {
-            // City not configured, use base value only
-            totalBonus += Number(settings.base_value) || 0;
+            totalBonus += levelValue;
           }
+          // City not configured = R$0 bonus
         }
       }
 
