@@ -27,6 +27,7 @@ interface FormData {
   description: string | null;
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
   expense_status: "não_separar" | "separar_dinheiro" | "separar_dia_anterior";
+  is_penalized: boolean;
 }
 
 export default function NewAppointment() {
@@ -43,13 +44,15 @@ export default function NewAppointment() {
     description: "",
     status: "scheduled",
     expense_status: "não_separar",
+    is_penalized: false,
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { canEdit } = useAuth();
+  const { canEdit, role } = useAuth();
+  const isAdmin = role === "admin" || role === "dev";
 
   useEffect(() => {
     // Check permissions
@@ -112,6 +115,7 @@ export default function NewAppointment() {
       description: data.description,
       status: data.status,
       expense_status: data.expense_status,
+      is_penalized: data.is_penalized || false,
     });
   };
 
@@ -209,6 +213,7 @@ export default function NewAppointment() {
             description: formData.description,
             status: formData.status,
             expense_status: formData.expense_status,
+            is_penalized: formData.is_penalized,
           })
           .eq("id", editingId);
 
@@ -243,6 +248,7 @@ export default function NewAppointment() {
             description: formData.description,
             status: formData.status,
             expense_status: formData.expense_status,
+            is_penalized: formData.is_penalized,
           })
           .select()
           .single();
@@ -456,6 +462,33 @@ export default function NewAppointment() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
               />
+            </div>
+
+            {/* Penalty Checkbox - visible to all, editable only by admins */}
+            <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/50">
+              <Checkbox
+                id="is_penalized"
+                checked={formData.is_penalized}
+                onCheckedChange={(checked) => {
+                  if (isAdmin) {
+                    setFormData({ ...formData, is_penalized: checked === true });
+                  }
+                }}
+                disabled={!isAdmin}
+              />
+              <div className="flex-1">
+                <Label 
+                  htmlFor="is_penalized" 
+                  className={`font-medium ${!isAdmin ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                >
+                  Penalidade
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {isAdmin 
+                    ? "Marcar este agendamento como penalizado (não gerará bonificação)"
+                    : "Somente administradores podem alterar este campo"}
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-end gap-2">

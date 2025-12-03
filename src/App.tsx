@@ -15,6 +15,7 @@ import Vacations from "./pages/Vacations";
 import Auth from "./pages/Auth";
 import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
+import Bonus from "./pages/Bonus";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -89,6 +90,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout><UserManagement /></Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bonus"
+              element={
+                <ProtectedRoute>
+                  <Layout><Bonus /></Layout>
                 </ProtectedRoute>
               }
             />
