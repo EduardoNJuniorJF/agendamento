@@ -15,7 +15,7 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isHoliday, getHolidayName } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +42,7 @@ interface Appointment {
   status: string;
   description?: string;
   expense_status: string;
+  is_penalized?: boolean;
   agents?: Array<{ name: string; color: string | null }>;
   vehicles?: { model: string; plate: string };
 }
@@ -53,7 +54,8 @@ export default function CalendarView() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { canEdit } = useAuth();
+  const { canEdit, role } = useAuth();
+  const isAdmin = role === "admin" || role === "dev";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -168,6 +170,23 @@ export default function CalendarView() {
 
   const handleEditAppointment = (id: string) => {
     navigate(`/new-appointment?edit=${id}`);
+  };
+
+  const handleTogglePenalty = async (id: string, currentValue: boolean) => {
+    if (!isAdmin) return;
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({ is_penalized: !currentValue })
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Erro ao alterar penalidade", variant: "destructive" });
+      return;
+    }
+
+    toast({ title: currentValue ? "Penalidade removida" : "Penalidade aplicada" });
+    loadAppointments();
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -377,6 +396,33 @@ export default function CalendarView() {
                                       <div className="text-muted-foreground line-clamp-2 text-[10px] md:text-xs">{apt.description}</div>
                                     </div>
                                   )}
+                                  {/* Penalty Badge */}
+                                  <div 
+                                    className={`flex items-center gap-1 mt-1 ${isAdmin ? 'cursor-pointer' : ''}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (isAdmin) handleTogglePenalty(apt.id, apt.is_penalized || false);
+                                    }}
+                                    title={isAdmin ? "Clique para alternar penalidade" : "Somente administradores podem alterar"}
+                                  >
+                                    <div className="font-medium text-[9px] md:text-[10px]">Penalidade:</div>
+                                    {apt.is_penalized ? (
+                                      <Badge 
+                                        variant="destructive" 
+                                        className="text-[8px] md:text-[9px] px-1 py-0.5 flex items-center gap-0.5"
+                                      >
+                                        <AlertTriangle className="h-2.5 w-2.5" />
+                                        Sim
+                                      </Badge>
+                                    ) : (
+                                      <Badge 
+                                        variant="outline" 
+                                        className="text-[8px] md:text-[9px] px-1 py-0.5 bg-green-100 text-green-800 border-green-300"
+                                      >
+                                        Não
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </DraggableAppointmentCard>
                             ))
