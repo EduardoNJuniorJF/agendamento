@@ -10,10 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, X, Check, ChevronsUpDown } from "lucide-react";
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 type Agent = Database["public"]["Tables"]["agents"]["Row"];
 type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
@@ -33,9 +35,11 @@ interface FormData {
 export default function NewAppointment() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [agentsOnVacation, setAgentsOnVacation] = useState<Set<string>>(new Set());
   const [currentUserName, setCurrentUserName] = useState<string>("");
+  const [cityOpen, setCityOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: "",
     date: "",
@@ -89,13 +93,15 @@ export default function NewAppointment() {
   };
 
   const loadData = async () => {
-    const [agentsRes, vehiclesRes] = await Promise.all([
+    const [agentsRes, vehiclesRes, citiesRes] = await Promise.all([
       supabase.from("agents").select("*").eq("is_active", true).order("name"),
       supabase.from("vehicles").select("*").eq("status", "available").order("model"),
+      supabase.from("city_bonus_levels").select("city_name").order("city_name"),
     ]);
 
     if (agentsRes.data) setAgents(agentsRes.data);
     if (vehiclesRes.data) setVehicles(vehiclesRes.data);
+    if (citiesRes.data) setCities(citiesRes.data.map(c => c.city_name));
   };
 
   const loadAppointment = async (id: string) => {
@@ -353,12 +359,48 @@ export default function NewAppointment() {
               </div>
               <div>
                 <Label htmlFor="city">Cidade *</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  required
-                />
+                <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={cityOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      {formData.city || "Selecione uma cidade..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar cidade..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
+                        <CommandGroup>
+                          {cities.map((city) => (
+                            <CommandItem
+                              key={city}
+                              value={city}
+                              onSelect={(currentValue) => {
+                                setFormData({ ...formData, city: currentValue.toUpperCase() });
+                                setCityOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  formData.city === city ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {city}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <input type="hidden" name="city" value={formData.city} required />
               </div>
             </div>
 
