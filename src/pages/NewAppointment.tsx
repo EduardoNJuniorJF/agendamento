@@ -35,6 +35,7 @@ export default function NewAppointment() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [agentsOnVacation, setAgentsOnVacation] = useState<Set<string>>(new Set());
+  const [currentUserName, setCurrentUserName] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     title: "",
     date: "",
@@ -51,7 +52,7 @@ export default function NewAppointment() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { canEdit, role } = useAuth();
+  const { canEdit, role, user } = useAuth();
   const isAdmin = role === "admin" || role === "dev";
 
   useEffect(() => {
@@ -67,12 +68,25 @@ export default function NewAppointment() {
     }
 
     loadData();
+    loadCurrentUserName();
     const editId = searchParams.get("edit");
     if (editId) {
       setEditingId(editId);
       loadAppointment(editId);
     }
   }, [searchParams, canEdit, navigate]);
+
+  const loadCurrentUserName = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, username")
+      .eq("id", user.id)
+      .single();
+    if (data) {
+      setCurrentUserName(data.full_name || data.username || "Usuário");
+    }
+  };
 
   const loadData = async () => {
     const [agentsRes, vehiclesRes] = await Promise.all([
@@ -214,6 +228,9 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            updated_by_name: currentUserName,
+            last_action: "updated",
+            last_action_at: new Date().toISOString(),
           })
           .eq("id", editingId);
 
@@ -249,6 +266,9 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            created_by_name: currentUserName,
+            last_action: "created",
+            last_action_at: new Date().toISOString(),
           })
           .select()
           .single();

@@ -11,6 +11,8 @@ interface CreateUserRequest {
   password: string
   fullName: string
   role: 'admin' | 'user' | 'financeiro'
+  isAgent: boolean
+  agentColor?: string
 }
 
 Deno.serve(async (req) => {
@@ -58,9 +60,9 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { username, email, password, fullName, role }: CreateUserRequest = await req.json()
+    const { username, email, password, fullName, role, isAgent, agentColor }: CreateUserRequest = await req.json()
 
-    console.log('Creating user:', { username, email, role })
+    console.log('Creating user:', { username, email, role, isAgent })
 
     // Check if username already exists
     const { data: existingProfile } = await supabaseAdmin
@@ -128,6 +130,25 @@ Deno.serve(async (req) => {
 
     console.log('Role assigned:', role)
 
+    // Create agent if isAgent is true
+    if (isAgent) {
+      const { error: agentError } = await supabaseAdmin
+        .from('agents')
+        .insert({
+          name: fullName,
+          user_id: authData.user.id,
+          color: agentColor || '#3b82f6',
+          is_active: true
+        })
+
+      if (agentError) {
+        console.error('Agent error:', agentError)
+        // Don't throw - user is created, just log the error
+      } else {
+        console.log('Agent created for user')
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -135,7 +156,8 @@ Deno.serve(async (req) => {
           id: authData.user.id,
           email: authData.user.email,
           username,
-          role
+          role,
+          isAgent
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
