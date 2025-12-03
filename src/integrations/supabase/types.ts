@@ -90,6 +90,7 @@ export type Database = {
           description: string | null
           expense_status: Database["public"]["Enums"]["expense_status"] | null
           id: string
+          is_penalized: boolean | null
           status: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -105,6 +106,7 @@ export type Database = {
           description?: string | null
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
+          is_penalized?: boolean | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -120,6 +122,7 @@ export type Database = {
           description?: string | null
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
+          is_penalized?: boolean | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time?: string
           title?: string
@@ -142,6 +145,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bonus_settings: {
+        Row: {
+          base_value: number
+          created_at: string | null
+          id: string
+          level_1_value: number
+          level_2_value: number
+          level_3_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          base_value?: number
+          created_at?: string | null
+          id?: string
+          level_1_value?: number
+          level_2_value?: number
+          level_3_value?: number
+          updated_at?: string | null
+        }
+        Update: {
+          base_value?: number
+          created_at?: string | null
+          id?: string
+          level_1_value?: number
+          level_2_value?: number
+          level_3_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      city_bonus_levels: {
+        Row: {
+          city_name: string
+          created_at: string | null
+          id: string
+          km: number | null
+          level: number
+          updated_at: string | null
+        }
+        Insert: {
+          city_name: string
+          created_at?: string | null
+          id?: string
+          km?: number | null
+          level: number
+          updated_at?: string | null
+        }
+        Update: {
+          city_name?: string
+          created_at?: string | null
+          id?: string
+          km?: number | null
+          level?: number
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
