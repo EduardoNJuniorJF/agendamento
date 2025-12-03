@@ -53,7 +53,6 @@ interface AgentBonus {
   agent: Agent;
   totalBonus: number;
   completed: number;
-  inProgress: number;
   penalties: number;
 }
 
@@ -120,7 +119,6 @@ export default function Bonus() {
           agent,
           totalBonus: 0,
           completed: 0,
-          inProgress: 0,
           penalties: 0,
         });
         continue;
@@ -140,7 +138,6 @@ export default function Bonus() {
           agent,
           totalBonus: 0,
           completed: 0,
-          inProgress: 0,
           penalties: 0,
         });
         continue;
@@ -148,13 +145,11 @@ export default function Bonus() {
 
       let totalBonus = 0;
       let completed = 0;
-      let inProgress = 0;
       let penalties = 0;
 
       for (const apt of appointments) {
         if (apt.status === "completed") completed++;
-        if (apt.status === "in_progress") inProgress++;
-        if (apt.is_penalized) penalties++;
+        if (apt.status === "completed" && apt.is_penalized) penalties++;
 
         // Calculate bonus only for completed and not penalized
         if (apt.status === "completed" && !apt.is_penalized) {
@@ -198,7 +193,6 @@ export default function Bonus() {
         agent,
         totalBonus,
         completed,
-        inProgress,
         penalties,
       });
     }
@@ -608,7 +602,7 @@ export default function Bonus() {
       </Card>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Bonificação</CardDescription>
@@ -622,14 +616,6 @@ export default function Bonus() {
             <CardDescription>Total Concluídos</CardDescription>
             <CardTitle className="text-2xl">
               {agentBonuses.reduce((sum, ab) => sum + ab.completed, 0)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Em Andamento</CardDescription>
-            <CardTitle className="text-2xl text-blue-600">
-              {agentBonuses.reduce((sum, ab) => sum + ab.inProgress, 0)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -658,7 +644,6 @@ export default function Bonus() {
                 <TableRow>
                   <TableHead>Agente</TableHead>
                   <TableHead className="text-center">Concluídos</TableHead>
-                  <TableHead className="text-center">Em Andamento</TableHead>
                   <TableHead className="text-center">Penalidades</TableHead>
                   <TableHead className="text-right">Bonificação</TableHead>
                 </TableRow>
@@ -676,7 +661,6 @@ export default function Bonus() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{ab.completed}</TableCell>
-                    <TableCell className="text-center">{ab.inProgress}</TableCell>
                     <TableCell className="text-center text-red-600">{ab.penalties}</TableCell>
                     <TableCell className="text-right font-semibold text-green-600">
                       R$ {ab.totalBonus.toFixed(2)}
@@ -685,7 +669,7 @@ export default function Bonus() {
                 ))}
                 {agentBonuses.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
                       Nenhum agente encontrado
                     </TableCell>
                   </TableRow>

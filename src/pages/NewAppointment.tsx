@@ -516,6 +516,19 @@ export default function NewAppointment() {
               </Select>
             </div>
 
+            {editingId && (
+              <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/50">
+                <Checkbox
+                  id="completed"
+                  checked={formData.status === "completed"}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, status: checked ? "completed" : "scheduled" })
+                  }
+                />
+                <Label htmlFor="completed" className="cursor-pointer font-medium">Concluído</Label>
+              </div>
+            )}
+
             <div>
               <Label htmlFor="description">Observações</Label>
               <Textarea
