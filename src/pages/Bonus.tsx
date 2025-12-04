@@ -356,6 +356,7 @@ export default function Bonus() {
             th { background-color: #f5f5f5; }
             .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
             .agent-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+            .separator-right { border-right: 3px solid #000 !important; }
             @media print {
               button { display: none; }
             }
@@ -369,7 +370,7 @@ export default function Bonus() {
             <thead>
               <tr>
                 <th rowspan="2">Agente</th>
-                <th colspan="4">Atendimentos Concluídos</th>
+                <th colspan="4" class="separator-right">Atendimentos Concluídos</th>
                 <th colspan="4">Penalidades</th>
                 <th rowspan="2">Bonificação Total</th>
               </tr>
@@ -377,7 +378,7 @@ export default function Bonus() {
                 <th>Total</th>
                 <th>Nível 1</th>
                 <th>Nível 2</th>
-                <th>Nível 3</th>
+                <th class="separator-right">Nível 3</th>
                 <th>Total</th>
                 <th>Nível 1</th>
                 <th>Nível 2</th>
@@ -396,7 +397,7 @@ export default function Bonus() {
                   <td>${ab.completed}</td>
                   <td>${ab.completedLevel1}</td>
                   <td>${ab.completedLevel2}</td>
-                  <td>${ab.completedLevel3}</td>
+                  <td class="separator-right">${ab.completedLevel3}</td>
                   <td>${ab.penalties}</td>
                   <td>${ab.penaltiesLevel1}</td>
                   <td>${ab.penaltiesLevel2}</td>
@@ -675,7 +676,7 @@ export default function Bonus() {
               <TableHeader>
                 <TableRow>
                   <TableHead rowSpan={2}>Agente</TableHead>
-                  <TableHead colSpan={4} className="text-center">
+                  <TableHead colSpan={4} className="text-center border-r-4 border-black">
                     Concluídos
                   </TableHead>
                   <TableHead colSpan={4} className="text-center">
@@ -689,7 +690,7 @@ export default function Bonus() {
                   <TableHead className="text-center">Total</TableHead>
                   <TableHead className="text-center">Nível 1</TableHead>
                   <TableHead className="text-center">Nível 2</TableHead>
-                  <TableHead className="text-center">Nível 3</TableHead>
+                  <TableHead className="text-center border-r-4 border-black">Nível 3</TableHead>
                   <TableHead className="text-center">Total</TableHead>
                   <TableHead className="text-center">Nível 1</TableHead>
                   <TableHead className="text-center">Nível 2</TableHead>
@@ -708,7 +709,7 @@ export default function Bonus() {
                     <TableCell className="text-center">{ab.completed}</TableCell>
                     <TableCell className="text-center">{ab.completedLevel1}</TableCell>
                     <TableCell className="text-center">{ab.completedLevel2}</TableCell>
-                    <TableCell className="text-center">{ab.completedLevel3}</TableCell>
+                    <TableCell className="text-center border-r-4 border-black">{ab.completedLevel3}</TableCell>
                     <TableCell className="text-center">{ab.penalties}</TableCell>
                     <TableCell className="text-center">{ab.penaltiesLevel1}</TableCell>
                     <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
