@@ -524,7 +524,7 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-7 text-sm md:text-base">
+              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                 <CalendarDays className="h-4 w-4 md:h-5 md:w-5" />
                 Férias Programadas
               </CardTitle>
@@ -535,7 +535,7 @@ export default function Dashboard() {
                   Nenhuma férias programada
                 </p>
               ) : (
-                <div className="space-y-1.5 md:space-y-2 max-h-[300px] overflow-y-auto">
+                <div className="space-y-1.5 md:space-y-2 max-h-[1920px] overflow-y-auto">
                   {stats.vacations.map((vacation) => {
                     const today = new Date();
                     const startDate = parseISO(vacation.start_date);
