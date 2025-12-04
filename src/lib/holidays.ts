@@ -74,7 +74,7 @@ export function isHoliday(date: Date): boolean {
 }
 
 export function isWeekendOrHoliday(date: Date): boolean {
-  // Verifica se é fim de semana (sábado ou domingo)
+  // Verifica se é fim de semana (domingo)
   const dayOfWeek = date.getDay();
   if (dayOfWeek === 0 || dayOfWeek === 7) {
     return true;
