@@ -123,21 +123,18 @@ export default function CalendarView() {
     const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
 
     return weeks
-      .map((weekStart) => {
+      .map((weekStart, index, array) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
         const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
         const weekDays = days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6); // Monday to Friday
 
         // Lógica de Filtragem:
-        // A primeira semana é aquela que começa antes ou no mesmo dia que o mês.
-        const isFirstWeek = weekStart.getTime() <= monthStart.getTime();
-
-        if (isFirstWeek) {
-          // Filtra dias que são do mês anterior
+        // Se não for a última semana, filtramos os dias que não pertencem ao mês atual.
+        if (index < array.length - 1) {
           return weekDays.filter((day) => day.getMonth() === currentMonth.getMonth());
         }
 
-        // Para as demais semanas, retorna os 5 dias úteis (segunda a sexta), incluindo dias de meses adjacentes (se for a última semana).
+        // Para a última semana, retorna os 5 dias úteis (segunda a sexta), incluindo dias de meses adjacentes.
         return weekDays;
       })
       .filter((week) => week.length > 0); // Remover semanas vazias
