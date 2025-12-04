@@ -76,7 +76,7 @@ export function isHoliday(date: Date): boolean {
 export function isWeekendOrHoliday(date: Date): boolean {
   // Verifica se é fim de semana (sábado ou domingo)
   const dayOfWeek = date.getDay();
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
+  if (dayOfWeek === 0 || dayOfWeek === 7) {
     return true;
   }
 
@@ -104,13 +104,13 @@ export function isBeforeWeekendOrHoliday(date: Date): boolean {
 export function isTwoDaysBeforeWeekendOrHoliday(date: Date): boolean {
   // Conforme legislação trabalhista, férias não podem começar nos 2 dias que antecedem
   // feriados ou dia de descanso semanal remunerado (DSR - sábado/domingo)
-  
+
   // Exemplos práticos:
   // - Se data é QUINTA e SÁBADO é fim de semana → bloqueia (2 dias antes do DSR)
   // - Se data é QUINTA e SEXTA é feriado → bloqueia (1 dia antes do feriado)
   // - Se data é QUARTA e SEXTA é feriado → bloqueia (2 dias antes do feriado)
   // - Se data é QUARTA e QUINTA é feriado → bloqueia (1 dia antes do feriado)
-  
+
   // Verifica se 1 dia depois (amanhã) é feriado ou fim de semana
   const nextDay = addDays(date, 1);
   if (isWeekendOrHoliday(nextDay)) {
