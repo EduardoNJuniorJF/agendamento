@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Car, Users, ChevronLeft, ChevronRight, Edit, Trash2, Umbrella, PartyPopper, GripVertical } from 'lucide-react';
-import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO } from 'date-fns';
+import { Calendar, Car, Users, ChevronLeft, ChevronRight, Edit, Trash2, Umbrella, PartyPopper, GripVertical, CalendarDays } from 'lucide-react';
+import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -44,12 +44,22 @@ interface TimeOff {
   agents: { name: string; color: string | null } | null;
 }
 
+interface Vacation {
+  id: string;
+  agent_id: string;
+  start_date: string;
+  end_date: string;
+  days: number | null;
+  agents: { name: string; color: string | null } | null;
+}
+
 interface Stats {
   totalAppointments: number;
   totalVehicles: number;
   totalAgents: number;
   weekAppointments: Appointment[];
   weekTimeOffs: TimeOff[];
+  vacations: Vacation[];
 }
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -61,6 +71,7 @@ export default function Dashboard() {
     totalAgents: 0,
     weekAppointments: [],
     weekTimeOffs: [],
+    vacations: [],
   });
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -94,7 +105,7 @@ export default function Dashboard() {
       const monday = startOfWeek(currentWeek, { weekStartsOn: 1 });
       const friday = addDays(monday, 4);
 
-      const [appointments, vehicles, agents, timeOffs] = await Promise.all([
+      const [appointments, vehicles, agents, timeOffs, vacations] = await Promise.all([
         supabase
           .from('appointments')
           .select('*, vehicles(model, plate)')
@@ -110,6 +121,11 @@ export default function Dashboard() {
           .gte('date', format(monday, 'yyyy-MM-dd'))
           .lte('date', format(friday, 'yyyy-MM-dd'))
           .order('date'),
+        supabase
+          .from('vacations')
+          .select('*, agents(name, color)')
+          .gte('start_date', format(new Date(), 'yyyy-MM-dd'))
+          .order('start_date'),
       ]);
 
       // Load agents for each appointment
@@ -134,6 +150,7 @@ export default function Dashboard() {
           totalAgents: agents.data?.length || 0,
           weekAppointments: appointmentsWithAgents as Appointment[],
           weekTimeOffs: timeOffs.data as TimeOff[] || [],
+          vacations: vacations.data as Vacation[] || [],
         });
       }
     } catch (error) {
@@ -433,8 +450,9 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Folgas da Semana - Terceira linha */}
-      <Card>
+      {/* Folgas e Férias - Terceira linha */}
+      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm md:text-base">
               <Umbrella className="h-4 w-4 md:h-5 md:w-5" />
@@ -485,6 +503,69 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+              <CalendarDays className="h-4 w-4 md:h-5 md:w-5" />
+              Férias Programadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats.vacations.length === 0 ? (
+              <p className="text-xs md:text-sm text-muted-foreground text-center py-6 md:py-8">
+                Nenhuma férias programada
+              </p>
+            ) : (
+              <div className="space-y-1.5 md:space-y-2 max-h-[300px] overflow-y-auto">
+                {stats.vacations.map((vacation) => {
+                  const today = new Date();
+                  const startDate = parseISO(vacation.start_date);
+                  const daysUntilStart = differenceInDays(startDate, today);
+                  
+                  let cardColorClass = 'bg-muted/30 border-border';
+                  if (daysUntilStart <= 30) {
+                    cardColorClass = 'bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-700';
+                  } else if (daysUntilStart <= 60) {
+                    cardColorClass = 'bg-orange-100 border-orange-300 dark:bg-orange-900/30 dark:border-orange-700';
+                  }
+                  
+                  return (
+                    <div 
+                      key={vacation.id} 
+                      className={`border rounded p-2 md:p-3 text-xs ${cardColorClass}`}
+                    >
+                      <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                        <CalendarDays className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
+                        <span className="font-semibold text-[10px] md:text-xs">
+                          {vacation.agents?.name || 'Agente não definido'}
+                        </span>
+                      </div>
+                      <div className="text-[10px] md:text-xs text-muted-foreground space-y-0.5">
+                        <div>
+                          <span className="font-medium">Início:</span> {format(startDate, "dd/MM/yyyy")}
+                        </div>
+                        <div>
+                          <span className="font-medium">Fim:</span> {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
+                        </div>
+                        <div>
+                          <span className="font-medium">Dias:</span> {vacation.days || '-'}
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={daysUntilStart <= 30 ? 'destructive' : daysUntilStart <= 60 ? 'secondary' : 'outline'}
+                        className="mt-1.5 text-[9px] md:text-[10px]"
+                      >
+                        {daysUntilStart <= 0 ? 'Em andamento' : `${daysUntilStart} dias restantes`}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
     </DndContext>
   );
