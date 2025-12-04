@@ -163,7 +163,7 @@ export default function Vacations() {
       toast({
         title: "Data inválida para início de férias",
         description:
-          "Não é permitido iniciar férias nos dois dias que antecedem um feriado ou fim de semana (dia de descanso semanal remunerado).",
+          "Não é permitido iniciar férias nos dois dias que antecedem um feriado ou domingo (dia de descanso semanal remunerado).",
         variant: "destructive",
       });
       return;
@@ -557,10 +557,16 @@ export default function Vacations() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="text-xs">{vacation.period_number}º Período</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {vacation.period_number}º Período
+                          </Badge>
                         </TableCell>
-                        <TableCell className="text-xs md:text-sm">{format(parseISO(vacation.start_date), "dd/MM/yyyy")}</TableCell>
-                        <TableCell className="text-xs md:text-sm">{format(parseISO(vacation.end_date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-xs md:text-sm">
+                          {format(parseISO(vacation.start_date), "dd/MM/yyyy")}
+                        </TableCell>
+                        <TableCell className="text-xs md:text-sm">
+                          {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
+                        </TableCell>
                         <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
                         <TableCell className="text-xs md:text-sm">
                           {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
@@ -568,10 +574,20 @@ export default function Vacations() {
                         <TableCell>
                           {canEdit("vacations") && (
                             <div className="flex gap-1">
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => editVacation(vacation)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => editVacation(vacation)}
+                              >
                                 <Edit className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDeleteVacation(vacation.id)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleDeleteVacation(vacation.id)}
+                              >
                                 <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
                             </div>
@@ -656,8 +672,10 @@ export default function Vacations() {
                     </div>
                   </div>
 
-                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button type="submit" className="w-full sm:w-auto">{editingTimeOffId ? "Atualizar" : "Cadastrar"}</Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button type="submit" className="w-full sm:w-auto">
+                      {editingTimeOffId ? "Atualizar" : "Cadastrar"}
+                    </Button>
                     {editingTimeOffId && (
                       <Button
                         type="button"
@@ -701,7 +719,9 @@ export default function Vacations() {
                   <TableBody>
                     {timeOffs.map((timeOff) => (
                       <TableRow key={timeOff.id}>
-                        <TableCell className="text-xs md:text-sm">{format(parseISO(timeOff.date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-xs md:text-sm">
+                          {format(parseISO(timeOff.date), "dd/MM/yyyy")}
+                        </TableCell>
                         <TableCell>
                           {timeOff.agents ? (
                             <div className="flex items-center gap-2">
@@ -728,10 +748,20 @@ export default function Vacations() {
                         <TableCell>
                           {canEdit("vacations") && (
                             <div className="flex gap-1">
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => editTimeOff(timeOff)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => editTimeOff(timeOff)}
+                              >
                                 <Edit className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDeleteTimeOff(timeOff.id)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleDeleteTimeOff(timeOff.id)}
+                              >
                                 <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                               </Button>
                             </div>
