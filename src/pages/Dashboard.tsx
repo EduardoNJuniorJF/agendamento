@@ -442,7 +442,8 @@ export default function Dashboard() {
                                 </div>
                                 <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
-                                                                    {apt.agents && apt.agents.length > 0
+                                  <div className="text-muted-foreground text-[10px] md:text-xs">
+                                    {apt.agents && apt.agents.length > 0
                                       ? apt.agents.map((agent, idx) => (
                                           <div key={idx} className="truncate">
                                             {agent.name}
