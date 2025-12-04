@@ -402,14 +402,6 @@ export default function Dashboard() {
                             </div>
                             <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
                               <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
-                              </div>
-                              <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Horário:</div>
-                                <div className="text-muted-foreground text-[10px] md:text-xs">{apt.time}</div>
-                              </div>
-                              <div>
                                 <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
                                 <div className="text-muted-foreground text-[10px] md:text-xs">
                                   {apt.agents && apt.agents.length > 0
@@ -420,32 +412,10 @@ export default function Dashboard() {
                                 </div>
                               </div>
                               <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Veículo:</div>
-                                <div className="truncate text-[10px] md:text-xs text-vehicle-name font-semibold">
-                                  {apt.vehicles ? `${apt.vehicles.model}` : 'N/A'}
-                                </div>
+                                <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
                               </div>
                             </div>
-                            <div>
-                              <div className="font-medium text-[9px] md:text-[10px]">Despesas:</div>
-                              <Badge 
-                                className={`text-[8px] md:text-[9px] px-1 py-0.5 mt-0.5 border-0 ${
-                                  apt.expense_status === 'separar_dia_anterior' 
-                                    ? 'bg-expense-previous-day text-expense-previous-day-foreground' 
-                                    : apt.expense_status === 'separar_dinheiro'
-                                    ? 'bg-expense-money text-expense-money-foreground'
-                                    : 'bg-expense-no-separate text-expense-no-separate-foreground'
-                                }`}
-                              >
-                                {getExpenseLabel(apt.expense_status)}
-                              </Badge>
-                            </div>
-                            {apt.description && (
-                              <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Observações:</div>
-                                <div className="text-muted-foreground line-clamp-2 text-[10px] md:text-xs">{apt.description}</div>
-                              </div>
-                            )}
                           </div>
                         </DraggableAppointmentCard>
                       ))
