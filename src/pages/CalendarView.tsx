@@ -129,8 +129,11 @@ export default function CalendarView() {
         const weekDays = days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6); // Monday to Friday
 
         // Lógica de Filtragem:
-        // Para a primeira semana do mês, filtra os dias que pertencem ao mês anterior.
-        if (index === 0) {
+        // A primeira semana é aquela que começa antes ou no mesmo dia que o mês.
+        const isFirstWeek = weekStart.getTime() <= monthStart.getTime();
+
+        if (isFirstWeek) {
+          // Filtra dias que são do mês anterior
           return weekDays.filter((day) => day.getMonth() === currentMonth.getMonth());
         }
 
