@@ -151,7 +151,7 @@ export default function Vacations() {
         title: "Data inválida para início de férias",
         description: holidayName
           ? `Não é permitido iniciar férias em feriado (${holidayName}). As férias devem começar em dia útil.`
-          : "Não é permitido iniciar férias em fim de semana (sábado ou domingo). As férias devem começar em dia útil.",
+          : "Não é permitido iniciar férias em dia de Descanso Semanal Remunerado. As férias devem começar em dia útil.",
         variant: "destructive",
       });
       return;
