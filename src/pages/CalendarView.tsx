@@ -415,19 +415,22 @@ export default function CalendarView() {
                                       >
                                         <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                       </Button>
-                                                               <div className="space-y-1.5">
-                                    {/* Apenas Cliente/Ticket e Cidade */}
-                                    <div className="flex gap-4">
-                                      <div>
-                                        <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
-                                        <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
-                                      </div>
-                                      <div>
-                                        <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                        <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
-                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="space-y-1.5">
+                                  {/* Apenas Cliente/Ticket e Cidade */}
+                                  <div className="flex gap-4">
+                                    <div>
+                                      <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                                      <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
+                                    </div>
+                                    <div>
+                                      <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                      <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
                                     </div>
                                   </div>
+                                </div>
                                   {/* Penalty Badge */}
                                   <div 
                                     className={`flex items-center gap-1 mt-1 ${isAdmin ? 'cursor-pointer' : ''}`}
