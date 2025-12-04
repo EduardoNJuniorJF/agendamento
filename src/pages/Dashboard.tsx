@@ -343,7 +343,10 @@ export default function Dashboard() {
                   id={format(day, 'yyyy-MM-dd')}
                   className="border rounded-lg p-2 md:p-3 min-h-[280px] md:min-h-[300px]"
                 >
-                  <div className="text-center mb-2 md:mb-3">
+                  <div 
+                    className="text-center mb-2 md:mb-3 cursor-pointer hover:bg-muted/50 rounded-md p-1 transition-colors"
+                    onClick={() => navigate(`/calendar?date=${format(day, 'yyyy-MM-dd')}`)}
+                  >
                     <div className="font-semibold text-xs md:text-sm">
                       {format(day, 'EEEE', { locale: ptBR })}
                     </div>
@@ -353,6 +356,9 @@ export default function Dashboard() {
                     <div className="text-[10px] md:text-xs text-muted-foreground">
                       {format(day, 'MMM', { locale: ptBR })}
                     </div>
+                    <Badge variant="secondary" className="mt-1 text-[9px] md:text-[10px] px-1.5 py-0.5">
+                      {dayAppointments.length} {dayAppointments.length === 1 ? 'atendimento' : 'atendimentos'}
+                    </Badge>
                     {isDayHoliday && holidayName && (
                       <Badge variant="destructive" className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center w-full">
                         <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
