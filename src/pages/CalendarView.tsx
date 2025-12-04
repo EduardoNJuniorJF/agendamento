@@ -156,11 +156,9 @@ export default function CalendarView() {
 
     return (
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
+        <div>
+          <div className="font-medium text-xs text-muted-foreground">Horário:</div>
           <div className="font-semibold text-sm md:text-base">{apt.time}</div>
-          <Badge variant="secondary" className="text-[9px] md:text-[10px] px-1.5 py-0.5">
-            {translateStatus(apt.status)}
-          </Badge>
         </div>
         <div>
           <div className="font-medium text-xs text-muted-foreground">Cliente / Ticket:</div>
