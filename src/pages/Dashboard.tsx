@@ -395,25 +395,23 @@ export default function Dashboard() {
                               </>
                             )}
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             <div>
                               <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
                               <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
                             </div>
-                            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
-                              <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
-                                <div className="text-muted-foreground text-[10px] md:text-xs">
-                                  {apt.agents && apt.agents.length > 0
-                                    ? apt.agents.map((agent, idx) => (
-                                        <div key={idx} className="truncate">{agent.name}</div>
-                                      ))
-                                    : 'Não atribuído'}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
+                            <div>
+                              <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                              <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
+                              <div className="text-muted-foreground text-[10px] md:text-xs">
+                                {apt.agents && apt.agents.length > 0
+                                  ? apt.agents.map((agent, idx) => (
+                                      <div key={idx} className="truncate">{agent.name}</div>
+                                    ))
+                                  : 'Não atribuído'}
                               </div>
                             </div>
                           </div>
