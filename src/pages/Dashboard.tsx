@@ -429,15 +429,17 @@ export default function Dashboard() {
                                   </>
                                 )}
                               </div>
-                              <div className="space-y-3">
-                                <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
-                                  <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
-                                </div>
-                                <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                  <div className="text-muted-foreground truncate text-[10px] md:text-xs">
-                                    {apt.city}
+                              <div className="space-y-1">
+                                <div className="flex gap-4">
+                                  <div>
+                                    <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                                    <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                    <div className="text-muted-foreground truncate text-[10px] md:text-xs">
+                                      {apt.city}
+                                    </div>
                                   </div>
                                 </div>
                                 <div>
