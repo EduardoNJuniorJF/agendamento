@@ -6,7 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +62,12 @@ interface AgentBonus {
   totalBonus: number;
   completed: number;
   penalties: number;
+  completedLevel1: number;
+  completedLevel2: number;
+  completedLevel3: number;
+  penaltiesLevel1: number;
+  penaltiesLevel2: number;
+  penaltiesLevel3: number;
 }
 
 export default function Bonus() {
@@ -97,11 +111,7 @@ export default function Bonus() {
     }
   };
 
-  const calculateBonuses = async (
-    agentsList: Agent[],
-    settings: BonusSettings | null,
-    cities: CityLevel[]
-  ) => {
+  const calculateBonuses = async (agentsList: Agent[], settings: BonusSettings | null, cities: CityLevel[]) => {
     const monthStart = format(startOfMonth(currentDate), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(currentDate), "yyyy-MM-dd");
 
@@ -120,6 +130,12 @@ export default function Bonus() {
           totalBonus: 0,
           completed: 0,
           penalties: 0,
+          completedLevel1: 0,
+          completedLevel2: 0,
+          completedLevel3: 0,
+          penaltiesLevel1: 0,
+          penaltiesLevel2: 0,
+          penaltiesLevel3: 0,
         });
         continue;
       }
@@ -139,6 +155,12 @@ export default function Bonus() {
           totalBonus: 0,
           completed: 0,
           penalties: 0,
+          completedLevel1: 0,
+          completedLevel2: 0,
+          completedLevel3: 0,
+          penaltiesLevel1: 0,
+          penaltiesLevel2: 0,
+          penaltiesLevel3: 0,
         });
         continue;
       }
@@ -146,28 +168,49 @@ export default function Bonus() {
       let totalBonus = 0;
       let completed = 0;
       let penalties = 0;
+      let completedLevel1 = 0;
+      let completedLevel2 = 0;
+      let completedLevel3 = 0;
+      let penaltiesLevel1 = 0;
+      let penaltiesLevel2 = 0;
+      let penaltiesLevel3 = 0;
 
       for (const apt of appointments) {
-        if (apt.status === "completed") completed++;
-        if (apt.status === "completed" && apt.is_penalized) penalties++;
+        if (apt.status === "completed") {
+          completed++;
+
+          const cityUpper = apt.city?.toUpperCase() || "";
+          const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
+
+          const level = cityConfig?.level || 0;
+
+          if (level === 1) completedLevel1++;
+          if (level === 2) completedLevel2++;
+          if (level === 3) completedLevel3++;
+
+          if (apt.is_penalized) {
+            penalties++;
+            if (level === 1) penaltiesLevel1++;
+            if (level === 2) penaltiesLevel2++;
+            if (level === 3) penaltiesLevel3++;
+          }
+        }
 
         // Calculate bonus only for completed and not penalized
         if (apt.status === "completed" && !apt.is_penalized) {
           const cityUpper = apt.city?.toUpperCase() || "";
-          
+
           // Online attendance = R$0
           if (cityUpper.includes("ONLINE")) {
             continue;
           }
 
           // Find city level
-          const cityConfig = cities.find(
-            (c) => c.city_name.toUpperCase() === cityUpper
-          );
+          const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
 
           if (settings && cityConfig) {
             let levelValue = 0;
-            
+
             switch (cityConfig.level) {
               case 1:
                 levelValue = Number(settings.level_1_value) || 0;
@@ -179,7 +222,7 @@ export default function Bonus() {
                 levelValue = Number(settings.level_3_value) || 0;
                 break;
             }
-            
+
             totalBonus += levelValue;
           }
           // City not configured = R$0 bonus
@@ -191,6 +234,12 @@ export default function Bonus() {
         totalBonus,
         completed,
         penalties,
+        completedLevel1,
+        completedLevel2,
+        completedLevel3,
+        penaltiesLevel1,
+        penaltiesLevel2,
+        penaltiesLevel3,
       });
     }
 
@@ -319,10 +368,20 @@ export default function Bonus() {
           <table>
             <thead>
               <tr>
-                <th>Agente</th>
-                <th>Atendimentos Concluídos</th>
-                <th>Penalidades</th>
-                <th>Bonificação Total</th>
+                <th rowspan="2">Agente</th>
+                <th colspan="4">Atendimentos Concluídos</th>
+                <th colspan="4">Penalidades</th>
+                <th rowspan="2">Bonificação Total</th>
+              </tr>
+              <tr>
+                <th>Total</th>
+                <th>Nível 1</th>
+                <th>Nível 2</th>
+                <th>Nível 3</th>
+                <th>Total</th>
+                <th>Nível 1</th>
+                <th>Nível 2</th>
+                <th>Nível 3</th>
               </tr>
             </thead>
             <tbody>
@@ -335,10 +394,16 @@ export default function Bonus() {
                     ${ab.agent.name}
                   </td>
                   <td>${ab.completed}</td>
+                  <td>${ab.completedLevel1}</td>
+                  <td>${ab.completedLevel2}</td>
+                  <td>${ab.completedLevel3}</td>
                   <td>${ab.penalties}</td>
+                  <td>${ab.penaltiesLevel1}</td>
+                  <td>${ab.penaltiesLevel2}</td>
+                  <td>${ab.penaltiesLevel3}</td>
                   <td>R$ ${ab.totalBonus.toFixed(2)}</td>
                 </tr>
-              `
+              `,
                 )
                 .join("")}
             </tbody>
@@ -364,9 +429,7 @@ export default function Bonus() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">Bonificação</h1>
-          <p className="text-xs md:text-sm text-muted-foreground">
-            Gestão e cálculo de bonificações mensais
-          </p>
+          <p className="text-xs md:text-sm text-muted-foreground">Gestão e cálculo de bonificações mensais</p>
         </div>
         <div className="flex items-center gap-2">
           {isAdmin && (
@@ -380,9 +443,7 @@ export default function Bonus() {
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Configurações de Bonificação</DialogTitle>
-                  <DialogDescription>
-                    Gerencie os valores base e níveis de bonificação
-                  </DialogDescription>
+                  <DialogDescription>Gerencie os valores base e níveis de bonificação</DialogDescription>
                 </DialogHeader>
 
                 <Tabs defaultValue="values" className="w-full">
@@ -406,9 +467,7 @@ export default function Bonus() {
                               value={bonusSettings?.base_value || 0}
                               onChange={(e) =>
                                 setBonusSettings((prev) =>
-                                  prev
-                                    ? { ...prev, base_value: parseFloat(e.target.value) || 0 }
-                                    : prev
+                                  prev ? { ...prev, base_value: parseFloat(e.target.value) || 0 } : prev,
                                 )
                               }
                             />
@@ -421,9 +480,7 @@ export default function Bonus() {
                               value={bonusSettings?.level_1_value || 0}
                               onChange={(e) =>
                                 setBonusSettings((prev) =>
-                                  prev
-                                    ? { ...prev, level_1_value: parseFloat(e.target.value) || 0 }
-                                    : prev
+                                  prev ? { ...prev, level_1_value: parseFloat(e.target.value) || 0 } : prev,
                                 )
                               }
                             />
@@ -436,9 +493,7 @@ export default function Bonus() {
                               value={bonusSettings?.level_2_value || 0}
                               onChange={(e) =>
                                 setBonusSettings((prev) =>
-                                  prev
-                                    ? { ...prev, level_2_value: parseFloat(e.target.value) || 0 }
-                                    : prev
+                                  prev ? { ...prev, level_2_value: parseFloat(e.target.value) || 0 } : prev,
                                 )
                               }
                             />
@@ -451,9 +506,7 @@ export default function Bonus() {
                               value={bonusSettings?.level_3_value || 0}
                               onChange={(e) =>
                                 setBonusSettings((prev) =>
-                                  prev
-                                    ? { ...prev, level_3_value: parseFloat(e.target.value) || 0 }
-                                    : prev
+                                  prev ? { ...prev, level_3_value: parseFloat(e.target.value) || 0 } : prev,
                                 )
                               }
                             />
@@ -475,9 +528,7 @@ export default function Bonus() {
                             <Label>Nome da Cidade</Label>
                             <Input
                               value={newCity.city_name}
-                              onChange={(e) =>
-                                setNewCity({ ...newCity, city_name: e.target.value })
-                              }
+                              onChange={(e) => setNewCity({ ...newCity, city_name: e.target.value })}
                               placeholder="Ex: PETRÓPOLIS"
                             />
                           </div>
@@ -485,9 +536,7 @@ export default function Bonus() {
                             <Label>Nível</Label>
                             <Select
                               value={String(newCity.level)}
-                              onValueChange={(v) =>
-                                setNewCity({ ...newCity, level: parseInt(v) })
-                              }
+                              onValueChange={(v) => setNewCity({ ...newCity, level: parseInt(v) })}
                             >
                               <SelectTrigger>
                                 <SelectValue />
@@ -505,9 +554,7 @@ export default function Bonus() {
                               type="number"
                               step="0.01"
                               value={newCity.km}
-                              onChange={(e) =>
-                                setNewCity({ ...newCity, km: parseFloat(e.target.value) || 0 })
-                              }
+                              onChange={(e) => setNewCity({ ...newCity, km: parseFloat(e.target.value) || 0 })}
                             />
                           </div>
                           <Button onClick={handleAddCity}>
@@ -540,18 +587,10 @@ export default function Bonus() {
                                 <TableCell>{city.km} km</TableCell>
                                 <TableCell>
                                   <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => setEditingCity(city)}
-                                    >
+                                    <Button variant="ghost" size="icon" onClick={() => setEditingCity(city)}>
                                       <Edit2 className="h-4 w-4" />
                                     </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => handleDeleteCity(city.id)}
-                                    >
+                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteCity(city.id)}>
                                       <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                   </div>
@@ -603,17 +642,13 @@ export default function Bonus() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Bonificação</CardDescription>
-            <CardTitle className="text-2xl text-green-600">
-              R$ {totalGlobal.toFixed(2)}
-            </CardTitle>
+            <CardTitle className="text-2xl text-green-600">R$ {totalGlobal.toFixed(2)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Concluídos</CardDescription>
-            <CardTitle className="text-2xl">
-              {agentBonuses.reduce((sum, ab) => sum + ab.completed, 0)}
-            </CardTitle>
+            <CardTitle className="text-2xl">{agentBonuses.reduce((sum, ab) => sum + ab.completed, 0)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -639,10 +674,26 @@ export default function Bonus() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Agente</TableHead>
-                  <TableHead className="text-center">Concluídos</TableHead>
-                  <TableHead className="text-center">Penalidades</TableHead>
-                  <TableHead className="text-right">Bonificação</TableHead>
+                  <TableHead rowSpan={2}>Agente</TableHead>
+                  <TableHead colSpan={4} className="text-center">
+                    Concluídos
+                  </TableHead>
+                  <TableHead colSpan={4} className="text-center">
+                    Penalidades
+                  </TableHead>
+                  <TableHead rowSpan={2} className="text-right">
+                    Bonificação
+                  </TableHead>
+                </TableRow>
+                <TableRow>
+                  <TableHead className="text-center">Total</TableHead>
+                  <TableHead className="text-center">Nível 1</TableHead>
+                  <TableHead className="text-center">Nível 2</TableHead>
+                  <TableHead className="text-center">Nível 3</TableHead>
+                  <TableHead className="text-center">Total</TableHead>
+                  <TableHead className="text-center">Nível 1</TableHead>
+                  <TableHead className="text-center">Nível 2</TableHead>
+                  <TableHead className="text-center">Nível 3</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -650,18 +701,19 @@ export default function Bonus() {
                   <TableRow key={ab.agent.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: ab.agent.color }}
-                        />
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ab.agent.color }} />
                         {ab.agent.name}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{ab.completed}</TableCell>
-                    <TableCell className="text-center text-red-600">{ab.penalties}</TableCell>
-                    <TableCell className="text-right font-semibold text-green-600">
-                      R$ {ab.totalBonus.toFixed(2)}
-                    </TableCell>
+                    <TableCell className="text-center">{ab.completedLevel1}</TableCell>
+                    <TableCell className="text-center">{ab.completedLevel2}</TableCell>
+                    <TableCell className="text-center">{ab.completedLevel3}</TableCell>
+                    <TableCell className="text-center">{ab.penalties}</TableCell>
+                    <TableCell className="text-center">{ab.penaltiesLevel1}</TableCell>
+                    <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
+                    <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
+                    <TableCell className="text-right font-medium">R$ {ab.totalBonus.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
                 {agentBonuses.length === 0 && (
@@ -689,18 +741,14 @@ export default function Bonus() {
                 <Label>Nome da Cidade</Label>
                 <Input
                   value={editingCity.city_name}
-                  onChange={(e) =>
-                    setEditingCity({ ...editingCity, city_name: e.target.value })
-                  }
+                  onChange={(e) => setEditingCity({ ...editingCity, city_name: e.target.value })}
                 />
               </div>
               <div>
                 <Label>Nível</Label>
                 <Select
                   value={String(editingCity.level)}
-                  onValueChange={(v) =>
-                    setEditingCity({ ...editingCity, level: parseInt(v) })
-                  }
+                  onValueChange={(v) => setEditingCity({ ...editingCity, level: parseInt(v) })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -718,9 +766,7 @@ export default function Bonus() {
                   type="number"
                   step="0.01"
                   value={editingCity.km}
-                  onChange={(e) =>
-                    setEditingCity({ ...editingCity, km: parseFloat(e.target.value) || 0 })
-                  }
+                  onChange={(e) => setEditingCity({ ...editingCity, km: parseFloat(e.target.value) || 0 })}
                 />
               </div>
             </div>
