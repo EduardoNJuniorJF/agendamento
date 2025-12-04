@@ -157,10 +157,9 @@ export default function CalendarView() {
     return (
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <div className="font-medium text-xs text-muted-foreground">Horário:</div>
           <div className="font-semibold text-sm md:text-base">{apt.time}</div>
           <Badge variant="secondary" className="text-[9px] md:text-[10px] px-1.5 py-0.5">
-            {apt.status}
+            {translateStatus(apt.status)}
           </Badge>
         </div>
         <div>
@@ -178,7 +177,7 @@ export default function CalendarView() {
               {apt.agents.map((agent) => (
                 <Badge
                   key={agent.name}
-                  style={{ backgroundColor: agent.color ? `${agent.color}15` : "hsl(var(--primary) / 0.1)" }}
+                  variant="outline" // Removido o estilo de cor para ser neutro
                   className="text-[9px] md:text-[10px] px-1.5 py-0.5"
                 >
                   {agent.name}
@@ -226,6 +225,17 @@ export default function CalendarView() {
   const getAppointmentsForDay = (day: Date) => {
     const dayStr = format(day, "yyyy-MM-dd");
     return appointments.filter((apt) => apt.date === dayStr);
+  };
+
+  const translateStatus = (status: string) => {
+    switch (status) {
+      case "scheduled":
+        return "Agendado";
+      case "completed":
+        return "Concluído";
+      default:
+        return status;
+    }
   };
 
   const getExpenseLabel = (status: string) => {
