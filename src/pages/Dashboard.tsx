@@ -468,7 +468,8 @@ export default function Dashboard() {
         </Card>
 
         {/* Folgas e Férias - Terceira linha */}
-        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
+        {/*<div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2"> */}
+        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 items-start">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
