@@ -429,7 +429,7 @@ export default function Dashboard() {
                                   </>
                                 )}
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-3">
                                 <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
                                   <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
