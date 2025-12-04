@@ -524,7 +524,7 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+              <CardTitle className="flex items-center gap-7 text-sm md:text-base">
                 <CalendarDays className="h-4 w-4 md:h-5 md:w-5" />
                 Férias Programadas
               </CardTitle>
