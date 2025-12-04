@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import {
-  format,
-  addMonths,
+	import {
+	  format,
+	  addMonths,
+	  addWeeks,
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
@@ -55,6 +56,7 @@ export default function CalendarView() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('month'); // 'month' or 'week'
   const [activeId, setActiveId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -116,31 +118,60 @@ export default function CalendarView() {
     }
   };
 
+  const getCurrentWeekDays = () => {
+    // Pega a semana que contém o dia 1 do currentMonth
+    const startDay = startOfWeek(currentMonth, { weekStartsOn: 1 });
+    const endDay = endOfWeek(startDay, { weekStartsOn: 1 });
+
+    const days = eachDayOfInterval({ start: startDay, end: endDay });
+    // Retorna apenas os dias úteis (segunda a sexta)
+    return days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6);
+  };
+
   const getMonthWeeks = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
 
     const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
 
-    // Filtra as semanas para remover a primeira se ela começar no mês anterior
-    const filteredWeeks = weeks.filter((weekStart, index) => {
-      // Se for a primeira semana (index === 0) e ela começar antes do mês atual, a ignoramos.
-      if (index === 0 && weekStart.getMonth() !== currentMonth.getMonth()) {
-        return false; // Ignora a semana
-      }
-      return true; // Mantém as outras semanas
-    });
+	    // Filtra as semanas para garantir que a primeira semana não comece no mês anterior,
+	    // a menos que o mês atual comece em um dia útil.
+	    const filteredWeeks = weeks.filter((weekStart) => {
+	      return weekStart.getMonth() === currentMonth.getMonth() || weekStart.getDay() === 1;
+	    });
 
-    return filteredWeeks
-      .map((weekStart, index, array) => {
-        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-        const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-        const weekDays = days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6); // Monday to Friday
+	    return filteredWeeks
+	      .map((weekStart) => {
+	        const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+	        const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+	        const weekDays = days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6); // Monday to Friday
+	
+	        // Retorna os 5 dias úteis (segunda a sexta) da semana.
+	        return weekDays;
+	      })
+	      .filter((week) => week.length > 0); // Remover semanas vazias
+  };
 
-        // Retorna os 5 dias úteis (segunda a sexta) da semana.
-        return weekDays;
-      })
-      .filter((week) => week.length > 0); // Remover semanas vazias
+  const renderAppointmentCardContent = (apt: Appointment, isSummary: boolean) => {
+    if (isSummary) {
+      return (
+        <div className="space-y-1.5">
+          <div>
+            <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+            <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
+          </div>
+          <div>
+            <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+            <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Conteúdo detalhado (original)
+    return (
+                                  {renderAppointmentCardContent(apt, viewMode === 'month')}
+    );
   };
 
   const getAppointmentsForDay = (day: Date) => {
@@ -232,6 +263,198 @@ export default function CalendarView() {
   }
 
   const monthWeeks = getMonthWeeks();
+  const currentWeekDays = getCurrentWeekDays();
+
+  const renderMonthView = () => (
+    <div className="space-y-4 md:space-y-6">
+      {monthWeeks.map((weekDays, weekIndex) => {
+        if (weekDays.length === 0) return null;
+        return (
+          <div key={weekIndex} className="space-y-2 md:space-y-3">
+            <div className="bg-muted/50 rounded-lg px-3 md:px-4 py-1.5 md:py-2">
+              <h3 className="font-semibold text-xs md:text-sm">
+                Semana {weekIndex + 1} - de {format(weekDays[0], "dd/MM", { locale: ptBR })} a{" "}
+                {format(weekDays[weekDays.length - 1], "dd/MM", { locale: ptBR })}
+              </h3>
+            </div>
+            <div className="overflow-x-auto pb-2">
+              <div
+                className="grid gap-2 md:gap-4 min-w-[640px]"
+                style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}
+              >
+                {weekDays.map((day) => {
+                  const dayAppointments = getAppointmentsForDay(day);
+                  const isDayHoliday = isHoliday(day);
+                  const holidayName = isDayHoliday ? getHolidayName(day) : null;
+
+                  return (
+                    <DroppableDay
+                      key={day.toISOString()}
+                      id={format(day, "yyyy-MM-dd")}
+                      className="bg-card rounded-lg border p-2 md:p-4 min-h-[200px]"
+                    >
+                      <div className="mb-2 md:mb-4 text-center">
+                        <div className="text-xs md:text-sm text-muted-foreground">
+                          {format(day, "EEEE", { locale: ptBR })}
+                        </div>
+                        <div className="text-base md:text-lg font-semibold">
+                          {format(day, "dd/MM", { locale: ptBR })}
+                        </div>
+                        {isDayHoliday && holidayName && (
+                          <Badge
+                            variant="destructive"
+                            className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center"
+                          >
+                            <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                            <span className="truncate">{holidayName}</span>
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-2 md:space-y-3">
+                        {dayAppointments.length === 0 ? (
+                          <p className="text-xs md:text-sm text-muted-foreground text-center py-3 md:py-4">
+                            Sem agendamentos
+                          </p>
+                        ) : (
+                          dayAppointments.map((apt) => (
+                            <DraggableAppointmentCard
+                              key={apt.id}
+                              id={apt.id}
+                              backgroundColor={
+                                apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                                  ? `${apt.agents[0].color}15`
+                                  : "hsl(var(--primary) / 0.1)"
+                              }
+                              borderColor={
+                                apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                                  ? apt.agents[0].color
+                                  : "hsl(var(--primary) / 0.2)"
+                              }
+                            >
+                              <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                {canEdit("calendar") && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
+                                      onClick={() => handleEditAppointment(apt.id)}
+                                    >
+                                      <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                                      onClick={() => handleDeleteAppointment(apt.id)}
+                                    >
+                                      <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                              {renderAppointmentCardContent(apt, true)} {/* Visualização resumida no mês */}
+                            </DraggableAppointmentCard>
+                          ))
+                        )}
+                      </div>
+                    </DroppableDay>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderWeekView = () => (
+    <div className="space-y-4 md:space-y-6">
+      {currentWeekDays.map((day) => {
+        const dayAppointments = getAppointmentsForDay(day);
+        const isDayHoliday = isHoliday(day);
+        const holidayName = isDayHoliday ? getHolidayName(day) : null;
+
+        return (
+          <div key={day.toISOString()} className="flex flex-col md:flex-row bg-card rounded-lg border p-2 md:p-4">
+            {/* Coluna do Dia */}
+            <div className="flex-shrink-0 w-full md:w-40 mb-2 md:mb-0 md:mr-4 text-center md:text-left">
+              <div className="text-xs md:text-sm text-muted-foreground">
+                {format(day, "EEEE", { locale: ptBR })}
+              </div>
+              <div className="text-base md:text-lg font-semibold">
+                {format(day, "dd/MM", { locale: ptBR })}
+              </div>
+              {isDayHoliday && holidayName && (
+                <Badge
+                  variant="destructive"
+                  className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center md:justify-start"
+                >
+                  <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                  <span className="truncate">{holidayName}</span>
+                </Badge>
+              )}
+            </div>
+
+            {/* Coluna dos Agendamentos (Horizontal) */}
+            <DroppableDay
+              id={format(day, "yyyy-MM-dd")}
+              className="flex-1 flex overflow-x-auto pb-2 space-x-3 md:space-x-4"
+            >
+              {dayAppointments.length === 0 ? (
+                <p className="text-xs md:text-sm text-muted-foreground self-center whitespace-nowrap">
+                  Sem agendamentos
+                </p>
+              ) : (
+                dayAppointments.map((apt) => (
+                  <DraggableAppointmentCard
+                    key={apt.id}
+                    id={apt.id}
+                    className="flex-shrink-0 w-64" // Definindo largura para os cards
+                    backgroundColor={
+                      apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                        ? `${apt.agents[0].color}15`
+                        : "hsl(var(--primary) / 0.1)"
+                    }
+                    borderColor={
+                      apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                        ? apt.agents[0].color
+                        : "hsl(var(--primary) / 0.2)"
+                    }
+                  >
+                    <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      {canEdit("calendar") && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
+                            onClick={() => handleEditAppointment(apt.id)}
+                          >
+                            <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleDeleteAppointment(apt.id)}
+                          >
+                            <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    {renderAppointmentCardContent(apt, false)} {/* Visualização completa na semana */}
+                  </DraggableAppointmentCard>
+                ))
+              )}
+            </DroppableDay>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <DndContext
@@ -254,16 +477,44 @@ export default function CalendarView() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between bg-card rounded-lg border p-3 md:p-4 gap-3">
-          <div className="text-center flex-1">
-            <p className="text-xs md:text-sm text-muted-foreground">Mês de</p>
-            <p className="font-semibold text-base md:text-lg">{format(currentMonth, "MMMM yyyy", { locale: ptBR })}</p>
+          {/* Toggle Switch */}
+          <div className="flex items-center rounded-md border p-1">
+            <Button
+              variant={viewMode === 'month' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('month')}
+            >
+              Mês
+            </Button>
+            <Button
+              variant={viewMode === 'week' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('week')}
+            >
+              Semana
+            </Button>
           </div>
+
+          {/* Título/Data */}
+          <div className="text-center flex-1">
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {viewMode === 'month' ? 'Mês de' : 'Semana de'}
+            </p>
+            <p className="font-semibold text-base md:text-lg">
+              {viewMode === 'month'
+                ? format(currentMonth, "MMMM yyyy", { locale: ptBR })
+                : `de ${format(startOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })} a ${format(endOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })}`
+              }
+            </p>
+          </div>
+
+          {/* Botões de Navegação */}
           <div className="flex items-center gap-1 md:gap-2">
             <Button
               variant="outline"
               size="icon"
               className="h-8 w-8 md:h-10 md:w-10"
-              onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}
+              onClick={() => setCurrentMonth(viewMode === 'month' ? addMonths(currentMonth, -1) : addWeeks(currentMonth, -1))}
             >
               <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
@@ -274,12 +525,92 @@ export default function CalendarView() {
               variant="outline"
               size="icon"
               className="h-8 w-8 md:h-10 md:w-10"
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              onClick={() => setCurrentMonth(viewMode === 'month' ? addMonths(currentMonth, 1) : addWeeks(currentMonth, 1))}
             >
               <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
           </div>
         </div>
+
+        {viewMode === 'month' ? renderMonthView() : renderWeekView()}
+      </div>
+    </DndContext>
+  );
+}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Calendário</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Visualize todos os agendamentos</p>
+          </div>
+          {canEdit("calendar") && (
+            <Button onClick={() => navigate("/new-appointment")} size="sm" className="w-full sm:w-auto">
+              Novo Agendamento
+            </Button>
+          )}
+        </div>
+
+	        <div className="flex flex-col sm:flex-row items-center justify-between bg-card rounded-lg border p-3 md:p-4 gap-3">
+	          {/* Toggle Switch */}
+	          <div className="flex items-center rounded-md border p-1">
+	            <Button
+	              variant={viewMode === 'month' ? 'default' : 'ghost'}
+	              size="sm"
+	              onClick={() => setViewMode('month')}
+	            >
+	              Mês
+	            </Button>
+	            <Button
+	              variant={viewMode === 'week' ? 'default' : 'ghost'}
+	              size="sm"
+	              onClick={() => setViewMode('week')}
+	            >
+	              Semana
+	            </Button>
+	          </div>
+	
+	          {/* Título/Data */}
+	          <div className="text-center flex-1">
+	            <p className="text-xs md:text-sm text-muted-foreground">
+	              {viewMode === 'month' ? 'Mês de' : 'Semana de'}
+	            </p>
+	            <p className="font-semibold text-base md:text-lg">
+	              {viewMode === 'month'
+	                ? format(currentMonth, "MMMM yyyy", { locale: ptBR })
+	                : `de ${format(startOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })} a ${format(endOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })}`
+	              }
+	            </p>
+	          </div>
+	
+	          {/* Botões de Navegação */}
+	          <div className="flex items-center gap-1 md:gap-2">
+	            <Button
+	              variant="outline"
+	              size="icon"
+	              className="h-8 w-8 md:h-10 md:w-10"
+	              onClick={() => setCurrentMonth(viewMode === 'month' ? addMonths(currentMonth, -1) : addWeeks(currentMonth, -1))}
+	            >
+	              <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
+	            </Button>
+	            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>
+	              Hoje
+	            </Button>
+	            <Button
+	              variant="outline"
+	              size="icon"
+	              className="h-8 w-8 md:h-10 md:w-10"
+	              onClick={() => setCurrentMonth(viewMode === 'month' ? addMonths(currentMonth, 1) : addWeeks(currentMonth, 1))}
+	            >
+	              <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
+	            </Button>
+	          </div>
+	        </div>
 
         <div className="space-y-4 md:space-y-6">
           {monthWeeks.map((weekDays, weekIndex) => {
