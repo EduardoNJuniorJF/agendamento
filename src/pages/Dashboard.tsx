@@ -430,17 +430,13 @@ export default function Dashboard() {
                                 )}
                               </div>
                               <div className="space-y-1">
-                                <div className="flex gap-14">
-                                  <div>
-                                    <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
-                                    <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                    <div className="text-muted-foreground truncate text-[10px] md:text-xs">
-                                      {apt.city}
-                                    </div>
-                                  </div>
+                                <div>
+                                  <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                                  <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                  <div className="text-muted-foreground text-[10px] md:text-xs">{apt.city}</div>
                                 </div>
                                 <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
@@ -468,8 +464,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Folgas e Férias - Terceira linha */}
-        {/*<div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2"> */}
-        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 items-start">
+        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -535,7 +530,7 @@ export default function Dashboard() {
                   Nenhuma férias programada
                 </p>
               ) : (
-                <div className="space-y-1.5 md:space-y-2 max-h-[1920px] overflow-y-auto">
+                <div className="space-y-1.5 md:space-y-2 max-h-[300px] overflow-y-auto">
                   {stats.vacations.map((vacation) => {
                     const today = new Date();
                     const startDate = parseISO(vacation.start_date);
