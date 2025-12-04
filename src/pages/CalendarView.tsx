@@ -193,9 +193,12 @@ export default function CalendarView() {
           </div>
         )}
         {apt.is_penalized && (
-          <div className="flex items-center text-xs text-destructive">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Penalizado
+          <div className="space-y-1">
+            <div className="font-medium text-xs text-muted-foreground">Penalidade:</div>
+            <div className="flex items-center text-xs font-semibold bg-destructive text-destructive-foreground p-1 rounded-sm">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Penalidade Aplicada
+            </div>
           </div>
         )}
         <div className="flex items-center justify-between pt-1">
