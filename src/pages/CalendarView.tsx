@@ -150,6 +150,12 @@ export default function CalendarView() {
             <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
             <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
           </div>
+          {apt.agents && apt.agents.length > 0 && (
+            <div>
+              <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
+              <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.agents[0].name}</div>
+            </div>
+          )}
         </div>
       );
     }
@@ -187,7 +193,7 @@ export default function CalendarView() {
         {apt.vehicles && (
           <div>
             <div className="font-medium text-xs text-muted-foreground">Veículo:</div>
-            <div className="text-muted-foreground truncate text-sm">
+            <div className="truncate text-sm" style={{ color: "#ffa100" }}>
               {apt.vehicles.model} ({apt.vehicles.plate})
             </div>
           </div>
@@ -202,8 +208,18 @@ export default function CalendarView() {
           </div>
         )}
         <div className="flex items-center justify-between pt-1">
-          <div className="text-[9px] text-muted-foreground">
-            <span className="font-medium">Despesa:</span> {getExpenseLabel(apt.expense_status)}
+          <div className="flex items-center gap-1">
+            <span className="font-medium text-[9px] text-muted-foreground">Despesa:</span>
+            <Badge
+              variant="secondary"
+              className="text-[9px] px-1.5 py-0.5"
+              style={{
+                backgroundColor: getExpenseColor(apt.expense_status),
+                color: getExpenseTextColor(apt.expense_status),
+              }}
+            >
+              {getExpenseLabel(apt.expense_status)}
+            </Badge>
           </div>
           {isAdmin && (
             <Button
@@ -224,6 +240,32 @@ export default function CalendarView() {
         </div>
       </div>
     );
+  };
+
+  const getExpenseColor = (status: string) => {
+    switch (status) {
+      case "separar_dia_anterior":
+        return "#11734b";
+      case "separar_dinheiro":
+        return "#d4edbc";
+      case "não_separar":
+        return "#ffcfc9";
+      default:
+        return "transparent";
+    }
+  };
+
+  const getExpenseTextColor = (status: string) => {
+    switch (status) {
+      case "separar_dia_anterior":
+        return "white"; // Para contraste com #11734b
+      case "separar_dinheiro":
+        return "black"; // Para contraste com #d4edbc
+      case "não_separar":
+        return "black"; // Para contraste com #ffcfc9
+      default:
+        return "black";
+    }
   };
 
   const getAppointmentsForDay = (day: Date) => {
