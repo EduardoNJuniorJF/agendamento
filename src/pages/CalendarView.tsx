@@ -604,7 +604,7 @@ export default function CalendarView() {
                               </div>
                               {apt.description && (
                                 <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Observaçõesa:</div>
+                                  <div className="font-medium text-[9px] md:text-[10px]">Observações:</div>
                                   <div className="text-muted-foreground line-clamp-2 text-[10px] md:text-xs">{apt.description}</div>
                                 </div>
                               )}
