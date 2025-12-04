@@ -209,13 +209,16 @@ export default function CalendarView() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5"
+              className={`h-5 w-5 ${apt.is_penalized ? "bg-destructive/80 hover:bg-destructive" : "hover:bg-destructive/20"}`}
+              title={apt.is_penalized ? "Remover Penalidade" : "Penalizar"}
               onClick={(e) => {
                 e.stopPropagation();
                 handleTogglePenalty(apt.id, apt.is_penalized || false);
               }}
             >
-              <User className="h-3 w-3" />
+              <AlertTriangle
+                className={`h-3 w-3 ${apt.is_penalized ? "text-destructive-foreground" : "text-destructive"}`}
+              />
             </Button>
           )}
         </div>
