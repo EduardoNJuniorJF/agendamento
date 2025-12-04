@@ -483,7 +483,7 @@ export default function CalendarView() {
               </div>
             );
           })}
-          ) : (
+          : (
             // Layout de Semana (Vertical)
             getWeekDays().map((day) => {
               const dayAppointments = getAppointmentsForDay(day);
