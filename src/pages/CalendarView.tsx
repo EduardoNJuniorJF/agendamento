@@ -128,7 +128,13 @@ export default function CalendarView() {
         const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
         const weekDays = days.filter((day) => day.getDay() !== 0 && day.getDay() !== 6); // Monday to Friday
 
-        // Retorna os 5 dias úteis (segunda a sexta) da semana, incluindo dias de meses adjacentes.
+        // Lógica de Filtragem:
+        // Para a primeira semana do mês, filtra os dias que pertencem ao mês anterior.
+        if (index === 0) {
+          return weekDays.filter((day) => day.getMonth() === currentMonth.getMonth());
+        }
+
+        // Para as demais semanas, retorna os 5 dias úteis (segunda a sexta), incluindo dias de meses adjacentes (se for a última semana).
         return weekDays;
       })
       .filter((week) => week.length > 0); // Remover semanas vazias
