@@ -355,7 +355,6 @@ export default function Bonus() {
             th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
             th { background-color: #f5f5f5; }
             .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
-            .total-title { display: block; font-size: 0.8em; font-weight: normal; }
             .agent-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
             .separator-right { border-right: 3px solid #000 !important; }
             @media print {
@@ -411,10 +410,9 @@ export default function Bonus() {
             </tbody>
           </table>
           
-	          <div class="total">
-	            <span class="total-title">Bonificação Total:</span>
-	            R$ ${totalGlobal.toFixed(2)}
-	          </div>
+          <div class="total">
+            TOTAL GLOBAL: R$ ${totalGlobal.toFixed(2)}
+          </div>
           
           <script>
             window.onload = function() { window.print(); }
