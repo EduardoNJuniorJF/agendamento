@@ -635,7 +635,7 @@ export default function CalendarView() {
           <div className="text-center flex-1">
             <p className="text-xs md:text-sm text-muted-foreground">{viewMode === "month" ? "Mês de" : "Semana de"}</p>
             <p className="font-semibold text-base md:text-lg">
-              {viewMode === "month"
+              {viewMode === "week"
                 ? format(currentMonth, "MMMM yyyy", { locale: ptBR })
                 : `de ${format(startOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })} a ${format(endOfWeek(currentMonth, { weekStartsOn: 1 }), "dd/MM", { locale: ptBR })}`}
             </p>
