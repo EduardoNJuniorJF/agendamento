@@ -118,7 +118,7 @@ export default function Bonus() {
     const bonuses: AgentBonus[] = [];
 
     for (const agent of agentsList) {
-      // Agenda reuniões com este agente no mês selecionado.
+      // Get appointments for this agent in the selected month
       const { data: appointmentAgents } = await supabase
         .from("appointment_agents")
         .select("appointment_id")
@@ -176,27 +176,28 @@ export default function Bonus() {
       let penaltiesLevel3 = 0;
 
       for (const apt of appointments) {
-        // Nova lógica: Contar TODOS os agendamentos para as métricas de produtividade (completed, completedLevelX)
-        const cityUpper = apt.city?.toUpperCase() || "";
-        const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
-        const level = cityConfig?.level || 0;
+        if (apt.status === "completed") {
+          completed++;
 
-        // 1. Contagem de Produtividade (agora contando TODOS os agendamentos)
-        completed++;
-        if (level === 1) completedLevel1++;
-        if (level === 2) completedLevel2++;
-        if (level === 3) completedLevel3++;
+          const cityUpper = apt.city?.toUpperCase() || "";
+          const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
 
-        // 2. Contagem de Penalidades (apenas para concluídos e penalizados)
-        if (apt.status === "completed" && apt.is_penalized) {
-          penalties++;
-          if (level === 1) penaltiesLevel1++;
-          if (level === 2) penaltiesLevel2++;
-          if (level === 3) penaltiesLevel3++;
+          const level = cityConfig?.level || 0;
+
+          if (level === 1) completedLevel1++;
+          if (level === 2) completedLevel2++;
+          if (level === 3) completedLevel3++;
+
+          if (apt.is_penalized) {
+            penalties++;
+            if (level === 1) penaltiesLevel1++;
+            if (level === 2) penaltiesLevel2++;
+            if (level === 3) penaltiesLevel3++;
+          }
         }
 
         // Calculate bonus only for completed and not penalized
-        if (apt.is_penalized) {
+        if (apt.status === "completed" || (apt.status === "scheduled" && !apt.is_penalized)) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
           // Online attendance = R$0
@@ -647,7 +648,7 @@ export default function Bonus() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Agendamentos</CardDescription>
+            <CardDescription>Total Concluídos</CardDescription>
             <CardTitle className="text-2xl">{agentBonuses.reduce((sum, ab) => sum + ab.completed, 0)}</CardTitle>
           </CardHeader>
         </Card>
