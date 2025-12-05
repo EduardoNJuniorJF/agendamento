@@ -371,7 +371,7 @@ export default function Bonus() {
               <tr>
                 <th rowspan="2">Agente</th>
                 <th colspan="4" class="separator-right">Atendimentos Concluídos</th>
-                <th colspan="3">Penalidades</th>
+                <th colspan="4">Penalidades</th>
                 <th rowspan="2">Bonificação Total</th>
               </tr>
               <tr>
@@ -690,7 +690,7 @@ export default function Bonus() {
                   <TableHead className="text-center">Total</TableHead>
                   <TableHead className="text-center">Nível 1</TableHead>
                   <TableHead className="text-center">Nível 2</TableHead>
-                  <TableHead className="text-center border-r-4 border-black">Nível 3</TableHead>
+                  <TableHead className="text-center border-r-1 border-black">Nível 3</TableHead>
                   <TableHead className="text-center">Total</TableHead>
                   <TableHead className="text-center">Nível 1</TableHead>
                   <TableHead className="text-center">Nível 2</TableHead>
