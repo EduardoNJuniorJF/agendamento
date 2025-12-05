@@ -368,7 +368,6 @@ export default function Dashboard() {
                         className="text-center mb-2 md:mb-3 cursor-pointer hover:bg-muted/50 rounded-md p-1 transition-colors"
                         onClick={() => navigate(`/calendar?date=${format(day, "yyyy-MM-dd")}`)}
                       >
-                        <div className="font-semibold text-xs md:text-sm">{format(day, "EEEE", { locale: ptBR })}</div>
                         <div className="text-xl md:text-2xl font-bold">{format(day, "dd", { locale: ptBR })}</div>
                         <div className="text-[10px] md:text-xs text-muted-foreground">
                           {format(day, "MMM", { locale: ptBR })}
