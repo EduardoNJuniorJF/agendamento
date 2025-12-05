@@ -668,12 +668,12 @@ export default function CalendarView() {
           </div>
         </div>
 
-        {viewMode === "week" ? renderMonthView() : renderWeekView()}
+        {viewMode === "month" ? renderMonthView() : renderWeekView()}
 
         <DragOverlay>
           {activeId ? (
             <DraggableAppointmentCard id={activeId} isOverlay>
-              {renderAppointmentCardContent(appointments.find((apt) => apt.id === activeId)!, viewMode === "week")}
+              {renderAppointmentCardContent(appointments.find((apt) => apt.id === activeId)!, viewMode === "month")}
             </DraggableAppointmentCard>
           ) : null}
         </DragOverlay>
