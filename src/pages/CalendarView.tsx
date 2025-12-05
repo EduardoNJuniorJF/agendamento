@@ -212,8 +212,8 @@ export default function CalendarView() {
       <div className="space-y-1.5">
         {/* Horário */}
         <div>
-          <div className="font-medium text-[9px] text-xs text-muted-foreground">Horário:</div>
-          <div className="font-semibold text-sm md:text-base">{apt.time}</div>
+          <div className="font-medium text-xs text-muted-foreground">Horário:</div>
+          <div className="font-semibold text-[9px] md:text-base">{apt.time}</div>
         </div>
         {/* Cliente / Ticket */}
         <div>
