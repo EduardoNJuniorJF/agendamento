@@ -360,7 +360,7 @@ export default function Bonus() {
             th { background-color: #f5f5f5; }
             .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
             .agent-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-            .separator-right { border-right: 3px solid #000 !important; }
+            .separator-right { border-right: 2px solid #000 !important; }
             @media print {
               button { display: none; }
             }
