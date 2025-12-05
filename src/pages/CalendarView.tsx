@@ -66,7 +66,7 @@ export default function CalendarView() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week">("month"); // 'month' or 'week'
+  const [viewMode, setViewMode] = useState<"month" | "week">("week"); // 'month' or 'week'
   const [activeId, setActiveId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -624,10 +624,10 @@ export default function CalendarView() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between bg-card rounded-lg border p-3 md:p-4 gap-3">
           <div className="flex items-center rounded-md border p-1">
-            <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")}>
+            <Button variant={viewMode === "week" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")}>
               Mês
             </Button>
-            <Button variant={viewMode === "week" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("week")}>
+            <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("week")}>
               Semana
             </Button>
           </div>
