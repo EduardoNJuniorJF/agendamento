@@ -434,11 +434,7 @@ export default function Dashboard() {
                                   <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
                                   <div className="font-semibold text-[10px] md:text-xs">{apt.title}</div>
                                 </div>
-                                <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                  <div className="text-muted-foreground text-[10px] md:text-xs">{apt.city}</div>
-                                </div>
-                                <div>
+
                                   <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
                                   <div className="text-muted-foreground text-[10px] md:text-xs">
                                     {apt.agents && apt.agents.length > 0
