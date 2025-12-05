@@ -312,7 +312,6 @@ export type Database = {
       }
       vacations: {
         Row: {
-          agent_id: string
           created_at: string | null
           days: number | null
           deadline: string | null
@@ -323,9 +322,9 @@ export type Database = {
           period_number: number | null
           start_date: string
           updated_at: string | null
+          user_id: string
         }
         Insert: {
-          agent_id: string
           created_at?: string | null
           days?: number | null
           deadline?: string | null
@@ -336,9 +335,9 @@ export type Database = {
           period_number?: number | null
           start_date: string
           updated_at?: string | null
+          user_id: string
         }
         Update: {
-          agent_id?: string
           created_at?: string | null
           days?: number | null
           deadline?: string | null
@@ -349,13 +348,14 @@ export type Database = {
           period_number?: number | null
           start_date?: string
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "vacations_agent_id_fkey"
-            columns: ["agent_id"]
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "agents"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
