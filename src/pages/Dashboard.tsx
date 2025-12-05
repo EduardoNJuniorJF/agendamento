@@ -277,7 +277,6 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalAppointments}</div>
-              <p className="text-xs text-muted-foreground">Total de atendimentos</p>
             </CardContent>
           </Card>
 
