@@ -16,7 +16,7 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle, User, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isHoliday, getHolidayName } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
@@ -198,30 +198,52 @@ export default function CalendarView() {
             </div>
           </div>
         )}
-        {apt.is_penalized && (
-          <div className="space-y-1">
-            <div className="font-medium text-xs text-muted-foreground">Penalidade:</div>
-            <div className="flex items-center text-xs font-semibold bg-destructive text-destructive-foreground p-1 rounded-sm">
+        {/* Status indicators */}
+        <div className="flex flex-wrap gap-1 pt-1">
+          {apt.status === "completed" && (
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-800 border-green-300">
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Concluído
+            </Badge>
+          )}
+          {apt.is_penalized && (
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 bg-destructive text-destructive-foreground">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              Penalidade Aplicada
-            </div>
-          </div>
-        )}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-1">
-            <span className="font-medium text-[9px] text-muted-foreground">Despesa:</span>
-            <Badge
-              variant="secondary"
-              className="text-[9px] px-1.5 py-0.5"
-              style={{
-                backgroundColor: getExpenseColor(apt.expense_status),
-                color: getExpenseTextColor(apt.expense_status),
+              Penalizado
+            </Badge>
+          )}
+        </div>
+        {/* Expense section */}
+        <div className="pt-1">
+          <div className="font-medium text-[9px] text-muted-foreground mb-1">Despesas:</div>
+          <Badge
+            variant="secondary"
+            className="text-[9px] px-1.5 py-0.5"
+            style={{
+              backgroundColor: getExpenseColor(apt.expense_status),
+              color: getExpenseTextColor(apt.expense_status),
+            }}
+          >
+            {getExpenseLabel(apt.expense_status)}
+          </Badge>
+        </div>
+        {/* Admin action buttons */}
+        {isAdmin && (
+          <div className="flex items-center gap-1 pt-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-5 w-5 ${apt.status === "completed" ? "bg-green-500/80 hover:bg-green-600" : "hover:bg-green-200"}`}
+              title={apt.status === "completed" ? "Marcar como Agendado" : "Marcar como Concluído"}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleCompleted(apt.id, apt.status);
               }}
             >
-              {getExpenseLabel(apt.expense_status)}
-            </Badge>
-          </div>
-          {isAdmin && (
+              <CheckCircle2
+                className={`h-3 w-3 ${apt.status === "completed" ? "text-white" : "text-green-600"}`}
+              />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -236,8 +258,8 @@ export default function CalendarView() {
                 className={`h-3 w-3 ${apt.is_penalized ? "text-destructive-foreground" : "text-destructive"}`}
               />
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -326,6 +348,21 @@ export default function CalendarView() {
     }
 
     toast({ title: currentValue ? "Penalidade removida" : "Penalidade aplicada" });
+    loadAppointments();
+  };
+
+  const handleToggleCompleted = async (id: string, currentStatus: string) => {
+    if (!isAdmin) return;
+
+    const newStatus = currentStatus === "completed" ? "scheduled" : "completed";
+    const { error } = await supabase.from("appointments").update({ status: newStatus }).eq("id", id);
+
+    if (error) {
+      toast({ title: "Erro ao alterar status", variant: "destructive" });
+      return;
+    }
+
+    toast({ title: newStatus === "completed" ? "Marcado como concluído" : "Marcado como agendado" });
     loadAppointments();
   };
 
