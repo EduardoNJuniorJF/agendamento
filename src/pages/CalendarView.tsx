@@ -43,9 +43,9 @@ import {
   useSensor, // Hook para criar sensores
   useSensors, // Hook para agrupar sensores
 } from "@dnd-kit/core";
-import { useDraggable, useDroppable } from "@dnd-kit/core"; // Hooks DND (embora useDraggable/useDroppable sejam usados em componentes filhos)
-import { DraggableAppointmentCard } from "@/components/DraggableAppointmentCard"; // Componente de card de agendamento arrastável
-import { DroppableDay } from "@/components/DroppableDay"; // Componente de área de destino (dia)
+import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { DraggableAppointmentCard } from "@/components/DraggableAppointmentCard";
+import { DroppableDay } from "@/components/DroppableDay";
 
 // Interface que define a estrutura de um Agendamento (Appointment)
 interface Appointment {

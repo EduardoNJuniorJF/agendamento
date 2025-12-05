@@ -44,7 +44,7 @@ export default function NewAppointment() {
     title: "",
     date: "",
     time: "",
-    city: "",
+    city: "ATENDIMENTO ONLINE",
     vehicle_id: null,
     description: "",
     status: "scheduled",
@@ -82,11 +82,7 @@ export default function NewAppointment() {
 
   const loadCurrentUserName = async () => {
     if (!user?.id) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, username")
-      .eq("id", user.id)
-      .single();
+    const { data } = await supabase.from("profiles").select("full_name, username").eq("id", user.id).single();
     if (data) {
       setCurrentUserName(data.full_name || data.username || "Usuário");
     }
@@ -101,7 +97,7 @@ export default function NewAppointment() {
 
     if (agentsRes.data) setAgents(agentsRes.data);
     if (vehiclesRes.data) setVehicles(vehiclesRes.data);
-    if (citiesRes.data) setCities(citiesRes.data.map(c => c.city_name));
+    if (citiesRes.data) setCities(citiesRes.data.map((c) => c.city_name));
   };
 
   const loadAppointment = async (id: string) => {
@@ -333,7 +329,9 @@ export default function NewAppointment() {
           <ArrowLeft className="h-3 w-3 md:h-4 md:w-4" />
         </Button>
         <div>
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">
+            {editingId ? "Editar Agendamento" : "Novo Agendamento"}
+          </h1>
           <p className="text-xs md:text-sm text-muted-foreground">
             {editingId ? "Atualize os dados do atendimento" : "Crie um novo atendimento"}
           </p>
@@ -387,10 +385,7 @@ export default function NewAppointment() {
                               }}
                             >
                               <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formData.city === city ? "opacity-100" : "opacity-0"
-                                )}
+                                className={cn("mr-2 h-4 w-4", formData.city === city ? "opacity-100" : "opacity-0")}
                               />
                               {city}
                             </CommandItem>
@@ -472,7 +467,10 @@ export default function NewAppointment() {
                       return agent ? (
                         <Badge key={agentId} variant="secondary" className="gap-1 text-xs">
                           {agent.name}
-                          <X className="h-2.5 w-2.5 md:h-3 md:w-3 cursor-pointer" onClick={() => removeAgent(agentId)} />
+                          <X
+                            className="h-2.5 w-2.5 md:h-3 md:w-3 cursor-pointer"
+                            onClick={() => removeAgent(agentId)}
+                          />
                         </Badge>
                       ) : null;
                     })}
@@ -525,7 +523,9 @@ export default function NewAppointment() {
                     setFormData({ ...formData, status: checked ? "completed" : "scheduled" })
                   }
                 />
-                <Label htmlFor="completed" className="cursor-pointer font-medium">Concluído</Label>
+                <Label htmlFor="completed" className="cursor-pointer font-medium">
+                  Concluído
+                </Label>
               </div>
             )}
 
@@ -552,14 +552,14 @@ export default function NewAppointment() {
                 disabled={!isAdmin}
               />
               <div className="flex-1">
-                <Label 
-                  htmlFor="is_penalized" 
+                <Label
+                  htmlFor="is_penalized"
                   className={`font-medium ${!isAdmin ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                 >
                   Penalidade
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  {isAdmin 
+                  {isAdmin
                     ? "Marcar este agendamento como penalizado (não gerará bonificação)"
                     : "Somente administradores podem alterar este campo"}
                 </p>
