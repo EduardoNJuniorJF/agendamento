@@ -16,7 +16,17 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Edit, Trash2, PartyPopper, GripVertical, AlertTriangle, User, CheckCircle2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Trash2,
+  PartyPopper,
+  GripVertical,
+  AlertTriangle,
+  User,
+  CheckCircle2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { isHoliday, getHolidayName } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
@@ -150,12 +160,15 @@ export default function CalendarView() {
             <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
             <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.city}</div>
           </div>
+
           {apt.agents && apt.agents.length > 0 && (
             <div>
-              <div className="font-medium text-[9px] md:text-[10px]">Agente{apt.agents.length > 1 ? 's' : ''}:</div>
+              <div className="font-medium text-[9px] md:text-[10px]">Agente{apt.agents.length > 1 ? "s" : ""}:</div>
               <div className="text-muted-foreground text-[10px] md:text-xs space-y-0.5">
                 {apt.agents.map((agent, index) => (
-                  <div key={index} className="truncate">{agent.name}</div>
+                  <div key={index} className="truncate">
+                    {agent.name}
+                  </div>
                 ))}
               </div>
             </div>
@@ -205,7 +218,10 @@ export default function CalendarView() {
         {/* Status indicators */}
         <div className="flex flex-wrap gap-1 pt-1">
           {apt.status === "completed" && (
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-800 border-green-300">
+            <Badge
+              variant="secondary"
+              className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-800 border-green-300"
+            >
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Concluído
             </Badge>
@@ -244,9 +260,7 @@ export default function CalendarView() {
                 handleToggleCompleted(apt.id, apt.status);
               }}
             >
-              <CheckCircle2
-                className={`h-3 w-3 ${apt.status === "completed" ? "text-white" : "text-green-600"}`}
-              />
+              <CheckCircle2 className={`h-3 w-3 ${apt.status === "completed" ? "text-white" : "text-green-600"}`} />
             </Button>
             <Button
               variant="ghost"
