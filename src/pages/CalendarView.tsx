@@ -66,7 +66,7 @@ export default function CalendarView() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week">("week"); // 'month' or 'week'
+  const [viewMode, setViewMode] = useState<"month" | "week">("month"); // 'month' or 'week'
   const [activeId, setActiveId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
