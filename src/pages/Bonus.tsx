@@ -176,7 +176,7 @@ export default function Bonus() {
       let penaltiesLevel3 = 0;
 
       for (const apt of appointments) {
-        if (apt.status === "completed") {
+        if (apt.status === "completed" || apt.status === "scheduled") {
           completed++;
 
           const cityUpper = apt.city?.toUpperCase() || "";
