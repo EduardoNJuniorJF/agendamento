@@ -507,16 +507,16 @@ export default function CalendarView() {
                       >
                         {/* Botões de ação (Edição/Exclusão) */}
                         <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {canEdit("calendar") && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4 bg-background/80 hover:bg-background"
-                                onClick={() => handleEditAppointment(apt.id)}
-                              >
-                                <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                              </Button>
+                                {canEdit("dashboard") && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
+                                      onClick={() => handleEditAppointment(apt.id)}
+                                    >
+                                      <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                    </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
