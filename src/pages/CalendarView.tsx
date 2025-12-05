@@ -625,10 +625,10 @@ export default function CalendarView() {
         <div className="flex flex-col sm:flex-row items-center justify-between bg-card rounded-lg border p-3 md:p-4 gap-3">
           <div className="flex items-center rounded-md border p-1">
             <Button variant={viewMode === "week" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("week")}>
-              Mês
+              Semana
             </Button>
             <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")}>
-              Semana
+              Mês
             </Button>
           </div>
 
