@@ -269,7 +269,7 @@ export default function Dashboard() {
         </div>
 
         {/* Cards de estatísticas - Primeira linha */}
-        <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
+        {/*<div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
@@ -309,6 +309,61 @@ export default function Dashboard() {
               <Umbrella className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
+              <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
+              <p className="text-xs text-muted-foreground">Esta semana</p>
+            </CardContent>
+          </Card>
+        </div>*/}
+
+        {/* Cards de estatísticas - Primeira linha */}
+        <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
+          <Card>
+            {/* Alterado pb-2 para pb-1 */}
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            {/* Adicionado className="py-2" */}
+            <CardContent className="py-2">
+              <div className="text-2xl font-bold">{stats.totalAppointments}</div>
+              <p className="text-xs text-muted-foreground">Total de atendimentos</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            {/* Alterado pb-2 para pb-1 */}
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-sm font-medium">Veículos</CardTitle>
+              <Car className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            {/* Adicionado className="py-2" */}
+            <CardContent className="py-2">
+              <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+              <p className="text-xs text-muted-foreground">Frota ativa</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            {/* Alterado pb-2 para pb-1 */}
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-sm font-medium">Agentes</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            {/* Adicionado className="py-2" */}
+            <CardContent className="py-2">
+              <div className="text-2xl font-bold">{stats.totalAgents}</div>
+              <p className="text-xs text-muted-foreground">Equipe ativa</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            {/* Alterado pb-2 para pb-1 */}
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle className="text-sm font-medium">Folgas</CardTitle>
+              <Umbrella className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            {/* Adicionado className="py-2" */}
+            <CardContent className="py-2">
               <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
               <p className="text-xs text-muted-foreground">Esta semana</p>
             </CardContent>
