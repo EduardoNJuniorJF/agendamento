@@ -196,50 +196,37 @@ export default function Bonus() {
           }
         }
 
-        // Lógica de Cálculo de Bônus e Penalidade Monetária
-        const cityUpper = apt.city?.toUpperCase() || "";
+        // Calculate bonus only for not penalized
+        if (apt.status === "completed" || (apt.status === "scheduled" && !apt.is_penalized)) {
+          const cityUpper = apt.city?.toUpperCase() || "";
 
-        // Agendamentos Online não geram bônus nem penalidade monetária
-        if (cityUpper.includes("ONLINE")) {
-          continue;
-        }
-
-        // Encontra a configuração de nível da cidade
-        const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
-
-        if (settings && cityConfig) {
-          let levelValue = 0;
-
-          // Determina o valor do bônus/penalidade com base no nível da cidade
-          switch (cityConfig.level) {
-            case 1:
-              levelValue = Number(settings.level_1_value) || 0;
-              break;
-            case 2:
-              levelValue = Number(settings.level_2_value) || 0;
-              break;
-            case 3:
-              levelValue = Number(settings.level_3_value) || 0;
-              break;
+          // Online attendance = R$0
+          if (cityUpper.includes("ONLINE")) {
+            continue;
           }
 
-          // Se o agendamento foi concluído E não penalizado, adiciona o bônus
-          if (apt.status === "completed" && !apt.is_penalized) {
+          // Find city level
+          const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
+
+          if (settings && cityConfig) {
+            let levelValue = 0;
+
+            switch (cityConfig.level) {
+              case 1:
+                levelValue = Number(settings.level_1_value) || 0;
+                break;
+              case 2:
+                levelValue = Number(settings.level_2_value) || 0;
+                break;
+              case 3:
+                levelValue = Number(settings.level_3_value) || 0;
+                break;
+            }
+
             totalBonus += levelValue;
           }
-
-          // Se o agendamento foi concluído E penalizado, subtrai o valor do bônus (penalidade monetária)
-          // Nota: O agendamento penalizado já não adiciona bônus no bloco acima.
-          // Para que a penalidade seja uma subtração do total, precisamos de uma lógica clara.
-          // Assumindo que a penalidade é o valor do bônus que seria pago:
-          if (apt.status === "completed" && apt.is_penalized) {
-            // Se o agendamento penalizado já não adiciona bônus, subtrair o valor do bônus
-            // é o mesmo que subtrair o valor do bônus que ele *não* ganhou.
-            // Para ter um efeito de "multa" sobre o total, subtraímos o valor do bônus.
-            totalBonus -= levelValue;
-          }
+          // City not configured = R$0 bonus
         }
-        // Cidade não configurada = R$0 bônus/penalidade
       }
 
       bonuses.push({
