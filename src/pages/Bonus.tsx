@@ -196,7 +196,7 @@ export default function Bonus() {
         }
 
         // Calculate bonus only for completed and not penalized
-        if (apt.status === "completed" && !apt.is_penalized) {
+        if (apt.is_penalized) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
           // Online attendance = R$0
