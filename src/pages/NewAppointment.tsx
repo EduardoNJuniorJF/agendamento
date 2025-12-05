@@ -44,7 +44,7 @@ export default function NewAppointment() {
     title: "",
     date: "",
     time: "",
-    city: "ATENDIMENTO ONLINE",
+    city: "",
     vehicle_id: null,
     description: "",
     status: "scheduled",
