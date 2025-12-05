@@ -152,8 +152,12 @@ export default function CalendarView() {
           </div>
           {apt.agents && apt.agents.length > 0 && (
             <div>
-              <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
-              <div className="text-muted-foreground truncate text-[10px] md:text-xs">{apt.agents[0].name}</div>
+              <div className="font-medium text-[9px] md:text-[10px]">Agente{apt.agents.length > 1 ? 's' : ''}:</div>
+              <div className="text-muted-foreground text-[10px] md:text-xs space-y-0.5">
+                {apt.agents.map((agent, index) => (
+                  <div key={index} className="truncate">{agent.name}</div>
+                ))}
+              </div>
             </div>
           )}
         </div>
