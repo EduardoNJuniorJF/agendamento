@@ -7,32 +7,32 @@ import { Badge } from "@/components/ui/badge"; // Componente de Badge (etiqueta)
 import { Button } from "@/components/ui/button"; // Componente de Botão
 import { useNavigate } from "react-router-dom"; // Hook para navegação
 import {
-  format, // Formatação de datas
-  addMonths, // Adicionar meses
-  addWeeks, // Adicionar semanas
-  startOfWeek, // Início da semana
-  endOfWeek, // Fim da semana
-  eachDayOfInterval, // Iterar sobre dias em um intervalo
-  parseISO, // Converter string ISO para objeto Date
-  startOfMonth, // Início do mês
-  endOfMonth, // Fim do mês
-  eachWeekOfInterval, // Iterar sobre semanas em um intervalo
+  format, /
+  addMonths, 
+  addWeeks, 
+  startOfWeek, 
+  endOfWeek, 
+  eachDayOfInterval, 
+  parseISO, 
+  startOfMonth, 
+  endOfMonth, 
+  eachWeekOfInterval, 
 } from "date-fns";
-import { ptBR } from "date-fns/locale"; // Localização para Português do Brasil
+import { ptBR } from "date-fns/locale"; 
 import {
-  ChevronLeft, // Ícone de seta para esquerda (navegação)
-  ChevronRight, // Ícone de seta para direita (navegação)
-  Edit, // Ícone de edição
-  Trash2, // Ícone de lixeira (exclusão)
-  PartyPopper, // Ícone de feriado
-  GripVertical, // Ícone de arrastar (DND)
-  AlertTriangle, // Ícone de alerta (penalidade)
-  User, // Ícone de usuário/agente
-  CheckCircle2, // Ícone de conclusão
-} from "lucide-react"; // Biblioteca de ícones
-import { useToast } from "@/hooks/use-toast"; // Hook para exibir notificações (toasts)
-import { isHoliday, getHolidayName } from "@/lib/holidays"; // Funções utilitárias para verificar feriados
-import { useAuth } from "@/contexts/AuthContext"; // Contexto de autenticação para permissões
+  ChevronLeft, 
+  ChevronRight, 
+  Edit, 
+  Trash2, 
+  PartyPopper, 
+  GripVertical, 
+  AlertTriangle, 
+  User, 
+  CheckCircle2, 
+} from "lucide-react"; 
+import { useToast } from "@/hooks/use-toast"; 
+import { isHoliday, getHolidayName } from "@/lib/holidays"; 
+import { useAuth } from "@/contexts/AuthContext"; 
 import {
   DndContext, // Contexto principal do Drag and Drop
   DragEndEvent, // Tipo de evento ao finalizar o arrasto
@@ -212,7 +212,7 @@ export default function CalendarView() {
       <div className="space-y-1.5">
         {/* Horário */}
         <div>
-          <div className="font-medium text-xs text-muted-foreground">Horário:</div>
+          <div className="font-medium text-[9px] text-xs text-muted-foreground">Horário:</div>
           <div className="font-semibold text-sm md:text-base">{apt.time}</div>
         </div>
         {/* Cliente / Ticket */}
