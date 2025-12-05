@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella } from "lucide-react";
+import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -22,16 +22,19 @@ import {
 } from "@/lib/holidays";
 import { addMonths } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
-interface Agent {
+interface Profile {
   id: string;
-  name: string;
-  color: string | null;
+  full_name: string | null;
+  email: string;
 }
 
 interface Vacation {
   id: string;
-  agent_id: string;
+  user_id: string;
   start_date: string;
   end_date: string;
   expiry_date: string | null;
@@ -39,7 +42,7 @@ interface Vacation {
   days: number;
   period_number: number;
   notes: string | null;
-  agents: { name: string; color: string | null };
+  profiles: { full_name: string | null; email: string } | null;
 }
 
 interface TimeOff {
@@ -60,18 +63,20 @@ interface VacationReminder {
 }
 
 export default function Vacations() {
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [agents, setAgents] = useState<{ id: string; name: string; color: string | null }[]>([]);
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [timeOffs, setTimeOffs] = useState<TimeOff[]>([]);
   const [reminders, setReminders] = useState<VacationReminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("vacations");
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
   const { toast } = useToast();
   const { canEdit } = useAuth();
 
   // Vacation form
   const [vacationForm, setVacationForm] = useState({
-    agent_id: "",
+    user_id: "",
     start_date: "",
     end_date: "",
     expiry_date: "",
@@ -98,12 +103,14 @@ export default function Vacations() {
 
   const loadData = async () => {
     try {
-      const [agentsRes, vacationsRes, timeOffsRes] = await Promise.all([
+      const [profilesRes, agentsRes, vacationsRes, timeOffsRes] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, email").order("full_name"),
         supabase.from("agents").select("id, name, color").eq("is_active", true).order("name"),
-        supabase.from("vacations").select("*, agents(name, color)").order("start_date", { ascending: false }),
+        supabase.from("vacations").select("*, profiles(full_name, email)").order("start_date", { ascending: false }),
         supabase.from("time_off").select("*, agents(name, color)").order("date", { ascending: false }),
       ]);
 
+      if (profilesRes.data) setProfiles(profilesRes.data);
       if (agentsRes.data) setAgents(agentsRes.data);
       if (vacationsRes.data) setVacations(vacationsRes.data as Vacation[]);
       if (timeOffsRes.data) setTimeOffs(timeOffsRes.data as TimeOff[]);
@@ -132,7 +139,7 @@ export default function Vacations() {
   const handleVacationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!vacationForm.agent_id || !vacationForm.start_date || !vacationForm.expiry_date) {
+    if (!vacationForm.user_id || !vacationForm.start_date || !vacationForm.expiry_date) {
       toast({
         title: "Erro",
         description: "Preencha os campos obrigatórios",
@@ -182,7 +189,7 @@ export default function Vacations() {
       }
 
       setVacationForm({
-        agent_id: "",
+        user_id: "",
         start_date: "",
         end_date: "",
         expiry_date: "",
@@ -281,7 +288,7 @@ export default function Vacations() {
 
   const editVacation = (vacation: Vacation) => {
     setVacationForm({
-      agent_id: vacation.agent_id,
+      user_id: vacation.user_id,
       start_date: vacation.start_date,
       end_date: vacation.end_date,
       expiry_date: vacation.expiry_date || "",
@@ -360,22 +367,51 @@ export default function Vacations() {
                 <form onSubmit={handleVacationSubmit} className="space-y-3 md:space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <Label htmlFor="agent">Funcionário *</Label>
-                      <Select
-                        value={vacationForm.agent_id}
-                        onValueChange={(value) => setVacationForm({ ...vacationForm, agent_id: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {agents.map((agent) => (
-                            <SelectItem key={agent.id} value={agent.id}>
-                              {agent.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="user">Funcionário *</Label>
+                      <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={userSearchOpen}
+                            className="w-full justify-between"
+                          >
+                            {vacationForm.user_id
+                              ? profiles.find((p) => p.id === vacationForm.user_id)?.full_name || 
+                                profiles.find((p) => p.id === vacationForm.user_id)?.email
+                              : "Selecione um funcionário..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar funcionário..." />
+                            <CommandList>
+                              <CommandEmpty>Nenhum funcionário encontrado.</CommandEmpty>
+                              <CommandGroup>
+                                {profiles.map((profile) => (
+                                  <CommandItem
+                                    key={profile.id}
+                                    value={profile.full_name || profile.email}
+                                    onSelect={() => {
+                                      setVacationForm({ ...vacationForm, user_id: profile.id });
+                                      setUserSearchOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        vacationForm.user_id === profile.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {profile.full_name || profile.email}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
                     <div>
@@ -506,7 +542,7 @@ export default function Vacations() {
                         onClick={() => {
                           setEditingVacationId(null);
                           setVacationForm({
-                            agent_id: "",
+                            user_id: "",
                             start_date: "",
                             end_date: "",
                             expiry_date: "",
@@ -548,13 +584,9 @@ export default function Vacations() {
                     {vacations.map((vacation) => (
                       <TableRow key={vacation.id}>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: vacation.agents.color || "#3b82f6" }}
-                            />
-                            <span className="text-xs md:text-sm">{vacation.agents.name}</span>
-                          </div>
+                          <span className="text-xs md:text-sm">
+                            {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
+                          </span>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs">

@@ -58,11 +58,11 @@ interface TimeOff {
 
 interface Vacation {
   id: string;
-  agent_id: string;
+  user_id: string;
   start_date: string;
   end_date: string;
   days: number | null;
-  agents: { name: string; color: string | null } | null;
+  profiles: { full_name: string | null; email: string } | null;
 }
 
 interface Stats {
@@ -141,7 +141,7 @@ export default function Dashboard() {
           .order("date"),
         supabase
           .from("vacations")
-          .select("*, agents(name, color)")
+          .select("*, profiles(full_name, email)")
           .gte("start_date", format(new Date(), "yyyy-MM-dd"))
           .order("start_date"),
       ]);
@@ -553,7 +553,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-1.5 md:gap-2 mb-1">
                           <CalendarDays className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
                           <span className="font-semibold text-[10px] md:text-xs">
-                            {vacation.agents?.name || "Agente não definido"}
+                            {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
                           </span>
                         </div>
                         <div className="text-[10px] md:text-xs text-muted-foreground space-y-0.5">
