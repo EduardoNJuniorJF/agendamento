@@ -196,21 +196,24 @@ export default function Bonus() {
           }
         }
 
-        // Calculate bonus only for not penalized
-        if (apt.status === "completed" || (apt.status === "scheduled" && !apt.is_penalized)) {
+        // Lógica de Cálculo de Bônus Monetário (Apenas para agendamentos CONCLUÍDOS OU AGENDADOS, E NÃO PENALIZADOS)
+        // Isso garante que agendamentos penalizados (is_penalized: true) não recebam bônus,
+        // e que agendamentos agendados (scheduled) também sejam elegíveis se não penalizados.
+        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
-          // Online attendance = R$0
+          // Agendamentos Online não geram bônus (R$0)
           if (cityUpper.includes("ONLINE")) {
             continue;
           }
 
-          // Find city level
+          // Encontra a configuração de nível da cidade
           const cityConfig = cities.find((c) => c.city_name.toUpperCase() === cityUpper);
 
           if (settings && cityConfig) {
             let levelValue = 0;
 
+            // Determina o valor do bônus com base no nível da cidade
             switch (cityConfig.level) {
               case 1:
                 levelValue = Number(settings.level_1_value) || 0;
@@ -223,9 +226,10 @@ export default function Bonus() {
                 break;
             }
 
+            // Adiciona o valor do bônus ao total
             totalBonus += levelValue;
           }
-          // City not configured = R$0 bonus
+          // Cidade não configurada = R$0 bônus
         }
       }
 
