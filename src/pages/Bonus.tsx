@@ -681,7 +681,7 @@ export default function Bonus() {
                 <TableRow>
                   <TableHead rowSpan={2}>Agente</TableHead>
                   <TableHead colSpan={4} className="text-center border-r-2 border-gray-300">
-                    Agtendimentos
+                    Atendimentos
                   </TableHead>
                   <TableHead colSpan={4} className="text-center">
                     Penalidades
