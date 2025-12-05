@@ -375,7 +375,7 @@ export default function Dashboard() {
                         </div>*/}
 
                         {/*novo cabeçalho*/}
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center justify-center space-x-1">
                           <div className="font-semibold text-xs md:text-sm">
                             {format(day, "EEEE", { locale: ptBR })}
                           </div>
@@ -384,6 +384,7 @@ export default function Dashboard() {
                             {format(day, "MMM", { locale: ptBR })}
                           </div>
                         </div>
+                        {/*fim do novo cabeçalho*/}
 
                         <Badge variant="secondary" className="mt-1 text-[9px] md:text-[10px] px-1.5 py-0.5">
                           {dayAppointments.length} {dayAppointments.length === 1 ? "atendimento" : "atendimentos"}
