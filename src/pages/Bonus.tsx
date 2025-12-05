@@ -371,7 +371,7 @@ export default function Bonus() {
               <tr>
                 <th rowspan="2">Agente</th>
                 <th colspan="4" class="separator-right">Atendimentos Concluídos</th>
-                <th colspan="4">Penalidades</th>
+                <th colspan="3">Penalidades</th>
                 <th rowspan="2">Bonificação Total</th>
               </tr>
               <tr>
