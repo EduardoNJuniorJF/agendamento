@@ -507,7 +507,7 @@ export default function CalendarView() {
                       >
                         {/* Botões de ação (Edição/Exclusão) */}
                         <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {canEdit("dashboard") && (
+                                {canEdit("calendar") && (
                                   <>
                                     <Button
                                       variant="ghost"
