@@ -668,7 +668,7 @@ export default function CalendarView() {
           </div>
         </div>
 
-        {viewMode === "month" ? renderMonthView() : renderWeekView()}
+        {viewMode === "week" ? renderMonthView() : renderWeekView()}
 
         <DragOverlay>
           {activeId ? (
