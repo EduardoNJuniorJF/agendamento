@@ -430,25 +430,19 @@ export default function Dashboard() {
                                 )}
                               </div>
                               <div className="space-y-1">
-                                <div className="flex gap-14">
-                                  <div>
-                                    <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
-                                    <div className="font-semibold truncate text-[10px] md:text-xs">{apt.title}</div>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
-                                    <div className="text-muted-foreground text-[10px] md:text-xs">{apt.city}</div>
-                                  </div>
+                                <div>
+                                  <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                                  <div className="font-semibold text-[10px] md:text-xs">{apt.title}</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-[9px] md:text-[10px]">Cidade:</div>
+                                  <div className="text-muted-foreground text-[10px] md:text-xs">{apt.city}</div>
                                 </div>
                                 <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
                                   <div className="text-muted-foreground text-[10px] md:text-xs">
                                     {apt.agents && apt.agents.length > 0
-                                      ? apt.agents.map((agent, idx) => (
-                                          <div key={idx} className="truncate">
-                                            {agent.name}
-                                          </div>
-                                        ))
+                                      ? apt.agents.map((agent, idx) => <div key={idx}>{agent.name}</div>)
                                       : "Não atribuído"}
                                   </div>
                                 </div>
