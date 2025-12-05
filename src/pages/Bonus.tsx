@@ -652,7 +652,7 @@ export default function Bonus() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Concluídos</CardDescription>
+            <CardDescription>Total de Atendimentos</CardDescription>
             <CardTitle className="text-2xl">{agentBonuses.reduce((sum, ab) => sum + ab.completed, 0)}</CardTitle>
           </CardHeader>
         </Card>
@@ -681,7 +681,7 @@ export default function Bonus() {
                 <TableRow>
                   <TableHead rowSpan={2}>Agente</TableHead>
                   <TableHead colSpan={4} className="text-center border-r-2 border-gray-300">
-                    Concluídos
+                    Agtendimentos
                   </TableHead>
                   <TableHead colSpan={4} className="text-center">
                     Penalidades
