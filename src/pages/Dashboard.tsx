@@ -377,11 +377,11 @@ export default function Dashboard() {
                         {/*novo cabeçalho*/}
                         <div className="flex items-center justify-center space-x-1">
                           <div className="font-semibold text-xs md:text-sm">
-                            {format(day, "EEEE", { locale: ptBR })}
+                            {format(day, "EEEE,", { locale: ptBR })}
                           </div>
                           <div className="text-xl md:text-2xl font-bold">{format(day, "dd", { locale: ptBR })}</div>
                           <div className="text-[10px] md:text-xs text-muted-foreground">
-                            {format(day, "MMM", { locale: ptBR })}
+                            {format(day, "dia MMM", { locale: ptBR })}
                           </div>
                         </div>
                         {/*fim do novo cabeçalho*/}
