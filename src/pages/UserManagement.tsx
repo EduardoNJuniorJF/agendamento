@@ -36,6 +36,7 @@ export default function UserManagement() {
     password: '',
     fullName: '',
     role: 'user' as 'admin' | 'user' | 'financeiro',
+    sector: '' as 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | '',
     isAgent: false,
     agentColor: '#3b82f6'
   });
@@ -91,8 +92,8 @@ export default function UserManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.username || !formData.email || !formData.password || !formData.fullName) {
-      toast.error('Preencha todos os campos');
+    if (!formData.username || !formData.email || !formData.password || !formData.fullName || !formData.sector) {
+      toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
@@ -120,6 +121,7 @@ export default function UserManagement() {
         password: '',
         fullName: '',
         role: 'user',
+        sector: '',
         isAgent: false,
         agentColor: '#3b82f6'
       });
@@ -330,6 +332,27 @@ export default function UserManagement() {
                           </span>
                         </div>
                       </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sector">Setor *</Label>
+                  <Select
+                    value={formData.sector}
+                    onValueChange={(value: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo') => 
+                      setFormData({ ...formData, sector: value })
+                    }
+                    disabled={loading}
+                  >
+                    <SelectTrigger id="sector">
+                      <SelectValue placeholder="Selecione o setor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Comercial">Comercial</SelectItem>
+                      <SelectItem value="Suporte">Suporte</SelectItem>
+                      <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
+                      <SelectItem value="Administrativo">Administrativo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

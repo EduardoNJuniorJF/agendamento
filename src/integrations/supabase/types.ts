@@ -21,6 +21,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          receives_bonus: boolean | null
           sector: string | null
           updated_at: string | null
           user_id: string | null
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          receives_bonus?: boolean | null
           sector?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          receives_bonus?: boolean | null
           sector?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -226,6 +229,7 @@ export type Database = {
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"] | null
+          sector: string | null
           updated_at: string | null
           username: string | null
         }
@@ -236,6 +240,7 @@ export type Database = {
           full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role"] | null
+          sector?: string | null
           updated_at?: string | null
           username?: string | null
         }
@@ -246,6 +251,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role"] | null
+          sector?: string | null
           updated_at?: string | null
           username?: string | null
         }
