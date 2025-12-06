@@ -12,18 +12,21 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Agent = Database["public"]["Tables"]["agents"]["Row"];
+type Agent = Database["public"]["Tables"]["agents"]["Row"] & {
+  receives_bonus?: boolean;
+};
 type AgentInsert = Database["public"]["Tables"]["agents"]["Insert"];
 
 export default function Team() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [open, setOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
-  const [formData, setFormData] = useState<AgentInsert>({
+  const [formData, setFormData] = useState<AgentInsert & { receives_bonus: boolean }>({
     name: "",
     sector: "",
     is_active: true,
     color: "#3b82f6",
+    receives_bonus: true,
   });
   const { toast } = useToast();
   const { canEdit } = useAuth();
@@ -54,6 +57,7 @@ export default function Team() {
           sector: formData.sector,
           is_active: formData.is_active,
           color: formData.color,
+          receives_bonus: formData.receives_bonus,
         })
         .eq("id", editingAgent.id);
 
@@ -69,6 +73,7 @@ export default function Team() {
         sector: formData.sector,
         is_active: formData.is_active,
         color: formData.color,
+        receives_bonus: formData.receives_bonus,
       });
 
       if (error) {
@@ -81,7 +86,7 @@ export default function Team() {
 
     setOpen(false);
     setEditingAgent(null);
-    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6" });
+    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true });
     loadAgents();
   };
 
@@ -104,15 +109,16 @@ export default function Team() {
     setFormData({
       name: agent.name,
       sector: agent.sector || "",
-      is_active: agent.is_active,
+      is_active: agent.is_active ?? true,
       color: agent.color || "#3b82f6",
+      receives_bonus: agent.receives_bonus ?? true,
     });
     setOpen(true);
   };
 
   const openNewDialog = () => {
     setEditingAgent(null);
-    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6" });
+    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true });
     setOpen(true);
   };
 
@@ -169,10 +175,18 @@ export default function Team() {
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="is_active"
-                    checked={formData.is_active}
+                    checked={formData.is_active ?? true}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                   />
                   <Label htmlFor="is_active">Ativo</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="receives_bonus"
+                    checked={formData.receives_bonus ?? true}
+                    onCheckedChange={(checked) => setFormData({ ...formData, receives_bonus: checked })}
+                  />
+                  <Label htmlFor="receives_bonus">Recebe Bonificação</Label>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -195,6 +209,7 @@ export default function Team() {
                 <TableHead className="min-w-[120px]">Nome</TableHead>
                 <TableHead className="min-w-[100px]">Setor</TableHead>
                 <TableHead className="min-w-[80px]">Status</TableHead>
+                <TableHead className="min-w-[80px]">Bonificação</TableHead>
                 <TableHead className="text-right min-w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -213,6 +228,11 @@ export default function Team() {
                   <TableCell>
                     <Badge variant={agent.is_active ? "default" : "secondary"} className="text-xs">
                       {agent.is_active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={agent.receives_bonus !== false ? "default" : "secondary"} className="text-xs">
+                      {agent.receives_bonus !== false ? "Sim" : "Não"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

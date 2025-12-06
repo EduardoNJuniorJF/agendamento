@@ -11,12 +11,12 @@ interface CreateUserRequest {
   password: string
   fullName: string
   role: 'admin' | 'user' | 'financeiro'
+  sector: string
   isAgent: boolean
   agentColor?: string
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -33,7 +33,6 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Verify the requesting user is an admin
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       throw new Error('No authorization header')
@@ -46,7 +45,6 @@ Deno.serve(async (req) => {
       throw new Error('Invalid token')
     }
 
-    // Check if user is admin or dev
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -60,11 +58,10 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { username, email, password, fullName, role, isAgent, agentColor }: CreateUserRequest = await req.json()
+    const { username, email, password, fullName, role, sector, isAgent, agentColor }: CreateUserRequest = await req.json()
 
-    console.log('Creating user:', { username, email, role, isAgent })
+    console.log('Creating user:', { username, email, role, sector, isAgent })
 
-    // Check if username already exists
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('username')
@@ -78,7 +75,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Create auth user
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -99,12 +95,12 @@ Deno.serve(async (req) => {
 
     console.log('Auth user created:', authData.user.id)
 
-    // Update profile with username
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
         username,
-        full_name: fullName
+        full_name: fullName,
+        sector
       })
       .eq('id', authData.user.id)
 
@@ -113,9 +109,8 @@ Deno.serve(async (req) => {
       throw profileError
     }
 
-    console.log('Profile updated')
+    console.log('Profile updated with sector:', sector)
 
-    // Insert user role
     const { error: roleInsertError } = await supabaseAdmin
       .from('user_roles')
       .insert({
@@ -130,22 +125,22 @@ Deno.serve(async (req) => {
 
     console.log('Role assigned:', role)
 
-    // Create agent if isAgent is true
     if (isAgent) {
       const { error: agentError } = await supabaseAdmin
         .from('agents')
         .insert({
           name: fullName,
+          sector: sector,
           user_id: authData.user.id,
           color: agentColor || '#3b82f6',
-          is_active: true
+          is_active: true,
+          receives_bonus: true
         })
 
       if (agentError) {
         console.error('Agent error:', agentError)
-        // Don't throw - user is created, just log the error
       } else {
-        console.log('Agent created for user')
+        console.log('Agent created for user with sector:', sector)
       }
     }
 
@@ -157,6 +152,7 @@ Deno.serve(async (req) => {
           email: authData.user.email,
           username,
           role,
+          sector,
           isAgent
         }
       }),

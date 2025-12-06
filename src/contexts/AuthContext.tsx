@@ -9,6 +9,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
+  userName: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -34,9 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             fetchUserRole(session.user.id);
+            fetchUserName(session.user.id);
           }, 0);
         } else {
           setRole(null);
+          setUserName(null);
         }
       }
     );
@@ -46,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
+        fetchUserName(session.user.id);
       } else {
         setLoading(false);
       }
@@ -72,6 +77,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchUserName = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name, username')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        setUserName(data.full_name || data.username || 'Usuário');
+      }
+    } catch (error) {
+      console.error('Error fetching user name:', error);
+    }
+  };
+
   const signIn = async (username: string, password: string) => {
     // First, get email from username
     const { data: emailData, error: emailError } = await supabase
@@ -91,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRole(null);
+    setUserName(null);
     navigate('/auth');
   };
 
@@ -120,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         role,
+        userName,
         loading,
         signIn,
         signOut,

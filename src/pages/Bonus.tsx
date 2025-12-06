@@ -94,7 +94,7 @@ export default function Bonus() {
     setLoading(true);
     try {
       const [agentsRes, settingsRes, citiesRes] = await Promise.all([
-        supabase.from("agents").select("id, name, color").eq("is_active", true).order("name"),
+        supabase.from("agents").select("id, name, color, receives_bonus").eq("is_active", true).eq("receives_bonus", true).order("name"),
         supabase.from("bonus_settings").select("*").limit(1).maybeSingle(),
         supabase.from("city_bonus_levels").select("*").order("city_name"),
       ]);
