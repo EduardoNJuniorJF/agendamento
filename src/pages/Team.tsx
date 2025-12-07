@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -182,11 +183,20 @@ export default function Team() {
                 </div>
                 <div>
                   <Label htmlFor="sector">Setor</Label>
-                  <Input
-                    id="sector"
+                  <Select
                     value={formData.sector || ""}
-                    onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, sector: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o setor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Comercial">Comercial</SelectItem>
+                      <SelectItem value="Suporte">Suporte</SelectItem>
+                      <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
+                      <SelectItem value="Administrativo">Administrativo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="color">Cor de Identificação</Label>
