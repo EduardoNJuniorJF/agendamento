@@ -73,7 +73,8 @@ export default function NewAppointment() {
 
     loadData();
     loadCurrentUserName();
-    const editId = searchParams.get("edit");
+    // Suporta tanto "id" quanto "edit" como parâmetros para edição
+    const editId = searchParams.get("id") || searchParams.get("edit");
     if (editId) {
       setEditingId(editId);
       loadAppointment(editId);
