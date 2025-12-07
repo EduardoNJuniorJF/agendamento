@@ -36,14 +36,43 @@ export default function Team() {
   }, []);
 
   const loadAgents = async () => {
-    const { data, error } = await supabase.from("agents").select("*").order("name", { ascending: true });
+    // Buscar agentes
+    const { data: agentsData, error } = await supabase.from("agents").select("*").order("name", { ascending: true });
 
     if (error) {
       toast({ title: "Erro ao carregar agentes", variant: "destructive" });
       return;
     }
 
-    setAgents(data || []);
+    if (!agentsData) {
+      setAgents([]);
+      return;
+    }
+
+    // Para agentes com user_id, buscar o setor do profile correspondente
+    const agentsWithSector = await Promise.all(
+      agentsData.map(async (agent) => {
+        // Se o agente já tem setor, usar ele
+        if (agent.sector) return agent;
+
+        // Se o agente tem user_id, buscar o setor do profile
+        if (agent.user_id) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("sector")
+            .eq("id", agent.user_id)
+            .single();
+
+          if (profile?.sector) {
+            return { ...agent, sector: profile.sector };
+          }
+        }
+
+        return agent;
+      })
+    );
+
+    setAgents(agentsWithSector);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
