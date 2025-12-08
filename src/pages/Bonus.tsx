@@ -448,6 +448,8 @@ export default function Bonus() {
     }
   };
 
+
+  {/*relatório detalhado*/}
   const handlePrintDetailedReport = () => {
     if (!detailedReportAgent) return;
 
@@ -986,7 +988,7 @@ export default function Bonus() {
         </DialogContent>
       </Dialog>
 
-      {/* Detailed Report Dialog */}
+      {/* Relatório detalhado tela */}
       <Dialog open={!!detailedReportAgent} onOpenChange={() => setDetailedReportAgent(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1013,11 +1015,11 @@ export default function Bonus() {
                     <div className="bg-muted px-4 py-2 font-medium border-l-4 border-primary">
                       {format(new Date(day.date + "T12:00:00"), "dd 'de' MMMM 'de' yyyy (EEEE)", { locale: ptBR })}
                     </div>
-                    {day.appointments.length === 0 ? (
+                    {/*  {day.appointments.length === 0 ? (
                       <div className="px-4 py-2 text-muted-foreground italic text-sm">
                         Não houve atendimento nesse dia.
                       </div>
-                    ) : (
+                    ) : ( */}
                       <div className="divide-y">
                         {day.appointments.map((apt) => (
                           <div key={apt.id} className="px-4 py-2 flex justify-between items-center text-sm">
