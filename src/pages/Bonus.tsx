@@ -878,7 +878,7 @@ export default function Bonus() {
                     Bonificação
                   </TableHead>
                   <TableHead rowSpan={2} className="text-center w-[80px]">
-                    Ações
+                    Detalhar
                   </TableHead>
                 </TableRow>
                 <TableRow>
