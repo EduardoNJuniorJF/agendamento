@@ -87,7 +87,7 @@ export function isWeekendOrHoliday(date: Date): boolean {
 export function isBeforeWeekendOrHoliday(date: Date): boolean {
   // Verifica se é sexta-feira (dia antes do fim de semana)
   const dayOfWeek = date.getDay();
-  if (dayOfWeek === 5) {
+  if (dayOfWeek === 6) {
     // Sexta-feira
     return true;
   }
