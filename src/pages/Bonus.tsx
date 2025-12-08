@@ -18,9 +18,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronLeft, ChevronRight, Settings, Printer, Plus, Trash2, Edit2 } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight, Settings, Printer, Plus, Trash2, Edit2, FileText } from "lucide-react";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import logoReport from "@/assets/logo-bonus-report.png";
 
 interface Agent {
   id: string;
@@ -70,6 +71,20 @@ interface AgentBonus {
   penaltiesLevel3: number;
 }
 
+interface DetailedAppointment {
+  id: string;
+  city: string;
+  date: string;
+  level: number;
+  is_penalized: boolean;
+  bonusValue: number;
+}
+
+interface AgentDailyReport {
+  date: string;
+  appointments: DetailedAppointment[];
+}
+
 export default function Bonus() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -80,6 +95,10 @@ export default function Bonus() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editingCity, setEditingCity] = useState<CityLevel | null>(null);
   const [newCity, setNewCity] = useState({ city_name: "", level: 1, km: 0 });
+  const [detailedReportAgent, setDetailedReportAgent] = useState<Agent | null>(null);
+  const [detailedReport, setDetailedReport] = useState<AgentDailyReport[]>([]);
+  const [detailedReportTotal, setDetailedReportTotal] = useState(0);
+  const [loadingReport, setLoadingReport] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { role } = useAuth();
@@ -338,6 +357,190 @@ export default function Bonus() {
     }
   };
 
+  const loadDetailedReport = async (agent: Agent) => {
+    setDetailedReportAgent(agent);
+    setLoadingReport(true);
+    
+    try {
+      const monthStart = startOfMonth(currentDate);
+      const monthEnd = endOfMonth(currentDate);
+      const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+      
+      // Get appointments for this agent in the selected month
+      const { data: appointmentAgents } = await supabase
+        .from("appointment_agents")
+        .select("appointment_id")
+        .eq("agent_id", agent.id);
+      
+      const appointmentIds = appointmentAgents?.map((aa) => aa.appointment_id) || [];
+      
+      let appointments: any[] = [];
+      if (appointmentIds.length > 0) {
+        const { data } = await supabase
+          .from("appointments")
+          .select("id, city, date, status, is_penalized")
+          .in("id", appointmentIds)
+          .gte("date", format(monthStart, "yyyy-MM-dd"))
+          .lte("date", format(monthEnd, "yyyy-MM-dd"))
+          .order("date");
+        
+        appointments = data || [];
+      }
+      
+      // Group by day
+      const report: AgentDailyReport[] = allDays.map((day) => {
+        const dateStr = format(day, "yyyy-MM-dd");
+        const dayAppointments = appointments
+          .filter((apt) => apt.date === dateStr && (apt.status === "completed" || apt.status === "scheduled"))
+          .map((apt) => {
+            const cityUpper = apt.city?.toUpperCase() || "";
+            const cityConfig = cityLevels.find((c) => c.city_name.toUpperCase() === cityUpper);
+            const level = cityConfig?.level || 0;
+            
+            let bonusValue = 0;
+            if (!apt.is_penalized && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
+              switch (cityConfig.level) {
+                case 1:
+                  bonusValue = Number(bonusSettings.level_1_value) || 0;
+                  break;
+                case 2:
+                  bonusValue = Number(bonusSettings.level_2_value) || 0;
+                  break;
+                case 3:
+                  bonusValue = Number(bonusSettings.level_3_value) || 0;
+                  break;
+              }
+            }
+            
+            return {
+              id: apt.id,
+              city: apt.city,
+              date: apt.date,
+              level,
+              is_penalized: apt.is_penalized || false,
+              bonusValue,
+            };
+          });
+        
+        return {
+          date: dateStr,
+          appointments: dayAppointments,
+        };
+      });
+      
+      const total = report.reduce((sum, day) => 
+        sum + day.appointments.reduce((daySum, apt) => daySum + apt.bonusValue, 0), 0
+      );
+      
+      setDetailedReport(report);
+      setDetailedReportTotal(total);
+    } catch (error) {
+      console.error("Error loading detailed report:", error);
+      toast({ title: "Erro ao carregar relatório detalhado", variant: "destructive" });
+    } finally {
+      setLoadingReport(false);
+    }
+  };
+
+  const handlePrintDetailedReport = () => {
+    if (!detailedReportAgent) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const today = new Date();
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Relatório Detalhado - ${detailedReportAgent.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+            .header-left { }
+            .header-right { text-align: right; }
+            .logo { max-height: 60px; }
+            .agent-name { font-size: 1.3em; font-weight: bold; margin-top: 10px; }
+            .ref-month { color: #666; }
+            .day-section { margin-bottom: 15px; }
+            .day-header { font-weight: bold; background: #f5f5f5; padding: 8px 10px; border-left: 4px solid #333; margin-bottom: 5px; }
+            .no-appointment { color: #666; font-style: italic; padding: 5px 10px; }
+            .appointment-row { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid #eee; }
+            .appointment-info { display: flex; gap: 20px; }
+            .level { color: #666; }
+            .penalty { color: #d00; }
+            .no-penalty { color: #080; }
+            .bonus { font-weight: bold; }
+            .total-section { margin-top: 30px; padding: 15px; background: #f5f5f5; border: 2px solid #333; }
+            .total-value { font-size: 1.5em; font-weight: bold; color: #080; }
+            .signature-section { margin-top: 50px; border-top: 2px solid #000; padding-top: 20px; }
+            .signature-text { line-height: 1.8; }
+            .signature-line { margin-top: 40px; }
+            @media print {
+              button { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-left">
+              <img src="${logoReport}" class="logo" alt="Logo" />
+            </div>
+            <div class="header-right">
+              <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
+              <div class="ref-month">Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
+              <div class="agent-name">Agente: ${detailedReportAgent.name}</div>
+            </div>
+          </div>
+
+          <h2 style="text-align: center; margin-bottom: 20px;">Relatório Detalhado de Atendimentos</h2>
+
+          ${detailedReport.map((day) => `
+            <div class="day-section">
+              <div class="day-header">${format(new Date(day.date + "T12:00:00"), "dd 'de' MMMM 'de' yyyy (EEEE)", { locale: ptBR })}</div>
+              ${day.appointments.length === 0 
+                ? '<div class="no-appointment">Não houve atendimento nesse dia.</div>'
+                : day.appointments.map((apt) => `
+                    <div class="appointment-row">
+                      <div class="appointment-info">
+                        <span><strong>${apt.city}</strong></span>
+                        <span class="level">Nível ${apt.level || "N/A"}</span>
+                        <span class="${apt.is_penalized ? 'penalty' : 'no-penalty'}">Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
+                      </div>
+                      <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
+                    </div>
+                  `).join("")
+              }
+            </div>
+          `).join("")}
+
+          <div class="total-section">
+            <strong>Valor total de bonificação a pagar:</strong>
+            <span class="total-value">R$ ${detailedReportTotal.toFixed(2)}</span>
+          </div>
+
+          <div class="signature-section">
+            <div class="signature-text">
+              Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela empresa.
+              <br /><br />
+              Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
+            </div>
+            <div class="signature-line">
+              <p>Assinatura do colaborador: ____________________________</p>
+              <p>Data: ____/____/_______</p>
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handlePrint = () => {
     const printContent = printRef.current;
     if (!printContent) return;
@@ -361,15 +564,12 @@ export default function Bonus() {
             .total { font-weight: bold; font-size: 1.2em; text-align: right; margin-top: 20px; }
             .agent-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
             .separator-right { border-right: 2px solid #A6A8A6 !important; }
-            @media print {
-              button { display: none; }
-            }
+            @media print { button { display: none; } }
           </style>
         </head>
         <body>
           <h1>Relatório de Bonificação</h1>
           <h2 style="text-align: center; color: #666;">${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</h2>
-          
           <table>
             <thead>
               <tr>
@@ -379,48 +579,24 @@ export default function Bonus() {
                 <th rowspan="2">Bonificação Total</th>
               </tr>
               <tr>
-                <th>Total</th>
-                <th>Nível 1</th>
-                <th>Nível 2</th>
-                <th class="separator-right">Nível 3</th>
-                <th>Total</th>
-                <th>Nível 1</th>
-                <th>Nível 2</th>
-                <th>Nível 3</th>
+                <th>Total</th><th>Nível 1</th><th>Nível 2</th><th class="separator-right">Nível 3</th>
+                <th>Total</th><th>Nível 1</th><th>Nível 2</th><th>Nível 3</th>
               </tr>
             </thead>
             <tbody>
-              ${agentBonuses
-                .map(
-                  (ab) => `
+              ${agentBonuses.map((ab) => `
                 <tr>
-                  <td>
-                    <span class="agent-color" style="background-color: ${ab.agent.color}"></span>
-                    ${ab.agent.name}
-                  </td>
-                  <td>${ab.completed}</td>
-                  <td>${ab.completedLevel1}</td>
-                  <td>${ab.completedLevel2}</td>
+                  <td><span class="agent-color" style="background-color: ${ab.agent.color}"></span>${ab.agent.name}</td>
+                  <td>${ab.completed}</td><td>${ab.completedLevel1}</td><td>${ab.completedLevel2}</td>
                   <td class="separator-right">${ab.completedLevel3}</td>
-                  <td>${ab.penalties}</td>
-                  <td>${ab.penaltiesLevel1}</td>
-                  <td>${ab.penaltiesLevel2}</td>
-                  <td>${ab.penaltiesLevel3}</td>
+                  <td>${ab.penalties}</td><td>${ab.penaltiesLevel1}</td><td>${ab.penaltiesLevel2}</td><td>${ab.penaltiesLevel3}</td>
                   <td>R$ ${ab.totalBonus.toFixed(2)}</td>
                 </tr>
-              `,
-                )
-                .join("")}
+              `).join("")}
             </tbody>
           </table>
-          
-          <div class="total">
-            TOTAL GLOBAL: R$ ${totalGlobal.toFixed(2)}
-          </div>
-          
-          <script>
-            window.onload = function() { window.print(); }
-          </script>
+          <div class="total">TOTAL GLOBAL: R$ ${totalGlobal.toFixed(2)}</div>
+          <script>window.onload = function() { window.print(); }</script>
         </body>
       </html>
     `);
@@ -689,6 +865,9 @@ export default function Bonus() {
                   <TableHead rowSpan={2} className="text-right">
                     Bonificação
                   </TableHead>
+                  <TableHead rowSpan={2} className="text-center w-[80px]">
+                    Ações
+                  </TableHead>
                 </TableRow>
                 <TableRow>
                   <TableHead className="text-center">Total</TableHead>
@@ -719,6 +898,16 @@ export default function Bonus() {
                     <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
                     <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
                     <TableCell className="text-right font-medium">R$ {ab.totalBonus.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => loadDetailedReport(ab.agent)}
+                        title="Relatório Detalhado"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {agentBonuses.length === 0 && (
@@ -782,6 +971,81 @@ export default function Bonus() {
             </Button>
             <Button onClick={handleUpdateCity}>Salvar</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detailed Report Dialog */}
+      <Dialog open={!!detailedReportAgent} onOpenChange={() => setDetailedReportAgent(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Relatório Detalhado</DialogTitle>
+            <DialogDescription>
+              {detailedReportAgent?.name} - {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingReport ? (
+            <div className="text-center py-8 text-muted-foreground">Carregando relatório...</div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <Button onClick={handlePrintDetailedReport}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Imprimir
+                </Button>
+              </div>
+
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto">
+                {detailedReport.map((day) => (
+                  <div key={day.date} className="border rounded-lg overflow-hidden">
+                    <div className="bg-muted px-4 py-2 font-medium border-l-4 border-primary">
+                      {format(new Date(day.date + "T12:00:00"), "dd 'de' MMMM 'de' yyyy (EEEE)", { locale: ptBR })}
+                    </div>
+                    {day.appointments.length === 0 ? (
+                      <div className="px-4 py-2 text-muted-foreground italic text-sm">
+                        Não houve atendimento nesse dia.
+                      </div>
+                    ) : (
+                      <div className="divide-y">
+                        {day.appointments.map((apt) => (
+                          <div key={apt.id} className="px-4 py-2 flex justify-between items-center text-sm">
+                            <div className="flex items-center gap-4">
+                              <span className="font-medium">{apt.city}</span>
+                              <span className="text-muted-foreground">Nível {apt.level || "N/A"}</span>
+                              <span className={apt.is_penalized ? "text-destructive" : "text-green-600"}>
+                                Penalidade: {apt.is_penalized ? "SIM" : "NÃO"}
+                              </span>
+                            </div>
+                            <span className="font-bold">R$ {apt.bonusValue.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <Card className="bg-muted">
+                <CardContent className="py-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Valor total de bonificação a pagar:</span>
+                    <span className="text-2xl font-bold text-green-600">R$ {detailedReportTotal.toFixed(2)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="text-sm text-muted-foreground border-t pt-4">
+                <p className="mb-4">
+                  Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela empresa.
+                </p>
+                <p className="mb-4">
+                  Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
+                </p>
+                <p>Assinatura do colaborador: ____________________________</p>
+                <p>Data: ____/____/_______</p>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
