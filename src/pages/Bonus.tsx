@@ -537,7 +537,7 @@ export default function Bonus() {
               Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
             </div>
             <div class="signature-line">
-              <p>Assinatura do colaborador: ____________________________</p>
+              <p>Assinatura do colaboradoreeeeeeeeeee: ____________________________</p>
               <p>Data: ____/____/_______</p>
             </div>
           </div>
@@ -813,7 +813,7 @@ export default function Bonus() {
         </div>
       </div>
 
-      {/* Month Navigation */}
+      {/* Navegação */}
       <Card>
         <CardContent className="py-4">
           <div className="flex items-center justify-center gap-4">
@@ -830,7 +830,7 @@ export default function Bonus() {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
+      {/* Contadores */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -854,7 +854,7 @@ export default function Bonus() {
         </Card>
       </div>
 
-      {/* Agent Bonuses Table */}
+      {/* Tabela */}
       <Card ref={printRef}>
         <CardHeader>
           <CardTitle>Bonificação por Agente</CardTitle>
