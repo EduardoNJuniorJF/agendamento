@@ -1049,7 +1049,7 @@ export default function Bonus() {
                 </CardContent>
               </Card>
 
-              <div className="text-sm text-muted-foreground border-t pt-4">
+              {/*}  <div className="text-sm text-muted-foreground border-t pt-4">
                 <p className="mb-4">
                   Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela
                   empresa.
@@ -1059,7 +1059,7 @@ export default function Bonus() {
                 </p>
                 <p>Assinatura do colaborador: ____________________________</p>
                 <p>Data: ____/____/_______</p>
-              </div>
+              </div>*/}
             </div>
           )}
         </DialogContent>
