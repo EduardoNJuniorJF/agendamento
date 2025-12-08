@@ -456,30 +456,25 @@ export default function Bonus() {
         <head>
           <title>Relatório Detalhado - ${detailedReportAgent.name}</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-            .header-left { }
-            .header-right { text-align: right; }
-            .logo { max-height: 60px; }
-            .agent-name { font-size: 1.3em; font-weight: bold; margin-top: 10px; }
-            .ref-month { color: #666; }
-            .day-section { margin-bottom: 15px; }
-            .day-header { font-weight: bold; background: #f5f5f5; padding: 8px 10px; border-left: 4px solid #333; margin-bottom: 5px; }
-            .no-appointment { color: #666; font-style: italic; padding: 5px 10px; }
-            .appointment-row { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid #eee; }
-            .appointment-info { display: flex; gap: 20px; }
-            .level { color: #666; }
-            .penalty { color: #d00; }
-            .no-penalty { color: #080; }
+            body { font-family: Arial, sans-serif; padding: 15px; max-width: 800px; margin: 0 auto; font-size: 11px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 10px; }
+            .header-right { text-align: right; font-size: 10px; }
+            .logo { max-height: 40px; }
+            .agent-name { font-size: 12px; font-weight: bold; margin-top: 5px; }
+            h2 { font-size: 14px; margin: 10px 0; }
+            .day-section { margin-bottom: 8px; }
+            .day-header { font-weight: bold; background: #eee; padding: 4px 8px; border-left: 3px solid #000; margin-bottom: 2px; font-size: 10px; }
+            .no-appointment { font-style: italic; padding: 2px 8px; font-size: 10px; }
+            .appointment-row { display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #ddd; font-size: 10px; }
+            .appointment-info { display: flex; gap: 15px; }
             .bonus { font-weight: bold; }
-            .total-section { margin-top: 30px; padding: 15px; background: #f5f5f5; border: 2px solid #333; }
-            .total-value { font-size: 1.5em; font-weight: bold; color: #080; }
-            .signature-section { margin-top: 50px; border-top: 2px solid #000; padding-top: 20px; }
-            .signature-text { line-height: 1.8; }
-            .signature-line { margin-top: 40px; }
-            @media print {
-              button { display: none; }
-            }
+            .total-section { margin-top: 15px; padding: 10px; border: 1px solid #000; }
+            .total-value { font-size: 14px; font-weight: bold; }
+            .signature-section { margin-top: 25px; border-top: 1px solid #000; padding-top: 10px; font-size: 10px; }
+            .signature-text { line-height: 1.6; }
+            .signature-line { margin-top: 20px; }
+            .signature-line p { margin: 5px 0; }
+            @media print { button { display: none; } }
           </style>
         </head>
         <body>
@@ -489,24 +484,24 @@ export default function Bonus() {
             </div>
             <div class="header-right">
               <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
-              <div class="ref-month">Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
+              <div>Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
               <div class="agent-name">Agente: ${detailedReportAgent.name}</div>
             </div>
           </div>
 
-          <h2 style="text-align: center; margin-bottom: 20px;">Relatório Detalhado de Atendimentos</h2>
+          <h2 style="text-align: center;">Relatório Detalhado de Atendimentos</h2>
 
           ${detailedReport.map((day) => `
             <div class="day-section">
-              <div class="day-header">${format(new Date(day.date + "T12:00:00"), "dd 'de' MMMM 'de' yyyy (EEEE)", { locale: ptBR })}</div>
+              <div class="day-header">${format(new Date(day.date + "T12:00:00"), "dd/MM/yyyy (EEEE)", { locale: ptBR })}</div>
               ${day.appointments.length === 0 
                 ? '<div class="no-appointment">Não houve atendimento nesse dia.</div>'
                 : day.appointments.map((apt) => `
                     <div class="appointment-row">
                       <div class="appointment-info">
                         <span><strong>${apt.city}</strong></span>
-                        <span class="level">Nível ${apt.level || "N/A"}</span>
-                        <span class="${apt.is_penalized ? 'penalty' : 'no-penalty'}">Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
+                        <span>Nível ${apt.level || "N/A"}</span>
+                        <span>Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
                       </div>
                       <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
                     </div>
@@ -523,7 +518,7 @@ export default function Bonus() {
           <div class="signature-section">
             <div class="signature-text">
               Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela empresa.
-              <br /><br />
+              <br />
               Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
             </div>
             <div class="signature-line">
@@ -532,9 +527,7 @@ export default function Bonus() {
             </div>
           </div>
 
-          <script>
-            window.onload = function() { window.print(); }
-          </script>
+          <script>window.onload = function() { window.print(); }</script>
         </body>
       </html>
     `);
