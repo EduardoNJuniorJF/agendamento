@@ -113,7 +113,12 @@ export default function Bonus() {
     setLoading(true);
     try {
       const [agentsRes, settingsRes, citiesRes] = await Promise.all([
-        supabase.from("agents").select("id, name, color, receives_bonus").eq("is_active", true).eq("receives_bonus", true).order("name"),
+        supabase
+          .from("agents")
+          .select("id, name, color, receives_bonus")
+          .eq("is_active", true)
+          .eq("receives_bonus", true)
+          .order("name"),
         supabase.from("bonus_settings").select("*").limit(1).maybeSingle(),
         supabase.from("city_bonus_levels").select("*").order("city_name"),
       ]);
@@ -360,20 +365,20 @@ export default function Bonus() {
   const loadDetailedReport = async (agent: Agent) => {
     setDetailedReportAgent(agent);
     setLoadingReport(true);
-    
+
     try {
       const monthStart = startOfMonth(currentDate);
       const monthEnd = endOfMonth(currentDate);
       const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-      
+
       // Get appointments for this agent in the selected month
       const { data: appointmentAgents } = await supabase
         .from("appointment_agents")
         .select("appointment_id")
         .eq("agent_id", agent.id);
-      
+
       const appointmentIds = appointmentAgents?.map((aa) => aa.appointment_id) || [];
-      
+
       let appointments: any[] = [];
       if (appointmentIds.length > 0) {
         const { data } = await supabase
@@ -383,10 +388,10 @@ export default function Bonus() {
           .gte("date", format(monthStart, "yyyy-MM-dd"))
           .lte("date", format(monthEnd, "yyyy-MM-dd"))
           .order("date");
-        
+
         appointments = data || [];
       }
-      
+
       // Group by day
       const report: AgentDailyReport[] = allDays.map((day) => {
         const dateStr = format(day, "yyyy-MM-dd");
@@ -396,7 +401,7 @@ export default function Bonus() {
             const cityUpper = apt.city?.toUpperCase() || "";
             const cityConfig = cityLevels.find((c) => c.city_name.toUpperCase() === cityUpper);
             const level = cityConfig?.level || 0;
-            
+
             let bonusValue = 0;
             if (!apt.is_penalized && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
               switch (cityConfig.level) {
@@ -411,7 +416,7 @@ export default function Bonus() {
                   break;
               }
             }
-            
+
             return {
               id: apt.id,
               city: apt.city,
@@ -421,17 +426,18 @@ export default function Bonus() {
               bonusValue,
             };
           });
-        
+
         return {
           date: dateStr,
           appointments: dayAppointments,
         };
       });
-      
-      const total = report.reduce((sum, day) => 
-        sum + day.appointments.reduce((daySum, apt) => daySum + apt.bonusValue, 0), 0
+
+      const total = report.reduce(
+        (sum, day) => sum + day.appointments.reduce((daySum, apt) => daySum + apt.bonusValue, 0),
+        0,
       );
-      
+
       setDetailedReport(report);
       setDetailedReportTotal(total);
     } catch (error) {
@@ -491,12 +497,17 @@ export default function Bonus() {
 
           <h2 style="text-align: center;">Relatório Detalhado de Atendimentos</h2>
 
-          ${detailedReport.map((day) => `
+          ${detailedReport
+            .map(
+              (day) => `
             <div class="day-section">
               <div class="day-header">${format(new Date(day.date + "T12:00:00"), "dd/MM/yyyy (EEEE)", { locale: ptBR })}</div>
-              ${day.appointments.length === 0 
-                ? '<div class="no-appointment">Não houve atendimento nesse dia.</div>'
-                : day.appointments.map((apt) => `
+              ${
+                day.appointments.length === 0
+                  ? '<div class="no-appointment">Não houve atendimento nesse dia.</div>'
+                  : day.appointments
+                      .map(
+                        (apt) => `
                     <div class="appointment-row">
                       <div class="appointment-info">
                         <span><strong>${apt.city}</strong></span>
@@ -505,10 +516,14 @@ export default function Bonus() {
                       </div>
                       <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
                     </div>
-                  `).join("")
+                  `,
+                      )
+                      .join("")
               }
             </div>
-          `).join("")}
+          `,
+            )
+            .join("")}
 
           <div class="total-section">
             <strong>Valor total de bonificação a pagar:</strong>
@@ -577,7 +592,9 @@ export default function Bonus() {
               </tr>
             </thead>
             <tbody>
-              ${agentBonuses.map((ab) => `
+              ${agentBonuses
+                .map(
+                  (ab) => `
                 <tr>
                   <td><span class="agent-color" style="background-color: ${ab.agent.color}"></span>${ab.agent.name}</td>
                   <td>${ab.completed}</td><td>${ab.completedLevel1}</td><td>${ab.completedLevel2}</td>
@@ -585,7 +602,9 @@ export default function Bonus() {
                   <td>${ab.penalties}</td><td>${ab.penaltiesLevel1}</td><td>${ab.penaltiesLevel2}</td><td>${ab.penaltiesLevel3}</td>
                   <td>R$ ${ab.totalBonus.toFixed(2)}</td>
                 </tr>
-              `).join("")}
+              `,
+                )
+                .join("")}
             </tbody>
           </table>
           <div class="total">TOTAL GLOBAL: R$ ${totalGlobal.toFixed(2)}</div>
@@ -750,7 +769,7 @@ export default function Bonus() {
                               <TableHead>Cidade</TableHead>
                               <TableHead>Nível</TableHead>
                               <TableHead>KM</TableHead>
-                              <TableHead className="w-[100px]">Ações</TableHead>
+                              <TableHead className="w-[100px]">Detalhar</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -892,8 +911,8 @@ export default function Bonus() {
                     <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
                     <TableCell className="text-right font-medium">R$ {ab.totalBonus.toFixed(2)}</TableCell>
                     <TableCell className="text-center">
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={() => loadDetailedReport(ab.agent)}
                         title="Relatório Detalhado"
@@ -1029,7 +1048,8 @@ export default function Bonus() {
 
               <div className="text-sm text-muted-foreground border-t pt-4">
                 <p className="mb-4">
-                  Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela empresa.
+                  Confirmo que recebi a bonificação informada neste relatório, conforme critérios estabelecidos pela
+                  empresa.
                 </p>
                 <p className="mb-4">
                   Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
