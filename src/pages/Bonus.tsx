@@ -548,7 +548,7 @@ export default function Bonus() {
               Declaro estar ciente do valor pago e de que eventuais dúvidas foram esclarecidas.
             </div>
             <div class="signature-line">
-              <p>Assinatura do colaboradoreeeeeeeeeee: ____________________________</p>
+              <p>Assinatura do colaborador: ____________________________</p>
               <p>Data: ____/____/_______</p>
             </div>
           </div>
