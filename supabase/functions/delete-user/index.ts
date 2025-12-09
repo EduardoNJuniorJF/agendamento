@@ -1,4 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+// Delete user edge function - v2
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3?no-deno-check'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
