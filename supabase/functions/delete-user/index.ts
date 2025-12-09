@@ -1,5 +1,5 @@
-// Delete user edge function - v2
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3?no-deno-check'
+// Delete user edge function - v3
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '')
+    console.log('Token received, length:', token.length)
 
     // Create admin client for privileged operations
     const supabaseAdmin = createClient(
@@ -31,13 +32,16 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Use admin client to verify the JWT token
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+    // Use admin client to verify the JWT token by getting user info
+    const { data, error: userError } = await supabaseAdmin.auth.getUser(token)
 
-    if (userError || !user) {
+    if (userError || !data?.user) {
       console.error('User validation error:', userError)
       throw new Error('Invalid token')
     }
+
+    const user = data.user
+    console.log('User validated:', user.id)
 
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
