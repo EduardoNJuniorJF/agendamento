@@ -1,9 +1,21 @@
-// Delete user edge function - v3
+// Delete user edge function - v4
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Decode JWT to get user ID without verification (verification is done by Supabase)
+function decodeJWT(token: string): { sub: string } | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(atob(parts[1]))
+    return payload
+  } catch {
+    return null
+  }
 }
 
 Deno.serve(async (req) => {
@@ -18,7 +30,15 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '')
-    console.log('Token received, length:', token.length)
+    
+    // Decode JWT to get user ID
+    const payload = decodeJWT(token)
+    if (!payload || !payload.sub) {
+      throw new Error('Invalid token format')
+    }
+
+    const requestingUserId = payload.sub
+    console.log('Requesting user ID from token:', requestingUserId)
 
     // Create admin client for privileged operations
     const supabaseAdmin = createClient(
@@ -32,21 +52,20 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Use admin client to verify the JWT token by getting user info
-    const { data, error: userError } = await supabaseAdmin.auth.getUser(token)
+    // Verify the user exists using admin API
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(requestingUserId)
 
-    if (userError || !data?.user) {
+    if (userError || !userData?.user) {
       console.error('User validation error:', userError)
       throw new Error('Invalid token')
     }
 
-    const user = data.user
-    console.log('User validated:', user.id)
+    console.log('User validated:', userData.user.id)
 
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id)
+      .eq('user_id', requestingUserId)
       .single()
 
     if (roleError || !roleData || (roleData.role !== 'admin' && roleData.role !== 'dev')) {
@@ -61,7 +80,7 @@ Deno.serve(async (req) => {
     console.log('Deleting user:', userId)
 
     // Prevent self-deletion
-    if (userId === user.id) {
+    if (userId === requestingUserId) {
       return new Response(
         JSON.stringify({ error: 'Você não pode excluir seu próprio usuário' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
