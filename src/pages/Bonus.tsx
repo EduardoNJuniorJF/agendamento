@@ -907,7 +907,7 @@ export default function Bonus() {
                         <TableCell className="text-center">{ab.completedLevel1}</TableCell>
                         <TableCell className="text-center">{ab.completedLevel2}</TableCell>
                         <TableCell className="text-center">{ab.completedLevel3}</TableCell>
-                        <TableCell className="text-center">{ab.completed}</TableCell>
+                        <TableCell className="text-center border-r-2 border-gray-300">{ab.completed}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel1}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
