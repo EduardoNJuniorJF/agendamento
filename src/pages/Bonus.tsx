@@ -861,14 +861,23 @@ export default function Bonus() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead rowSpan={2} className="align-bottom">Agente</TableHead>
-                      <TableHead colSpan={4} className="text-center border-b">Atendimentos</TableHead>
-                      <TableHead colSpan={4} className="text-center border-b">Penalidades</TableHead>
-                      <TableHead rowSpan={2} className="text-right align-bottom">Bonificação</TableHead>
-                      <TableHead rowSpan={2} className="w-[80px] text-center align-bottom">Detalhar</TableHead>
+                      <TableHead rowSpan={2} className="align-bottom">
+                        Agente
+                      </TableHead>
+                      <TableHead colSpan={4} className="text-center border-b">
+                        Atendimentos
+                      </TableHead>
+                      <TableHead colSpan={4} className="text-center border-b">
+                        Penalidades
+                      </TableHead>
+                      <TableHead rowSpan={2} className="text-right align-bottom">
+                        Bonificação
+                      </TableHead>
+                      <TableHead rowSpan={2} className="w-[80px] text-center align-bottom">
+                        Detalhar
+                      </TableHead>
                     </TableRow>
                     <TableRow>
-                      <TableHead className="text-center">Total</TableHead>
                       <TableHead className="text-center">Nível 1</TableHead>
                       <TableHead className="text-center">Nível 2</TableHead>
                       <TableHead className="text-center">Nível 3</TableHead>
@@ -876,6 +885,7 @@ export default function Bonus() {
                       <TableHead className="text-center">Nível 1</TableHead>
                       <TableHead className="text-center">Nível 2</TableHead>
                       <TableHead className="text-center">Nível 3</TableHead>
+                      <TableHead className="text-center">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -888,14 +898,14 @@ export default function Bonus() {
                           ></span>
                           {ab.agent.name}
                         </TableCell>
-                        <TableCell className="text-center">{ab.completed}</TableCell>
                         <TableCell className="text-center">{ab.completedLevel1}</TableCell>
                         <TableCell className="text-center">{ab.completedLevel2}</TableCell>
                         <TableCell className="text-center">{ab.completedLevel3}</TableCell>
-                        <TableCell className="text-center">{ab.penalties}</TableCell>
+                        <TableCell className="text-center">{ab.completed}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel1}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
                         <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
+                        <TableCell className="text-center">{ab.penalties}</TableCell>
                         <TableCell className="text-right font-semibold">R$ {ab.totalBonus.toFixed(2)}</TableCell>
                         <TableCell className="text-center">
                           <Dialog>
@@ -976,7 +986,9 @@ export default function Bonus() {
                   </TableBody>
                 </Table>
               </div>
-              <div className="mt-4 text-right text-lg font-bold">TOTAL GERAL DO MÊS: R$ {agentBonuses.reduce((sum, ab) => sum + ab.totalBonus, 0).toFixed(2)}</div>
+              <div className="mt-4 text-right text-lg font-bold">
+                TOTAL GERAL DO MÊS: R$ {agentBonuses.reduce((sum, ab) => sum + ab.totalBonus, 0).toFixed(2)}
+              </div>
             </>
           )}
         </CardContent>
