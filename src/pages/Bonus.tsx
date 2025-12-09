@@ -597,9 +597,15 @@ export default function Bonus() {
                 <th colspan="4">Penalidades</th>
                 <th rowspan="2">Bonificação Total</th>
               </tr>
-              <tr>
-                <th>Total</th><th>Nível 1</th><th>Nível 2</th><th class="separator-right">Nível 3</th>
-                <th>Total</th><th>Nível 1</th><th>Nível 2</th><th>Nível 3</th>
+              <tr>                
+                <th>Nível 1</th>
+                <th>Nível 2</th>
+                <th>Nível 3</th>
+                <thclass="separator-right">Total</th>
+                <th>Nível 1</th>
+                <th>Nível 2</th>
+                <th>Nível 3</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
