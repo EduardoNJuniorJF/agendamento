@@ -16,23 +16,7 @@ Deno.serve(async (req) => {
       throw new Error('No authorization header')
     }
 
-    // Create a client with the user's token to verify their identity
-    const supabaseUser = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    )
-
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser()
-
-    if (userError || !user) {
-      console.error('User validation error:', userError)
-      throw new Error('Invalid token')
-    }
+    const token = authHeader.replace('Bearer ', '')
 
     // Create admin client for privileged operations
     const supabaseAdmin = createClient(
@@ -46,7 +30,11 @@ Deno.serve(async (req) => {
       }
     )
 
+    // Use admin client to verify the JWT token
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+
     if (userError || !user) {
+      console.error('User validation error:', userError)
       throw new Error('Invalid token')
     }
 
@@ -73,6 +61,16 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Você não pode excluir seu próprio usuário' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // First, delete the agent record if it exists (to avoid foreign key constraint)
+    const { error: agentDeleteError } = await supabaseAdmin
+      .from('agents')
+      .delete()
+      .eq('user_id', userId)
+
+    if (agentDeleteError) {
+      console.log('Agent delete result:', agentDeleteError)
     }
 
     // Delete user using admin API (this will cascade delete profile and roles)
