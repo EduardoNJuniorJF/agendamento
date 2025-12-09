@@ -887,7 +887,7 @@ export default function Bonus() {
                       <TableHead className="text-center">Nível 1</TableHead>
                       <TableHead className="text-center">Nível 2</TableHead>
                       <TableHead className="text-center">Nível 3</TableHead>
-                      <TableHead className="text-center">Total</TableHead>
+                      <TableHead className="text-center border-r-2 border-gray-300">Total</TableHead>
                       <TableHead className="text-center">Nível 1</TableHead>
                       <TableHead className="text-center">Nível 2</TableHead>
                       <TableHead className="text-center">Nível 3</TableHead>
