@@ -176,6 +176,30 @@ export default function Vacations() {
       return;
     }
 
+    // REGRA 3: Férias só podem ser marcadas dentro do período concessivo (entre vencimento e data limite)
+    if (vacationForm.expiry_date && vacationForm.deadline) {
+      const expiryDate = parseISO(vacationForm.expiry_date);
+      const deadlineDate = parseISO(vacationForm.deadline);
+      
+      if (startDate < expiryDate) {
+        toast({
+          title: "Data fora do período concessivo",
+          description: `As férias só podem iniciar a partir do vencimento do período aquisitivo (${format(expiryDate, "dd/MM/yyyy")}). Data selecionada está antes do período permitido.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (startDate > deadlineDate) {
+        toast({
+          title: "Data fora do período concessivo",
+          description: `As férias devem iniciar até a data limite (${format(deadlineDate, "dd/MM/yyyy")}). Data selecionada está após o período permitido.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       if (editingVacationId) {
         const { error } = await supabase.from("vacations").update(vacationForm).eq("id", editingVacationId);
