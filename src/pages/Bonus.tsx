@@ -846,119 +846,137 @@ export default function Bonus() {
         {/* ... O RESTO DA INTERFACE PRINCIPAL CONTINUA AQUI ... */}
       </div>
 
-      {/* Tabela de Bônus (Não totalmente visível no código original, mas presumida) */}
+      {/* Tabela de Bônus */}
       <Card>
         <CardHeader>
-          <CardTitle>Resultados da Bonificação</CardTitle>
-          <CardDescription>Cálculo total de bonificações para o mês selecionado.</CardDescription>
+          <CardTitle>Bonificação por Agente</CardTitle>
+          <CardDescription>Resumo de produtividade e bonificação do mês</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <p className="text-center py-8">Carregando dados...</p>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Agente</TableHead>
-                    <TableHead>Atendimentos (Total)</TableHead>
-                    <TableHead>Penalidades</TableHead>
-                    <TableHead className="text-right">Bônus Total</TableHead>
-                    <TableHead className="w-[100px] text-center">Relatório</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {agentBonuses.map((ab) => (
-                    <TableRow key={ab.agent.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="font-medium">
-                        <span
-                          className="w-3 h-3 rounded-full inline-block mr-2"
-                          style={{ backgroundColor: ab.agent.color }}
-                        ></span>
-                        {ab.agent.name}
-                      </TableCell>
-                      <TableCell>{ab.completed}</TableCell>
-                      <TableCell>{ab.penalties}</TableCell>
-                      <TableCell className="text-right font-semibold">R$ {ab.totalBonus.toFixed(2)}</TableCell>
-                      <TableCell className="text-center">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={() => loadDetailedReport(ab.agent)}>
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          {/* Conteúdo do Dialog de Relatório Detalhado */}
-                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Relatório Detalhado: {detailedReportAgent?.name}</DialogTitle>
-                              <DialogDescription>
-                                Atendimentos presenciais elegíveis para bônus em{" "}
-                                {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            {loadingReport ? (
-                              <p className="text-center py-8">Calculando relatório detalhado...</p>
-                            ) : (
-                              <>
-                                <div className="space-y-4">
-                                  {detailedReport.map((day) => (
-                                    <Card key={day.date}>
-                                      <CardHeader className="p-3 bg-muted/60">
-                                        <CardTitle className="text-sm">
-                                          {format(new Date(day.date + "T12:00:00"), "dd/MM/yyyy (EEEE)", {
-                                            locale: ptBR,
-                                          })}
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent className="p-0">
-                                        {day.appointments.map((apt, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex justify-between items-center p-3 border-b text-sm"
-                                          >
-                                            <div className="flex items-center space-x-4">
-                                              <span className="font-medium">{apt.city}</span>
-                                              <span className="text-xs text-muted-foreground">Nível {apt.level}</span>
-                                              {apt.is_penalized && (
-                                                <span className="text-xs text-red-500">(Penalizado)</span>
-                                              )}
-                                            </div>
-                                            <span
-                                              className={`font-bold ${apt.bonusValue === 0 ? "text-gray-500" : "text-green-600"}`}
-                                            >
-                                              R$ {apt.bonusValue.toFixed(2)}
-                                            </span>
-                                          </div>
-                                        ))}
-                                      </CardContent>
-                                    </Card>
-                                  ))}
-                                  {detailedReport.length === 0 && (
-                                    <p className="text-center text-muted-foreground py-8">
-                                      Nenhum agendamento elegível encontrado neste mês.
-                                    </p>
-                                  )}
-                                </div>
-                                <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center">
-                                  <div className="text-lg font-bold">
-                                    Total de Bônus: R$ {detailedReportTotal.toFixed(2)}
-                                  </div>
-                                  <Button onClick={handlePrintDetailedReport} className="mt-2 sm:mt-0">
-                                    <Printer className="h-4 w-4 mr-2" />
-                                    Imprimir Relatório
-                                  </Button>
-                                </DialogFooter>
-                              </>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead rowSpan={2} className="align-bottom">Agente</TableHead>
+                      <TableHead colSpan={4} className="text-center border-b">Atendimentos</TableHead>
+                      <TableHead colSpan={4} className="text-center border-b">Penalidades</TableHead>
+                      <TableHead rowSpan={2} className="text-right align-bottom">Bonificação</TableHead>
+                      <TableHead rowSpan={2} className="w-[80px] text-center align-bottom">Detalhar</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <div className="mt-4 text-right text-lg font-bold">TOTAL GERAL DO MÊS: R$ {totalGlobal.toFixed(2)}</div>
+                    <TableRow>
+                      <TableHead className="text-center">Total</TableHead>
+                      <TableHead className="text-center">Nível 1</TableHead>
+                      <TableHead className="text-center">Nível 2</TableHead>
+                      <TableHead className="text-center">Nível 3</TableHead>
+                      <TableHead className="text-center">Total</TableHead>
+                      <TableHead className="text-center">Nível 1</TableHead>
+                      <TableHead className="text-center">Nível 2</TableHead>
+                      <TableHead className="text-center">Nível 3</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agentBonuses.map((ab) => (
+                      <TableRow key={ab.agent.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">
+                          <span
+                            className="w-3 h-3 rounded-full inline-block mr-2"
+                            style={{ backgroundColor: ab.agent.color }}
+                          ></span>
+                          {ab.agent.name}
+                        </TableCell>
+                        <TableCell className="text-center">{ab.completed}</TableCell>
+                        <TableCell className="text-center">{ab.completedLevel1}</TableCell>
+                        <TableCell className="text-center">{ab.completedLevel2}</TableCell>
+                        <TableCell className="text-center">{ab.completedLevel3}</TableCell>
+                        <TableCell className="text-center">{ab.penalties}</TableCell>
+                        <TableCell className="text-center">{ab.penaltiesLevel1}</TableCell>
+                        <TableCell className="text-center">{ab.penaltiesLevel2}</TableCell>
+                        <TableCell className="text-center">{ab.penaltiesLevel3}</TableCell>
+                        <TableCell className="text-right font-semibold">R$ {ab.totalBonus.toFixed(2)}</TableCell>
+                        <TableCell className="text-center">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => loadDetailedReport(ab.agent)}>
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            {/* Conteúdo do Dialog de Relatório Detalhado */}
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Relatório Detalhado: {detailedReportAgent?.name}</DialogTitle>
+                                <DialogDescription>
+                                  Atendimentos presenciais elegíveis para bônus em{" "}
+                                  {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
+                                </DialogDescription>
+                              </DialogHeader>
+
+                              {loadingReport ? (
+                                <p className="text-center py-8">Calculando relatório detalhado...</p>
+                              ) : (
+                                <>
+                                  <div className="space-y-4">
+                                    {detailedReport.map((day) => (
+                                      <Card key={day.date}>
+                                        <CardHeader className="p-3 bg-muted/60">
+                                          <CardTitle className="text-sm">
+                                            {format(new Date(day.date + "T12:00:00"), "dd/MM/yyyy (EEEE)", {
+                                              locale: ptBR,
+                                            })}
+                                          </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-0">
+                                          {day.appointments.map((apt, index) => (
+                                            <div
+                                              key={index}
+                                              className="flex justify-between items-center p-3 border-b text-sm"
+                                            >
+                                              <div className="flex items-center space-x-4">
+                                                <span className="font-medium">{apt.city}</span>
+                                                <span className="text-xs text-muted-foreground">Nível {apt.level}</span>
+                                                {apt.is_penalized && (
+                                                  <span className="text-xs text-red-500">(Penalizado)</span>
+                                                )}
+                                              </div>
+                                              <span
+                                                className={`font-bold ${apt.bonusValue === 0 ? "text-gray-500" : "text-green-600"}`}
+                                              >
+                                                R$ {apt.bonusValue.toFixed(2)}
+                                              </span>
+                                            </div>
+                                          ))}
+                                        </CardContent>
+                                      </Card>
+                                    ))}
+                                    {detailedReport.length === 0 && (
+                                      <p className="text-center text-muted-foreground py-8">
+                                        Nenhum agendamento elegível encontrado neste mês.
+                                      </p>
+                                    )}
+                                  </div>
+                                  <DialogFooter className="mt-4 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center">
+                                    <div className="text-lg font-bold">
+                                      Total de Bônus: R$ {detailedReportTotal.toFixed(2)}
+                                    </div>
+                                    <Button onClick={handlePrintDetailedReport} className="mt-2 sm:mt-0">
+                                      <Printer className="h-4 w-4 mr-2" />
+                                      Imprimir Relatório
+                                    </Button>
+                                  </DialogFooter>
+                                </>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="mt-4 text-right text-lg font-bold">TOTAL GERAL DO MÊS: R$ {agentBonuses.reduce((sum, ab) => sum + ab.totalBonus, 0).toFixed(2)}</div>
             </>
           )}
         </CardContent>
