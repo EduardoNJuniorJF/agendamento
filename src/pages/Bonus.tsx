@@ -604,7 +604,7 @@ export default function Bonus() {
                 <th>Nível 1</th>
                 <th>Nível 2</th>
                 <th>Nível 3</th>
-                <thclass="separator-right">Total</th>
+                <th class="separator-right">Total</th>
                 <th>Nível 1</th>
                 <th>Nível 2</th>
                 <th>Nível 3</th>
