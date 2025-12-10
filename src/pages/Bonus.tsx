@@ -466,6 +466,9 @@ export default function Bonus() {
     if (!printWindow) return;
 
     const today = new Date();
+    
+    // Converter o caminho do logo para URL absoluta
+    const logoUrl = new URL(logoReport, window.location.origin).href;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -497,7 +500,7 @@ export default function Bonus() {
         <body>
           <div class="header">
             <div class="header-left">
-              <img src="${logoReport}" class="logo" alt="Logo" />
+              <img src="${logoUrl}" class="logo" alt="Logo" />
             </div>
             <div class="header-right">
               <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
