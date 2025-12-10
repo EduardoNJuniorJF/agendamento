@@ -503,26 +503,13 @@ export default function Dashboard() {
                                   <div className="font-semibold text-[10px] md:text-xs">{apt.title}</div>
                                 </div>
 
-                                {/*<div>
+                                <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Agente:</div>
                                   <div className="text-muted-foreground text-[10px] md:text-xs">
                                     {apt.agents && apt.agents.length > 0
                                       ? apt.agents.map((agent, idx) => <div key={idx}>{agent.name}</div>)
                                       : "Não atribuído"}
                                   </div>
-                                </div>*/}
-                                <div className="pt-1">
-                                  <div className="font-medium text-[9px] text-muted-foreground mb-1">Despesas:</div>
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[9px] px-1.5 py-0.5"
-                                    style={{
-                                      backgroundColor: getExpenseColor(apt.expense_status),
-                                      color: getExpenseTextColor(apt.expense_status),
-                                    }}
-                                  >
-                                    {getExpenseLabel(apt.expense_status)}
-                                  </Badge>
                                 </div>
                               </div>
                             </DraggableAppointmentCard>
