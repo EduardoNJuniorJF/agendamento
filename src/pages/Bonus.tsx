@@ -564,8 +564,6 @@ export default function Bonus() {
   };
 
   const handlePrint = () => {
-    const printContent = printRef.current;
-    if (!printContent) return;
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
