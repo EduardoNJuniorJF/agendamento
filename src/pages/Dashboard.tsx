@@ -505,9 +505,23 @@ export default function Dashboard() {
 
                               <div>
                                   <div className="font-medium text-[9px] md:text-[10px]">Despesas:</div>
-                                  <div className="text-muted-foreground text-[10px] md:text-xs">
+                                  <Badge
+                                    className="text-[9px] md:text-[10px] mt-0.5"
+                                    style={{
+                                      backgroundColor:
+                                        apt.expense_status === "separar_dia_anterior"
+                                          ? "#11734b"
+                                          : apt.expense_status === "separar_dinheiro"
+                                            ? "#d4edbc"
+                                            : "#ffcfc9",
+                                      color:
+                                        apt.expense_status === "separar_dinheiro" || apt.expense_status === "não_separar"
+                                          ? "#000"
+                                          : "#fff",
+                                    }}
+                                  >
                                     {getExpenseLabel(apt.expense_status)}
-                                  </div>
+                                  </Badge>
                                 </div>
                               </div>
                             </DraggableAppointmentCard>
