@@ -481,13 +481,14 @@ export default function NewAppointment() {
               <div>
                 <Label htmlFor="vehicle">Veículo</Label>
                 <Select
-                  value={formData.vehicle_id || undefined}
-                  onValueChange={(value) => setFormData({ ...formData, vehicle_id: value })}
+                  value={formData.vehicle_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, vehicle_id: value === "none" ? null : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um veículo" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Sem veículo</SelectItem>
                     {vehicles.map((vehicle) => (
                       <SelectItem key={vehicle.id} value={vehicle.id}>
                         {vehicle.model} - {vehicle.plate}
