@@ -488,7 +488,7 @@ export default function NewAppointment() {
                     <SelectValue placeholder="Selecione um veículo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Sem veículo</SelectItem>
+                    <SelectItem value="none">N/A</SelectItem>
                     {vehicles.map((vehicle) => (
                       <SelectItem key={vehicle.id} value={vehicle.id}>
                         {vehicle.model} - {vehicle.plate}
