@@ -27,19 +27,25 @@ export default function ChangePassword() {
 
     setLoading(true);
 
-    const { error } = await updatePassword(newPassword);
+    try {
+      const { error } = await updatePassword(newPassword);
 
-    if (error) {
-      toast.error('Erro ao alterar senha', {
-        description: error.message,
-      });
-    } else {
-      toast.success('Senha alterada com sucesso!');
-      setNewPassword('');
-      setConfirmPassword('');
+      if (error) {
+        console.error('Password update error:', error);
+        toast.error('Erro ao alterar senha', {
+          description: error.message || 'Tente novamente mais tarde',
+        });
+      } else {
+        toast.success('Senha alterada com sucesso!');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast.error('Erro inesperado ao alterar senha');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
