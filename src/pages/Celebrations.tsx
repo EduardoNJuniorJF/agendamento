@@ -719,15 +719,22 @@ function SeasonalDatesSection() {
                 const day = i + 1;
                 const datesForDay = getDateForDay(day);
                 const hasDate = datesForDay.length > 0;
+                const today = new Date();
+                const isToday = day === today.getDate() && 
+                               currentMonth === today.getMonth() && 
+                               currentYear === today.getFullYear();
                 
                 return (
                   <div
                     key={day}
                     className={cn(
                       "h-16 border rounded-lg flex flex-col items-center justify-center relative group",
+                      isToday && "ring-2 ring-offset-2 ring-destructive",
                       hasDate 
                         ? "bg-primary/10 border-primary cursor-pointer hover:bg-primary/20 transition-colors" 
-                        : "border-border"
+                        : isToday 
+                          ? "bg-destructive/10 border-destructive"
+                          : "border-border"
                     )}
                     onClick={() => {
                       if (hasDate && datesForDay[0].image_url) {
@@ -737,6 +744,7 @@ function SeasonalDatesSection() {
                   >
                     <span className={cn(
                       "text-lg font-bold",
+                      isToday && !hasDate && "text-destructive",
                       hasDate ? "text-primary" : "text-foreground"
                     )}>
                       {day}
