@@ -82,6 +82,7 @@ function BirthdaysSection() {
   const [editingBirthday, setEditingBirthday] = useState<Birthday | null>(null);
   const [formData, setFormData] = useState({ employee_name: '', birth_date: '', image_url: '' });
   const [uploading, setUploading] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
   const { data: birthdays = [], isLoading } = useQuery({
     queryKey: ['birthdays'],
@@ -93,6 +94,12 @@ function BirthdaysSection() {
       if (error) throw error;
       return data as Birthday[];
     }
+  });
+
+  // Filter birthdays by selected month
+  const filteredBirthdays = birthdays.filter(birthday => {
+    const birthMonth = new Date(birthday.birth_date + 'T12:00:00').getMonth() + 1;
+    return birthMonth === selectedMonth;
   });
 
   const createMutation = useMutation({
@@ -199,91 +206,112 @@ function BirthdaysSection() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
         <CardTitle className="flex items-center gap-2">
           <Cake className="h-5 w-5" />
           Aniversários dos Funcionários
         </CardTitle>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Aniversário
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedMonth(m => m === 1 ? 12 : m - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingBirthday ? 'Editar Aniversário' : 'Novo Aniversário'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="employee_name">Nome do Funcionário *</Label>
-                <Input
-                  id="employee_name"
-                  value={formData.employee_name}
-                  onChange={e => setFormData(prev => ({ ...prev, employee_name: e.target.value }))}
-                  placeholder="Nome completo"
-                />
-              </div>
-              <div>
-                <Label htmlFor="birth_date">Data de Aniversário *</Label>
-                <Input
-                  id="birth_date"
-                  type="date"
-                  value={formData.birth_date}
-                  onChange={e => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label>Imagem (opcional)</Label>
-                <div className="flex items-center gap-2">
+            <span className="font-medium min-w-[100px] text-center">
+              {MONTHS[selectedMonth - 1]}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedMonth(m => m === 12 ? 1 : m + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Aniversário
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingBirthday ? 'Editar Aniversário' : 'Novo Aniversário'}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="employee_name">Nome do Funcionário *</Label>
                   <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                    className="flex-1"
+                    id="employee_name"
+                    value={formData.employee_name}
+                    onChange={e => setFormData(prev => ({ ...prev, employee_name: e.target.value }))}
+                    placeholder="Nome completo"
                   />
                 </div>
-                {formData.image_url && (
-                  <div className="mt-2 relative inline-block">
-                    <img 
-                      src={formData.image_url} 
-                      alt="Preview" 
-                      className="h-20 w-20 object-cover rounded-md"
+                <div>
+                  <Label htmlFor="birth_date">Data de Aniversário *</Label>
+                  <Input
+                    id="birth_date"
+                    type="date"
+                    value={formData.birth_date}
+                    onChange={e => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Imagem (opcional)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                      className="flex-1"
                     />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6"
-                      onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
                   </div>
-                )}
+                  {formData.image_url && (
+                    <div className="mt-2 relative inline-block">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        className="h-20 w-20 object-cover rounded-md"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6"
+                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+                  <Button onClick={handleSubmit} disabled={uploading}>
+                    {editingBirthday ? 'Atualizar' : 'Cadastrar'}
+                  </Button>
+                </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={resetForm}>Cancelar</Button>
-                <Button onClick={handleSubmit} disabled={uploading}>
-                  {editingBirthday ? 'Atualizar' : 'Cadastrar'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
-        ) : birthdays.length === 0 ? (
+        ) : filteredBirthdays.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
-            Nenhum aniversário cadastrado
+            Nenhum aniversário em {MONTHS[selectedMonth - 1]}
           </p>
         ) : (
           <Table>
@@ -296,7 +324,7 @@ function BirthdaysSection() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {birthdays.map(birthday => (
+              {filteredBirthdays.map(birthday => (
                 <TableRow key={birthday.id}>
                   <TableCell>
                     {birthday.image_url ? (
