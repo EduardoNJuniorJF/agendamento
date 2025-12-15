@@ -313,7 +313,7 @@ function BirthdaysSection() {
                   </TableCell>
                   <TableCell className="font-medium">{birthday.employee_name}</TableCell>
                   <TableCell>
-                    {format(new Date(birthday.birth_date), "dd 'de' MMMM", { locale: ptBR })}
+                    {format(new Date(birthday.birth_date + 'T12:00:00'), "dd 'de' MMMM", { locale: ptBR })}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
