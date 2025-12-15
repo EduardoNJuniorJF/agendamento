@@ -164,6 +164,33 @@ export type Database = {
           },
         ]
       }
+      birthdays: {
+        Row: {
+          birth_date: string
+          created_at: string | null
+          employee_name: string
+          id: string
+          image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birth_date: string
+          created_at?: string | null
+          employee_name: string
+          id?: string
+          image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birth_date?: string
+          created_at?: string | null
+          employee_name?: string
+          id?: string
+          image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       bonus_settings: {
         Row: {
           base_value: number
@@ -254,6 +281,39 @@ export type Database = {
           sector?: string | null
           updated_at?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      seasonal_dates: {
+        Row: {
+          created_at: string | null
+          day: number
+          id: string
+          image_url: string | null
+          location: string | null
+          month: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day: number
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          month: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day?: number
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          month?: number
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
