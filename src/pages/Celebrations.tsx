@@ -482,282 +482,249 @@ function SeasonalDatesSection() {
 
   return (
     <div className="space-y-6">
-      {/* Form Card */}
+      {/* Calendar View */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5" />
-            Datas Sazonais
-          </CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Data
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingDate ? 'Editar Data Sazonal' : 'Nova Data Sazonal'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nome da Data *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Natal, Carnaval..."
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Dia</Label>
-                    <Select
-                      value={formData.day.toString()}
-                      onValueChange={v => setFormData(prev => ({ ...prev, day: parseInt(v) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 31 }, (_, i) => (
-                          <SelectItem key={i + 1} value={(i + 1).toString()}>
-                            {i + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Mês</Label>
-                    <Select
-                      value={formData.month.toString()}
-                      onValueChange={v => setFormData(prev => ({ ...prev, month: parseInt(v) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MONTHS.map((month, i) => (
-                          <SelectItem key={i + 1} value={(i + 1).toString()}>
-                            {month}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <Label>Localização</Label>
-                  <Select
-                    value={formData.location}
-                    onValueChange={v => setFormData(prev => ({ ...prev, location: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="brasil">Brasil</SelectItem>
-                      <SelectItem value="tres_rios">Três Rios</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Imagem (opcional)</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="flex-1"
-                    />
-                  </div>
-                  {formData.image_url && (
-                    <div className="mt-2 relative inline-block">
-                      <img 
-                        src={formData.image_url} 
-                        alt="Preview" 
-                        className="h-20 w-20 object-cover rounded-md"
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
+              Calendário de Datas Sazonais
+            </CardTitle>
+            <div className="flex items-center gap-4">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Data
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingDate ? 'Editar Data Sazonal' : 'Nova Data Sazonal'}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Nome da Data *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Ex: Natal, Carnaval..."
                       />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6"
-                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Dia</Label>
+                        <Select
+                          value={formData.day.toString()}
+                          onValueChange={v => setFormData(prev => ({ ...prev, day: parseInt(v) }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 31 }, (_, i) => (
+                              <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                {i + 1}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Mês</Label>
+                        <Select
+                          value={formData.month.toString()}
+                          onValueChange={v => setFormData(prev => ({ ...prev, month: parseInt(v) }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MONTHS.map((month, i) => (
+                              <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                {month}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Localização</Label>
+                      <Select
+                        value={formData.location}
+                        onValueChange={v => setFormData(prev => ({ ...prev, location: v }))}
                       >
-                        <X className="h-3 w-3" />
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="brasil">Brasil</SelectItem>
+                          <SelectItem value="tres_rios">Três Rios</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Imagem (opcional)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                          className="flex-1"
+                        />
+                      </div>
+                      {formData.image_url && (
+                        <div className="mt-2 relative inline-block">
+                          <img 
+                            src={formData.image_url} 
+                            alt="Preview" 
+                            className="h-20 w-20 object-cover rounded-md"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6"
+                            onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+                      <Button onClick={handleSubmit} disabled={uploading}>
+                        {editingDate ? 'Atualizar' : 'Cadastrar'}
                       </Button>
                     </div>
-                  )}
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={resetForm}>Cancelar</Button>
-                  <Button onClick={handleSubmit} disabled={uploading}>
-                    {editingDate ? 'Atualizar' : 'Cadastrar'}
-                  </Button>
-                </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (currentMonth === 0) {
+                      setCurrentMonth(11);
+                      setCurrentYear(y => y - 1);
+                    } else {
+                      setCurrentMonth(m => m - 1);
+                    }
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="font-medium min-w-[150px] text-center">
+                  {MONTHS[currentMonth]} {currentYear}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (currentMonth === 11) {
+                      setCurrentMonth(0);
+                      setCurrentYear(y => y + 1);
+                    } else {
+                      setCurrentMonth(m => m + 1);
+                    }
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            </DialogContent>
-          </Dialog>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
-          ) : seasonalDates.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhuma data sazonal cadastrada
-            </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Imagem</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Localização</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {seasonalDates.map(date => (
-                  <TableRow key={date.id}>
-                    <TableCell>
-                      {date.image_url ? (
-                        <img 
-                          src={date.image_url} 
-                          alt={date.name}
-                          className="h-10 w-10 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => setSelectedImage({ url: date.image_url!, name: date.name })}
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                          <CalendarDays className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{date.name}</TableCell>
-                    <TableCell>
-                      {date.day} de {MONTHS[date.month - 1]}
-                    </TableCell>
-                    <TableCell>
-                      {date.location === 'brasil' ? '🇧🇷 Brasil' : '🏙️ Três Rios'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(date)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => deleteMutation.mutate(date.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Calendar View */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Calendário de Datas Sazonais</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (currentMonth === 0) {
-                    setCurrentMonth(11);
-                    setCurrentYear(y => y - 1);
-                  } else {
-                    setCurrentMonth(m => m - 1);
-                  }
-                }}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="font-medium min-w-[150px] text-center">
-                {MONTHS[currentMonth]} {currentYear}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (currentMonth === 11) {
-                    setCurrentMonth(0);
-                    setCurrentYear(y => y + 1);
-                  } else {
-                    setCurrentMonth(m => m + 1);
-                  }
-                }}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-7 gap-1">
-            {/* Weekday headers */}
-            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-              <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
-                {day}
-              </div>
-            ))}
-            
-            {/* Empty cells for days before the first day of month */}
-            {Array.from({ length: firstDayOfMonth }, (_, i) => (
-              <div key={`empty-${i}`} className="aspect-square" />
-            ))}
-            
-            {/* Days of the month */}
-            {Array.from({ length: daysInMonth }, (_, i) => {
-              const day = i + 1;
-              const datesForDay = getDateForDay(day);
-              const hasDate = datesForDay.length > 0;
-              
-              return (
-                <div
-                  key={day}
-                  className={cn(
-                    "aspect-square border rounded-md p-1 flex flex-col items-center justify-start",
-                    hasDate && "bg-primary/10 border-primary cursor-pointer hover:bg-primary/20 transition-colors"
-                  )}
-                  onClick={() => {
-                    if (hasDate && datesForDay[0].image_url) {
-                      setSelectedImage({ url: datesForDay[0].image_url, name: datesForDay[0].name });
-                    }
-                  }}
-                >
-                  <span className={cn(
-                    "text-sm",
-                    hasDate && "font-bold text-primary"
-                  )}>
-                    {day}
-                  </span>
-                  {hasDate && (
-                    <div className="text-[10px] text-center text-primary truncate w-full mt-1">
-                      {datesForDay[0].name}
-                    </div>
-                  )}
+            <div className="grid grid-cols-7 gap-2">
+              {/* Weekday headers */}
+              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+                <div key={day} className="text-center text-base font-semibold text-muted-foreground py-3">
+                  {day}
                 </div>
-              );
-            })}
-          </div>
+              ))}
+              
+              {/* Empty cells for days before the first day of month */}
+              {Array.from({ length: firstDayOfMonth }, (_, i) => (
+                <div key={`empty-${i}`} className="h-16" />
+              ))}
+              
+              {/* Days of the month */}
+              {Array.from({ length: daysInMonth }, (_, i) => {
+                const day = i + 1;
+                const datesForDay = getDateForDay(day);
+                const hasDate = datesForDay.length > 0;
+                
+                return (
+                  <div
+                    key={day}
+                    className={cn(
+                      "h-16 border rounded-lg flex flex-col items-center justify-center relative group",
+                      hasDate 
+                        ? "bg-primary/10 border-primary cursor-pointer hover:bg-primary/20 transition-colors" 
+                        : "border-border"
+                    )}
+                    onClick={() => {
+                      if (hasDate && datesForDay[0].image_url) {
+                        setSelectedImage({ url: datesForDay[0].image_url, name: datesForDay[0].name });
+                      }
+                    }}
+                  >
+                    <span className={cn(
+                      "text-lg font-bold",
+                      hasDate ? "text-primary" : "text-foreground"
+                    )}>
+                      {day}
+                    </span>
+                    {hasDate && (
+                      <>
+                        <span className="text-sm font-medium text-primary text-center px-1 truncate w-full">
+                          {datesForDay[0].name}
+                        </span>
+                        {/* Edit/Delete buttons - shown on hover */}
+                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 bg-background/80 hover:bg-background"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(datesForDay[0]);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteMutation.mutate(datesForDay[0].id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
