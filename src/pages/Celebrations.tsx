@@ -324,40 +324,65 @@ function BirthdaysSection() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredBirthdays.map(birthday => (
-                <TableRow key={birthday.id}>
-                  <TableCell>
-                    {birthday.image_url ? (
-                      <img 
-                        src={birthday.image_url} 
-                        alt={birthday.employee_name}
-                        className="h-10 w-10 object-cover rounded-full"
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                        <Cake className="h-5 w-5 text-muted-foreground" />
-                      </div>
+              {filteredBirthdays.map(birthday => {
+                const birthDate = new Date(birthday.birth_date + 'T12:00:00');
+                const today = new Date();
+                const isBirthdayToday = birthDate.getDate() === today.getDate() && 
+                                        birthDate.getMonth() === today.getMonth();
+                
+                return (
+                  <TableRow 
+                    key={birthday.id}
+                    className={cn(
+                      isBirthdayToday && "bg-primary/20 border-l-4 border-l-primary"
                     )}
-                  </TableCell>
-                  <TableCell className="font-medium">{birthday.employee_name}</TableCell>
-                  <TableCell>
-                    {format(new Date(birthday.birth_date + 'T12:00:00'), "dd 'de' MMMM", { locale: ptBR })}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => deleteMutation.mutate(birthday.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                  >
+                    <TableCell>
+                      {birthday.image_url ? (
+                        <img 
+                          src={birthday.image_url} 
+                          alt={birthday.employee_name}
+                          className="h-10 w-10 object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className={cn(
+                          "h-10 w-10 rounded-full flex items-center justify-center",
+                          isBirthdayToday ? "bg-primary text-primary-foreground" : "bg-muted"
+                        )}>
+                          <Cake className={cn("h-5 w-5", !isBirthdayToday && "text-muted-foreground")} />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className={cn(
+                      "font-medium",
+                      isBirthdayToday && "text-primary font-bold"
+                    )}>
+                      {birthday.employee_name}
+                      {isBirthdayToday && (
+                        <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                          🎉 Hoje!
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {format(birthDate, "dd 'de' MMMM", { locale: ptBR })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => deleteMutation.mutate(birthday.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
