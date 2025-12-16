@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format, getDaysInMonth, startOfMonth, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Cake, CalendarDays, Plus, Pencil, Trash2, Upload, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Cake, CalendarDays, Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X, Download, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Birthday {
@@ -81,8 +81,8 @@ function BirthdaysSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBirthday, setEditingBirthday] = useState<Birthday | null>(null);
   const [formData, setFormData] = useState({ employee_name: '', birth_date: '', image_url: '' });
-  const [uploading, setUploading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedBirthdayImage, setSelectedBirthdayImage] = useState<{ url: string; name: string } | null>(null);
 
   const { data: birthdays = [], isLoading } = useQuery({
     queryKey: ['birthdays'],
@@ -178,30 +178,14 @@ function BirthdaysSection() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const fileName = `birthdays/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('celebrations')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('celebrations')
-        .getPublicUrl(fileName);
-
-      setFormData(prev => ({ ...prev, image_url: publicUrl }));
-      toast.success('Imagem carregada com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao carregar imagem');
-    } finally {
-      setUploading(false);
-    }
+  const handleDownloadImage = (url: string, name: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${name.replace(/\s+/g, '_')}.jpg`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -264,22 +248,24 @@ function BirthdaysSection() {
                   />
                 </div>
                 <div>
-                  <Label>Imagem (opcional)</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                      className="flex-1"
-                    />
-                  </div>
+                  <Label htmlFor="image_url">URL da Imagem (opcional)</Label>
+                  <Input
+                    id="image_url"
+                    type="url"
+                    value={formData.image_url}
+                    onChange={e => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
                   {formData.image_url && (
                     <div className="mt-2 relative inline-block">
                       <img 
                         src={formData.image_url} 
                         alt="Preview" 
                         className="h-20 w-20 object-cover rounded-md"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '';
+                          toast.error('URL da imagem inválida');
+                        }}
                       />
                       <Button
                         type="button"
@@ -295,7 +281,7 @@ function BirthdaysSection() {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={resetForm}>Cancelar</Button>
-                  <Button onClick={handleSubmit} disabled={uploading}>
+                  <Button onClick={handleSubmit}>
                     {editingBirthday ? 'Atualizar' : 'Cadastrar'}
                   </Button>
                 </div>
@@ -342,7 +328,8 @@ function BirthdaysSection() {
                         <img 
                           src={birthday.image_url} 
                           alt={birthday.employee_name}
-                          className="h-10 w-10 object-cover rounded-full"
+                          className="h-10 w-10 object-cover rounded-full cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                          onClick={() => setSelectedBirthdayImage({ url: birthday.image_url!, name: birthday.employee_name })}
                         />
                       ) : (
                         <div className={cn(
@@ -387,6 +374,41 @@ function BirthdaysSection() {
           </Table>
         )}
       </CardContent>
+
+      {/* Birthday Image Preview Dialog */}
+      <Dialog open={!!selectedBirthdayImage} onOpenChange={() => setSelectedBirthdayImage(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{selectedBirthdayImage?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {selectedBirthdayImage && (
+            <div className="space-y-4">
+              <img 
+                src={selectedBirthdayImage.url} 
+                alt={selectedBirthdayImage.name}
+                className="w-full h-auto rounded-md"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(selectedBirthdayImage.url, '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir em nova aba
+                </Button>
+                <Button
+                  onClick={() => handleDownloadImage(selectedBirthdayImage.url, selectedBirthdayImage.name)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Imagem
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -397,7 +419,6 @@ function SeasonalDatesSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDate, setEditingDate] = useState<SeasonalDate | null>(null);
   const [formData, setFormData] = useState({ name: '', day: 1, month: 1, image_url: '', location: 'brasil' });
-  const [uploading, setUploading] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
@@ -497,30 +518,14 @@ function SeasonalDatesSection() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const fileName = `seasonal/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('celebrations')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('celebrations')
-        .getPublicUrl(fileName);
-
-      setFormData(prev => ({ ...prev, image_url: publicUrl }));
-      toast.success('Imagem carregada com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao carregar imagem');
-    } finally {
-      setUploading(false);
-    }
+  const handleDownloadImage = (url: string, name: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${name.replace(/\s+/g, '_')}.jpg`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Calendar rendering
@@ -621,22 +626,24 @@ function SeasonalDatesSection() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Imagem (opcional)</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          disabled={uploading}
-                          className="flex-1"
-                        />
-                      </div>
+                      <Label htmlFor="seasonal_image_url">URL da Imagem (opcional)</Label>
+                      <Input
+                        id="seasonal_image_url"
+                        type="url"
+                        value={formData.image_url}
+                        onChange={e => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                        placeholder="https://exemplo.com/imagem.jpg"
+                      />
                       {formData.image_url && (
                         <div className="mt-2 relative inline-block">
                           <img 
                             src={formData.image_url} 
                             alt="Preview" 
                             className="h-20 w-20 object-cover rounded-md"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '';
+                              toast.error('URL da imagem inválida');
+                            }}
                           />
                           <Button
                             type="button"
@@ -652,7 +659,7 @@ function SeasonalDatesSection() {
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={resetForm}>Cancelar</Button>
-                      <Button onClick={handleSubmit} disabled={uploading}>
+                      <Button onClick={handleSubmit}>
                         {editingDate ? 'Atualizar' : 'Cadastrar'}
                       </Button>
                     </div>
@@ -796,11 +803,28 @@ function SeasonalDatesSection() {
             <DialogTitle>{selectedImage?.name}</DialogTitle>
           </DialogHeader>
           {selectedImage && (
-            <img 
-              src={selectedImage.url} 
-              alt={selectedImage.name}
-              className="w-full h-auto rounded-md"
-            />
+            <div className="space-y-4">
+              <img 
+                src={selectedImage.url} 
+                alt={selectedImage.name}
+                className="w-full h-auto rounded-md"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(selectedImage.url, '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Abrir em nova aba
+                </Button>
+                <Button
+                  onClick={() => handleDownloadImage(selectedImage.url, selectedImage.name)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Imagem
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
