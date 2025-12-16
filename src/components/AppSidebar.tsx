@@ -25,6 +25,7 @@ const menuItems = [
   { title: "Equipe", url: "/team", icon: Users },
   { title: "Férias e Folgas", url: "/vacations", icon: Umbrella },
   { title: "Bonificação", url: "/bonus", icon: Receipt },
+  { title: "Celebrações", url: "/celebrations", icon: PartyPopper },
 ];
 
 export function AppSidebar() {
@@ -91,30 +92,6 @@ export function AppSidebar() {
           </>
         )}
 
-        {role === 'dev' && (
-          <>
-            <Separator className="my-2" />
-            <SidebarGroup>
-              <SidebarGroupLabel>Desenvolvedor</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/celebrations"
-                        className="hover:bg-sidebar-accent transition-smooth"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                      >
-                        <PartyPopper className="h-4 w-4" />
-                        {!collapsed && <span>Celebrações</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-2">
