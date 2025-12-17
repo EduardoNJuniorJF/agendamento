@@ -447,7 +447,7 @@ export default function UserManagement() {
                   </TableHeader>
                   <TableBody>
                     {users
-                      .filter(user => role === 'dev' || user.role !== 'dev')
+                      .filter(user => role === 'dev' || (user.role !== 'dev' && user.username?.toLowerCase() !== 'dev'))
                       .map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.username || '-'}</TableCell>
@@ -510,16 +510,15 @@ export default function UserManagement() {
                                     <Label htmlFor="edit-role">Tipo de Usuário</Label>
                                     <Select
                                       value={editFormData.role}
-                    onValueChange={(value: 'admin' | 'user' | 'financeiro' | 'dev') => 
-                      setEditFormData({ ...editFormData, role: value })
-                    }
+                                      onValueChange={(value: 'admin' | 'user' | 'financeiro') => 
+                                        setEditFormData({ ...editFormData, role: value })
+                                      }
                                     >
                                       <SelectTrigger id="edit-role">
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="admin">{getRoleLabel('admin')}</SelectItem>
-                                        <SelectItem value="dev">{getRoleLabel('dev')}</SelectItem>
                                         <SelectItem value="user">{getRoleLabel('user')}</SelectItem>
                                         <SelectItem value="financeiro">{getRoleLabel('financeiro')}</SelectItem>
                                       </SelectContent>
