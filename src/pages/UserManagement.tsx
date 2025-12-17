@@ -446,7 +446,9 @@ export default function UserManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
+                    {users
+                      .filter(user => role === 'dev' || user.role !== 'dev')
+                      .map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.username || '-'}</TableCell>
                         <TableCell>{user.full_name || '-'}</TableCell>
