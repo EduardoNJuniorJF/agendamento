@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -60,13 +59,38 @@ const MONTHS = [
 ];
 
 export default function Celebrations() {
-  const { role } = useAuth();
-  const queryClient = useQueryClient();
+  const { role, user } = useAuth();
+  const [canManage, setCanManage] = useState(false);
 
-  // Redirect non-dev users
-  if (role !== "dev") {
-    return <Navigate to="/" replace />;
-  }
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (!user) return;
+      
+      // DEV always can manage
+      if (role === 'dev') {
+        setCanManage(true);
+        return;
+      }
+      
+      // Check if admin from Comercial or Administrativo sector
+      if (role === 'admin') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('sector')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.sector && ['Comercial', 'Administrativo'].includes(profile.sector)) {
+          setCanManage(true);
+          return;
+        }
+      }
+      
+      setCanManage(false);
+    };
+    
+    checkPermissions();
+  }, [user, role]);
 
   return (
     <div className="p-6 space-y-6">
@@ -85,11 +109,11 @@ export default function Celebrations() {
         </TabsList>
 
         <TabsContent value="birthdays">
-          <BirthdaysSection />
+          <BirthdaysSection canManage={canManage} />
         </TabsContent>
 
         <TabsContent value="seasonal">
-          <SeasonalDatesSection />
+          <SeasonalDatesSection canManage={canManage} />
         </TabsContent>
       </Tabs>
     </div>
@@ -97,7 +121,7 @@ export default function Celebrations() {
 }
 
 // ==================== BIRTHDAYS SECTION ====================
-function BirthdaysSection() {
+function BirthdaysSection({ canManage }: { canManage: boolean }) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBirthday, setEditingBirthday] = useState<Birthday | null>(null);
@@ -223,18 +247,19 @@ function BirthdaysSection() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  resetForm();
-                  setIsDialogOpen(true);
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Aniversário
-              </Button>
-            </DialogTrigger>
+          {canManage && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setIsDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Aniversário
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editingBirthday ? "Editar Aniversário" : "Novo Aniversário"}</DialogTitle>
@@ -299,6 +324,7 @@ function BirthdaysSection() {
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -315,7 +341,7 @@ function BirthdaysSection() {
                 <TableHead>Foto</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                {canManage && <TableHead className="text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -360,19 +386,21 @@ function BirthdaysSection() {
                       )}
                     </TableCell>
                     <TableCell>{format(birthDate, "dd 'de' MMMM", { locale: ptBR })}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => deleteMutation.mutate(birthday.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    {canManage && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => deleteMutation.mutate(birthday.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -418,7 +446,7 @@ function BirthdaysSection() {
 }
 
 // ==================== SEASONAL DATES SECTION ====================
-function SeasonalDatesSection() {
+function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDate, setEditingDate] = useState<SeasonalDate | null>(null);
@@ -549,126 +577,128 @@ function SeasonalDatesSection() {
               Calendário de Datas Sazonais
             </CardTitle>
             <div className="flex items-center gap-4">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      resetForm();
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Data
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{editingDate ? "Editar Data Sazonal" : "Nova Data Sazonal"}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Nome da Data *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                        placeholder="Ex: Natal, Carnaval..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+              {canManage && (
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      onClick={() => {
+                        resetForm();
+                        setIsDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Data
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{editingDate ? "Editar Data Sazonal" : "Nova Data Sazonal"}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
                       <div>
-                        <Label>Dia</Label>
-                        <Select
-                          value={formData.day.toString()}
-                          onValueChange={(v) => setFormData((prev) => ({ ...prev, day: parseInt(v) }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 31 }, (_, i) => (
-                              <SelectItem key={i + 1} value={(i + 1).toString()}>
-                                {i + 1}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="name">Nome da Data *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                          placeholder="Ex: Natal, Carnaval..."
+                        />
                       </div>
-                      <div>
-                        <Label>Mês</Label>
-                        <Select
-                          value={formData.month.toString()}
-                          onValueChange={(v) => setFormData((prev) => ({ ...prev, month: parseInt(v) }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {MONTHS.map((month, i) => (
-                              <SelectItem key={i + 1} value={(i + 1).toString()}>
-                                {month}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Localização</Label>
-                      <Select
-                        value={formData.location}
-                        onValueChange={(v) => setFormData((prev) => ({ ...prev, location: v }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="brasil">Brasil</SelectItem>
-                          <SelectItem value="tres_rios">Três Rios</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="seasonal_image_url">URL da Imagem (opcional)</Label>
-                      <Input
-                        id="seasonal_image_url"
-                        type="url"
-                        value={formData.image_url}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
-                        placeholder="https://exemplo.com/imagem.jpg"
-                      />
-                      {formData.image_url && (
-                        <div className="mt-2 relative inline-block">
-                          <img
-                            src={formData.image_url}
-                            alt="Preview"
-                            className="h-20 w-20 object-cover rounded-md"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "";
-                              toast.error("URL da imagem inválida");
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 h-6 w-6"
-                            onClick={() => setFormData((prev) => ({ ...prev, image_url: "" }))}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Dia</Label>
+                          <Select
+                            value={formData.day.toString()}
+                            onValueChange={(v) => setFormData((prev) => ({ ...prev, day: parseInt(v) }))}
                           >
-                            <X className="h-3 w-3" />
-                          </Button>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 31 }, (_, i) => (
+                                <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                  {i + 1}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
+                        <div>
+                          <Label>Mês</Label>
+                          <Select
+                            value={formData.month.toString()}
+                            onValueChange={(v) => setFormData((prev) => ({ ...prev, month: parseInt(v) }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {MONTHS.map((month, i) => (
+                                <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                  {month}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Localização</Label>
+                        <Select
+                          value={formData.location}
+                          onValueChange={(v) => setFormData((prev) => ({ ...prev, location: v }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="brasil">Brasil</SelectItem>
+                            <SelectItem value="tres_rios">Três Rios</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="seasonal_image_url">URL da Imagem (opcional)</Label>
+                        <Input
+                          id="seasonal_image_url"
+                          type="url"
+                          value={formData.image_url}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
+                          placeholder="https://exemplo.com/imagem.jpg"
+                        />
+                        {formData.image_url && (
+                          <div className="mt-2 relative inline-block">
+                            <img
+                              src={formData.image_url}
+                              alt="Preview"
+                              className="h-20 w-20 object-cover rounded-md"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "";
+                                toast.error("URL da imagem inválida");
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6"
+                              onClick={() => setFormData((prev) => ({ ...prev, image_url: "" }))}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={resetForm}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleSubmit}>{editingDate ? "Atualizar" : "Cadastrar"}</Button>
+                      </div>
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={resetForm}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleSubmit}>{editingDate ? "Atualizar" : "Cadastrar"}</Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </DialogContent>
+                </Dialog>
+              )}
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -766,30 +796,32 @@ function SeasonalDatesSection() {
                           {datesForDay[0].name}
                         </span>
                         {/* Edit/Delete buttons - shown on hover */}
-                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 bg-background/80 hover:bg-background"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(datesForDay[0]);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteMutation.mutate(datesForDay[0].id);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {canManage && (
+                          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 bg-background/80 hover:bg-background"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(datesForDay[0]);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteMutation.mutate(datesForDay[0].id);
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

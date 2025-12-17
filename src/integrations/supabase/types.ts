@@ -458,6 +458,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_celebrations: { Args: { _user_id: string }; Returns: boolean }
       check_vehicle_availability: {
         Args: {
           p_appointment_id?: string
