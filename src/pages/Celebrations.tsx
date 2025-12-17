@@ -810,10 +810,10 @@ function SeasonalDatesSection() {
             <div className="space-y-4">
               <img src={selectedImage.url} alt={selectedImage.name} className="w-full h-auto rounded-md" />
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => window.open(selectedImage.url, "_blank")}>
+                {/*<Button variant="outline" onClick={() => window.open(selectedImage.url, "_blank")}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Abrir em nova aba
-                </Button>
+                </Button>*/}
                 <Button onClick={() => handleDownloadImage(selectedImage.url, selectedImage.name)}>
                   <Download className="h-4 w-4 mr-2" />
                   Baixar Imagem
