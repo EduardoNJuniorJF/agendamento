@@ -56,7 +56,7 @@ export default function Fleet() {
     status: 'available',
   });
   const { toast } = useToast();
-  const { canEdit } = useAuth();
+  const { canEditFleet } = useAuth();
 
   useEffect(() => {
     loadVehicles();
@@ -153,7 +153,7 @@ export default function Fleet() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Frota</h1>
           <p className="text-sm md:text-base text-muted-foreground">Gerencie os veículos da empresa</p>
         </div>
-        {canEdit('fleet') && (
+        {canEditFleet() && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button onClick={openNewDialog}>
@@ -238,7 +238,7 @@ export default function Fleet() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {canEdit('fleet') && (
+                    {canEditFleet() && (
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"

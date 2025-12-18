@@ -4,16 +4,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 type UserRole = 'dev' | 'admin' | 'user' | 'financeiro';
+type UserSector = 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | null;
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
+  sector: UserSector;
   userName: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  // Funções de verificação de acesso por setor
+  canAccessCalendar: () => boolean;
+  canEditCalendar: () => boolean;
+  canAccessFleet: () => boolean;
+  canEditFleet: () => boolean;
+  canAccessBonus: () => boolean;
+  canEditBonus: () => boolean;
+  canAccessTeam: () => boolean;
+  canEditTeam: () => boolean;
+  canAccessVacations: () => boolean;
+  canEditVacations: () => boolean;
+  canAccessUserManagement: () => boolean;
+  canEditUserManagement: (targetSector?: string) => boolean;
+  // Legacy function
   canEdit: (page: string) => boolean;
 }
 
@@ -23,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [sector, setSector] = useState<UserSector>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -36,10 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             fetchUserRole(session.user.id);
-            fetchUserName(session.user.id);
+            fetchUserProfile(session.user.id);
           }, 0);
         } else {
           setRole(null);
+          setSector(null);
           setUserName(null);
         }
       }
@@ -50,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
-        fetchUserName(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setLoading(false);
       }
@@ -77,24 +95,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchUserName = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, username')
+        .select('full_name, username, sector')
         .eq('id', userId)
         .single();
 
       if (!error && data) {
         setUserName(data.full_name || data.username || 'Usuário');
+        setSector(data.sector as UserSector);
       }
     } catch (error) {
-      console.error('Error fetching user name:', error);
+      console.error('Error fetching user profile:', error);
     }
   };
 
   const signIn = async (username: string, password: string) => {
-    // First, get email from username
     const { data: emailData, error: emailError } = await supabase
       .rpc('get_email_from_username', { _username: username });
 
@@ -112,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRole(null);
+    setSector(null);
     setUserName(null);
     navigate('/auth');
   };
@@ -123,16 +142,116 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  // ========== FUNÇÕES DE PERMISSÃO POR SETOR ==========
+
+  // Dev tem acesso total
+  const isDev = () => role === 'dev';
+
+  // Calendário/Agendamentos: Comercial (CRUD), Administrativo (apenas ver)
+  const canAccessCalendar = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial' || sector === 'Administrativo';
+  };
+
+  const canEditCalendar = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial';
+  };
+
+  // Frota: Comercial Admin (CRUD), Comercial User (ver), Administrativo (ver)
+  const canAccessFleet = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial' || sector === 'Administrativo';
+  };
+
+  const canEditFleet = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial' && role === 'admin';
+  };
+
+  // Bonificação: Comercial (admin: config, user: ver), Administrativo (ver e imprimir)
+  const canAccessBonus = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial' || sector === 'Administrativo';
+  };
+
+  const canEditBonus = (): boolean => {
+    if (isDev()) return true;
+    return sector === 'Comercial' && role === 'admin';
+  };
+
+  // Equipe: Cada setor vê e gerencia apenas sua equipe (admin), Administrativo vê todos
+  const canAccessTeam = (): boolean => {
+    return true; // Todos podem acessar
+  };
+
+  const canEditTeam = (): boolean => {
+    if (isDev()) return true;
+    return role === 'admin';
+  };
+
+  // Férias e Folgas: Cada setor vê apenas seu setor (admin edita), Administrativo vê todos e edita todos (alteração solicitada)
+  const canAccessVacations = (): boolean => {
+    return true; // Todos podem acessar
+  };
+
+  const canEditVacations = (): boolean => {
+    if (isDev()) return true;
+    // Administrativo pode editar de todos os setores (alteração solicitada)
+    if (sector === 'Administrativo' && role === 'admin') return true;
+    return role === 'admin';
+  };
+
+  // Criar Usuários: Admin Comercial (todos), Admin outros (só seu setor), Admin Administrativo (vê todos, edita só seu)
+  const canAccessUserManagement = (): boolean => {
+    if (isDev()) return true;
+    return role === 'admin';
+  };
+
+  const canEditUserManagement = (targetSector?: string): boolean => {
+    if (isDev()) return true;
+    if (role !== 'admin') return false;
+    
+    // Comercial Admin pode editar todos
+    if (sector === 'Comercial') return true;
+    
+    // Outros admins só podem editar do seu setor
+    if (targetSector) {
+      return sector === targetSector;
+    }
+    
+    return true;
+  };
+
+  // Legacy function para compatibilidade
   const canEdit = (page: string): boolean => {
-    if (!role) return false;
+    if (isDev()) return true;
+    if (role === 'admin') {
+      // Admin tem acesso de edição baseado no setor
+      switch (page) {
+        case 'dashboard':
+        case 'calendar':
+          return canEditCalendar();
+        case 'fleet':
+          return canEditFleet();
+        case 'team':
+          return canEditTeam();
+        case 'vacations':
+          return canEditVacations();
+        case 'bonus':
+          return canEditBonus();
+        default:
+          return true;
+      }
+    }
     
-    // Dev and Admin have full access
-    if (role === 'dev' || role === 'admin') return true;
+    if (role === 'user') {
+      // User do Comercial pode editar dashboard e calendar
+      if (sector === 'Comercial' && (page === 'dashboard' || page === 'calendar')) return true;
+      return false;
+    }
     
-    // User can edit Dashboard and Calendar
-    if (role === 'user' && (page === 'dashboard' || page === 'calendar')) return true;
-    
-    // Financeiro cannot edit anything
+    // Financeiro não pode editar nada
     return false;
   };
 
@@ -142,11 +261,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         role,
+        sector,
         userName,
         loading,
         signIn,
         signOut,
         updatePassword,
+        canAccessCalendar,
+        canEditCalendar,
+        canAccessFleet,
+        canEditFleet,
+        canAccessBonus,
+        canEditBonus,
+        canAccessTeam,
+        canEditTeam,
+        canAccessVacations,
+        canEditVacations,
+        canAccessUserManagement,
+        canEditUserManagement,
         canEdit,
       }}
     >

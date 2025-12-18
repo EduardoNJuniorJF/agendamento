@@ -101,9 +101,11 @@ export default function Bonus() {
   const [loadingReport, setLoadingReport] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { role } = useAuth();
+  const { role, canEditBonus, sector } = useAuth();
 
-  const isAdmin = role === "admin" || role === "dev";
+  const isAdmin = canEditBonus();
+  // Administrativo pode apenas visualizar e imprimir
+  const isReadOnly = sector === 'Administrativo' && role !== 'dev';
 
   useEffect(() => {
     loadData();
@@ -643,7 +645,7 @@ export default function Bonus() {
           <p className="text-xs md:text-sm text-muted-foreground">Gestão e cálculo de bonificações mensais</p>
         </div>
         <div className="flex items-center gap-2">
-          {isAdmin && (
+          {isAdmin && !isReadOnly && (
             <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">

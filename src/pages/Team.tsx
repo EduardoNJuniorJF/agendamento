@@ -30,7 +30,10 @@ export default function Team() {
     receives_bonus: true,
   });
   const { toast } = useToast();
-  const { canEdit } = useAuth();
+  const { canEditTeam, sector, role } = useAuth();
+  
+  // Filtrar agentes por setor (exceto Administrativo que vê todos)
+  const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
 
   useEffect(() => {
     loadAgents();
@@ -159,7 +162,7 @@ export default function Team() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Equipe</h1>
           <p className="text-sm md:text-base text-muted-foreground">Gerencie os agentes</p>
         </div>
-        {canEdit("team") && (
+        {canEditTeam() && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button onClick={openNewDialog}>
@@ -253,7 +256,9 @@ export default function Team() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {agents.map((agent) => (
+              {agents
+                .filter(agent => !shouldFilterBySector || agent.sector === sector)
+                .map((agent) => (
                 <TableRow key={agent.id}>
                   <TableCell>
                     <div
@@ -275,7 +280,7 @@ export default function Team() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {canEdit("team") && (
+                    {canEditTeam() && (
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(agent)}>
                           <Edit className="h-3 w-3 md:h-4 md:w-4" />
