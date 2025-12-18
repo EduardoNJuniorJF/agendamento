@@ -18,24 +18,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-const menuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Calendário", url: "/calendar", icon: Calendar },
-  { title: "Frota", url: "/fleet", icon: Car },
-  { title: "Equipe", url: "/team", icon: Users },
-  { title: "Férias e Folgas", url: "/vacations", icon: Umbrella },
-  { title: "Bonificação", url: "/bonus", icon: Receipt },
-  { title: "Celebrações", url: "/celebrations", icon: PartyPopper },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { signOut, user, role } = useAuth();
+  const { 
+    signOut, 
+    role, 
+    sector,
+    canAccessCalendar,
+    canAccessFleet,
+    canAccessBonus,
+    canAccessUserManagement
+  } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
   const collapsed = state === "collapsed";
+
+  // Itens do menu filtrados por permissão
+  const menuItems = [
+    { title: "Dashboard", url: "/", icon: LayoutDashboard, show: true },
+    { title: "Calendário", url: "/calendar", icon: Calendar, show: canAccessCalendar() },
+    { title: "Frota", url: "/fleet", icon: Car, show: canAccessFleet() },
+    { title: "Equipe", url: "/team", icon: Users, show: true },
+    { title: "Férias e Folgas", url: "/vacations", icon: Umbrella, show: true },
+    { title: "Bonificação", url: "/bonus", icon: Receipt, show: canAccessBonus() },
+    { title: "Celebrações", url: "/celebrations", icon: PartyPopper, show: true },
+  ];
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-60"}>
@@ -48,7 +57,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {menuItems.filter(item => item.show).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
@@ -67,7 +76,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {(role === 'admin' || role === 'dev') && (
+        {canAccessUserManagement() && (
           <>
             <Separator className="my-2" />
             <SidebarGroup>

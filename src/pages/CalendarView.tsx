@@ -87,8 +87,11 @@ export default function CalendarView() {
 
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { canEdit, role, userName } = useAuth();
+  const { canEdit, canEditCalendar, role, userName, sector } = useAuth();
   const isAdmin = role === "admin" || role === "dev";
+  
+  // Administrativo não pode editar (apenas visualizar)
+  const canEditPage = canEditCalendar();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -332,7 +335,7 @@ export default function CalendarView() {
           )}
         </div>
 
-        {isAdmin && (
+        {isAdmin && canEditPage && (
           <div className="flex items-center gap-1 pt-1">
             <Button
               variant="ghost"
@@ -540,7 +543,7 @@ export default function CalendarView() {
                         }
                       >
                         <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {canEdit("calendar") && (
+                          {canEditPage && (
                             <>
                               <Button
                                 variant="ghost"
@@ -629,7 +632,7 @@ export default function CalendarView() {
                     }
                   >
                     <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                      {canEdit("calendar") && (
+                      {canEditPage && (
                         <>
                           <Button
                             variant="ghost"
@@ -680,7 +683,7 @@ export default function CalendarView() {
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Calendário</h1>
             <p className="text-sm md:text-base text-muted-foreground">Visualize todos os agendamentos</p>
           </div>
-          {canEdit("calendar") && (
+          {canEditPage && (
             <Button onClick={() => navigate("/new-appointment")} size="sm" className="w-full sm:w-auto">
               Novo Agendamento
             </Button>

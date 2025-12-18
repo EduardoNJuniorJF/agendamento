@@ -72,7 +72,14 @@ export default function Vacations() {
   const [activeTab, setActiveTab] = useState("vacations");
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const { toast } = useToast();
-  const { canEdit } = useAuth();
+  const { canEditVacations, sector, role } = useAuth();
+  
+  // Administrativo pode editar de todos os setores
+  // Outros admins só podem editar do seu setor
+  const canEdit = canEditVacations();
+  
+  // Filtrar dados por setor (Administrativo vê todos)
+  const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
 
   // Vacation form
   const [vacationForm, setVacationForm] = useState({
@@ -382,7 +389,7 @@ export default function Vacations() {
 
         {/* Vacations Tab */}
         <TabsContent value="vacations" className="space-y-6">
-          {canEdit("vacations") && (
+          {canEdit && (
             <Card>
               <CardHeader>
                 <CardTitle>{editingVacationId ? "Editar Férias" : "Cadastrar Férias"}</CardTitle>
@@ -628,7 +635,7 @@ export default function Vacations() {
                           {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
                         </TableCell>
                         <TableCell>
-                          {canEdit("vacations") && (
+                          {canEdit && (
                             <div className="flex gap-1">
                               <Button
                                 size="sm"
@@ -660,7 +667,7 @@ export default function Vacations() {
 
         {/* Time Off Tab */}
         <TabsContent value="time-off" className="space-y-6">
-          {canEdit("vacations") && (
+          {canEdit && (
             <Card>
               <CardHeader>
                 <CardTitle>{editingTimeOffId ? "Editar Folga" : "Cadastrar Folga"}</CardTitle>
@@ -802,7 +809,7 @@ export default function Vacations() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {canEdit("vacations") && (
+                          {canEdit && (
                             <div className="flex gap-1">
                               <Button
                                 size="sm"

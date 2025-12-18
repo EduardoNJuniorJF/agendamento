@@ -22,6 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { isHoliday, getHolidayName } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
+
+// Hook para verificar se pode ver/editar elementos do dashboard baseado no setor
 import {
   DndContext,
   DragEndEvent,
@@ -96,7 +98,15 @@ export default function Dashboard() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { canEdit } = useAuth();
+  const { canEdit, canAccessCalendar, canEditCalendar, canAccessFleet, sector, role } = useAuth();
+
+  // Verificar se pode ver contadores de agendamento/frota
+  const showCalendarStats = canAccessCalendar();
+  const showFleetStats = canAccessFleet();
+  // Para Suporte e Desenvolvimento, mostrar apenas férias/folgas do setor
+  const isLimitedDashboard = sector === 'Suporte' || sector === 'Desenvolvimento';
+  // Administrativo: apenas visualização
+  const isReadOnly = sector === 'Administrativo' && role !== 'dev';
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -315,62 +325,61 @@ export default function Dashboard() {
           </Card>
         </div>*/}
 
-        {/* Cards de estatísticas - Primeira linha */}
-        <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
-          <Card>
-            {/* Alterado pb-2 para pb-1 */}
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            {/* Adicionado className="py-2" */}
-            <CardContent className="py-2">
-              <div className="text-2xl font-bold">{stats.totalAppointments}</div>
-              <p className="text-xs text-muted-foreground">Total de atendimentos</p>
-            </CardContent>
-          </Card>
+        {/* Cards de estatísticas - Primeira linha (escondido para Suporte/Desenvolvimento) */}
+        {!isLimitedDashboard && (
+          <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
+            {showCalendarStats && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-sm font-medium">Agendamentos</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="py-2">
+                  <div className="text-2xl font-bold">{stats.totalAppointments}</div>
+                  <p className="text-xs text-muted-foreground">Total de atendimentos</p>
+                </CardContent>
+              </Card>
+            )}
 
-          <Card>
-            {/* Alterado pb-2 para pb-1 */}
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-sm font-medium">Veículos</CardTitle>
-              <Car className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            {/* Adicionado className="py-2" */}
-            <CardContent className="py-2">
-              <div className="text-2xl font-bold">{stats.totalVehicles}</div>
-              <p className="text-xs text-muted-foreground">Frota ativa</p>
-            </CardContent>
-          </Card>
+            {showFleetStats && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                  <CardTitle className="text-sm font-medium">Veículos</CardTitle>
+                  <Car className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="py-2">
+                  <div className="text-2xl font-bold">{stats.totalVehicles}</div>
+                  <p className="text-xs text-muted-foreground">Frota ativa</p>
+                </CardContent>
+              </Card>
+            )}
 
-          <Card>
-            {/* Alterado pb-2 para pb-1 */}
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-sm font-medium">Agentes</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            {/* Adicionado className="py-2" */}
-            <CardContent className="py-2">
-              <div className="text-2xl font-bold">{stats.totalAgents}</div>
-              <p className="text-xs text-muted-foreground">Equipe ativa</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                <CardTitle className="text-sm font-medium">Agentes</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="py-2">
+                <div className="text-2xl font-bold">{stats.totalAgents}</div>
+                <p className="text-xs text-muted-foreground">Equipe ativa</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            {/* Alterado pb-2 para pb-1 */}
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-sm font-medium">Folgas</CardTitle>
-              <Umbrella className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            {/* Adicionado className="py-2" */}
-            <CardContent className="py-2">
-              <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
-              <p className="text-xs text-muted-foreground">Esta semana</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                <CardTitle className="text-sm font-medium">Folgas</CardTitle>
+                <Umbrella className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="py-2">
+                <div className="text-2xl font-bold">{stats.weekTimeOffs.length}</div>
+                <p className="text-xs text-muted-foreground">Esta semana</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {/* Calendário da Semana - Segunda linha */}
+        {/* Calendário da Semana - Segunda linha (escondido para Suporte/Desenvolvimento) */}
+        {showCalendarStats && (
         <Card>
           <CardHeader>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -476,7 +485,7 @@ export default function Dashboard() {
                               }
                             >
                               <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                {canEdit("dashboard") && (
+                                {canEditCalendar() && !isReadOnly && (
                                   <>
                                     <Button
                                       variant="ghost"
@@ -535,6 +544,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+        )}
 
         {/* Folgas e Férias - Terceira linha */}
         {/*<div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2"> */}
