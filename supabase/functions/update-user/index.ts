@@ -11,6 +11,7 @@ interface UpdateUserRequest {
   fullName?: string
   email?: string
   role?: 'admin' | 'user' | 'financeiro'
+  sector?: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo'
 }
 
 Deno.serve(async (req) => {
@@ -55,9 +56,9 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { userId, username, fullName, email, role }: UpdateUserRequest = await req.json()
+    const { userId, username, fullName, email, role, sector }: UpdateUserRequest = await req.json()
 
-    console.log('Updating user:', { userId, username, email, role })
+    console.log('Updating user:', { userId, username, email, role, sector })
 
     // Check if username already exists (if changing username)
     if (username) {
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
     const profileUpdate: any = {}
     if (username) profileUpdate.username = username
     if (fullName) profileUpdate.full_name = fullName
+    if (sector) profileUpdate.sector = sector
 
     if (Object.keys(profileUpdate).length > 0) {
       const { error: profileError } = await supabaseAdmin
