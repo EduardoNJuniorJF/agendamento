@@ -46,7 +46,8 @@ export default function UserManagement() {
     username: '',
     email: '',
     fullName: '',
-    role: 'user' as 'admin' | 'user' | 'financeiro' | 'dev'
+    role: 'user' as 'admin' | 'user' | 'financeiro' | 'dev',
+    sector: '' as 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | ''
   });
 
   if (role !== 'admin' && role !== 'dev') {
@@ -143,7 +144,8 @@ export default function UserManagement() {
       username: user.username || '',
       email: user.email,
       fullName: user.full_name || '',
-      role: user.role
+      role: user.role,
+      sector: (user.sector as 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo') || ''
     });
     setIsEditDialogOpen(true);
   };
@@ -160,7 +162,8 @@ export default function UserManagement() {
           username: editFormData.username,
           email: editFormData.email,
           fullName: editFormData.fullName,
-          role: editFormData.role
+          role: editFormData.role,
+          sector: editFormData.sector
         },
         headers: {
           Authorization: `Bearer ${session?.access_token}`
@@ -529,6 +532,25 @@ export default function UserManagement() {
                                         <SelectItem value="admin">{getRoleLabel('admin')}</SelectItem>
                                         <SelectItem value="user">{getRoleLabel('user')}</SelectItem>
                                         <SelectItem value="financeiro">{getRoleLabel('financeiro')}</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-sector">Setor</Label>
+                                    <Select
+                                      value={editFormData.sector}
+                                      onValueChange={(value: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo') => 
+                                        setEditFormData({ ...editFormData, sector: value })
+                                      }
+                                    >
+                                      <SelectTrigger id="edit-sector">
+                                        <SelectValue placeholder="Selecione o setor" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Comercial">Comercial</SelectItem>
+                                        <SelectItem value="Suporte">Suporte</SelectItem>
+                                        <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
+                                        <SelectItem value="Administrativo">Administrativo</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>
