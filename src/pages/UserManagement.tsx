@@ -453,7 +453,7 @@ export default function UserManagement() {
                   </TableHeader>
                   <TableBody>
                     {users
-                      .filter(user => role === 'dev' || (user.role !== 'dev' && user.username?.toLowerCase() !== 'dev'))
+                      .filter(user => user.email !== 'dev@sistema.com' && user.username?.toLowerCase() !== 'dev')
                       .map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.username || '-'}</TableCell>
