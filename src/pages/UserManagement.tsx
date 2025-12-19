@@ -20,6 +20,7 @@ interface User {
   email: string;
   full_name: string | null;
   role: 'admin' | 'user' | 'financeiro' | 'dev';
+  sector: string | null;
 }
 
 export default function UserManagement() {
@@ -62,7 +63,7 @@ export default function UserManagement() {
       
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username, email, full_name');
+        .select('id, username, email, full_name, sector');
 
       if (profilesError) throw profilesError;
 
@@ -76,7 +77,8 @@ export default function UserManagement() {
         const userRole = roles?.find(r => r.user_id === profile.id);
         return {
           ...profile,
-          role: userRole?.role || 'user'
+          role: userRole?.role || 'user',
+          sector: profile.sector
         };
       }) || [];
 
@@ -441,6 +443,7 @@ export default function UserManagement() {
                       <TableHead>Usuário</TableHead>
                       <TableHead>Nome</TableHead>
                       <TableHead>E-mail</TableHead>
+                      <TableHead>Setor</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
@@ -453,6 +456,11 @@ export default function UserManagement() {
                         <TableCell className="font-medium">{user.username || '-'}</TableCell>
                         <TableCell>{user.full_name || '-'}</TableCell>
                         <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground">
+                            {user.sector || '-'}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-primary/10 text-primary">
                             {getRoleLabel(user.role)}
