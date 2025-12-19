@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown } from "lucide-react";
-import { format, differenceInDays, parseISO } from "date-fns";
+import { format, differenceInDays, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -628,6 +628,7 @@ export default function Vacations() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[140px]">Funcionário</TableHead>
+                      <TableHead className="min-w-[80px]">Status</TableHead>
                       <TableHead className="min-w-[100px]">Período</TableHead>
                       <TableHead className="min-w-[100px]">Data Saída</TableHead>
                       <TableHead className="min-w-[100px]">Data Volta</TableHead>
@@ -637,52 +638,87 @@ export default function Vacations() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {vacations.map((vacation) => (
-                      <TableRow key={vacation.id}>
-                        <TableCell>
-                          <span className="text-xs md:text-sm">
-                            {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {vacation.period_number}º Período
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs md:text-sm">
-                          {format(parseISO(vacation.start_date), "dd/MM/yyyy")}
-                        </TableCell>
-                        <TableCell className="text-xs md:text-sm">
-                          {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
-                        </TableCell>
-                        <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
-                        <TableCell className="text-xs md:text-sm">
-                          {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {canEdit && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => editVacation(vacation)}
-                              >
-                                <Edit className="h-3 w-3 md:h-4 md:w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => handleDeleteVacation(vacation.id)}
-                              >
-                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {vacations.map((vacation) => {
+                      const today = startOfDay(new Date());
+                      const startDate = startOfDay(parseISO(vacation.start_date));
+                      const endDate = startOfDay(parseISO(vacation.end_date));
+                      
+                      let status: 'scheduled' | 'in_progress' | 'completed' = 'scheduled';
+                      let rowClass = '';
+                      
+                      if (today > endDate) {
+                        status = 'completed';
+                        rowClass = 'bg-green-100 dark:bg-green-900/30';
+                      } else if (today >= startDate && today <= endDate) {
+                        status = 'in_progress';
+                        rowClass = 'bg-orange-100 dark:bg-orange-900/30';
+                      }
+                      
+                      const statusConfig = {
+                        scheduled: { label: 'Agendado', variant: 'outline' as const },
+                        in_progress: { label: 'Em andamento', variant: 'secondary' as const },
+                        completed: { label: 'Finalizada', variant: 'default' as const },
+                      };
+                      
+                      return (
+                        <TableRow key={vacation.id} className={rowClass}>
+                          <TableCell>
+                            <span className="text-xs md:text-sm">
+                              {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={statusConfig[status].variant}
+                              className={cn(
+                                "text-xs",
+                                status === 'in_progress' && "bg-orange-500 text-white hover:bg-orange-600",
+                                status === 'completed' && "bg-green-600 text-white hover:bg-green-700"
+                              )}
+                            >
+                              {statusConfig[status].label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {vacation.period_number}º Período
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs md:text-sm">
+                            {format(parseISO(vacation.start_date), "dd/MM/yyyy")}
+                          </TableCell>
+                          <TableCell className="text-xs md:text-sm">
+                            {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
+                          </TableCell>
+                          <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
+                          <TableCell className="text-xs md:text-sm">
+                            {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {canEdit && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => editVacation(vacation)}
+                                >
+                                  <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => handleDeleteVacation(vacation.id)}
+                                >
+                                  <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
