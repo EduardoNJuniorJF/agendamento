@@ -16,7 +16,7 @@ import {
   GripVertical,
   CalendarDays,
 } from "lucide-react";
-import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO, differenceInDays } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -635,7 +635,7 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-1.5 md:space-y-2 max-h-[1920px] overflow-y-auto">
                   {stats.vacations.map((vacation) => {
-                    const today = new Date();
+                    const today = startOfDay(new Date());
                     const startDate = parseISO(vacation.start_date);
                     const daysUntilStart = differenceInDays(startDate, today);
 
