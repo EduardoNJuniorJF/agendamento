@@ -628,13 +628,19 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stats.vacations.length === 0 ? (
+              {stats.vacations.filter((v) => differenceInDays(parseISO(v.start_date), startOfDay(new Date())) <= 60).length === 0 ? (
                 <p className="text-xs md:text-sm text-muted-foreground text-center py-6 md:py-8">
-                  Nenhuma férias programada
+                  Nenhuma férias nos próximos 60 dias
                 </p>
               ) : (
                 <div className="space-y-1.5 md:space-y-2 max-h-[1920px] overflow-y-auto">
-                  {stats.vacations.map((vacation) => {
+                  {stats.vacations
+                    .filter((vacation) => {
+                      const today = startOfDay(new Date());
+                      const startDate = parseISO(vacation.start_date);
+                      return differenceInDays(startDate, today) <= 60;
+                    })
+                    .map((vacation) => {
                     const today = startOfDay(new Date());
                     const startDate = parseISO(vacation.start_date);
                     const daysUntilStart = differenceInDays(startDate, today);
