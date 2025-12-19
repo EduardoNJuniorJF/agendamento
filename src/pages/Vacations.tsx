@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown } from "lucide-react";
+import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown } from "lucide-react";
 import { format, differenceInDays, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -94,6 +94,7 @@ export default function Vacations() {
     notes: "",
   });
   const [editingVacationId, setEditingVacationId] = useState<string | null>(null);
+  const [vacationSortOrder, setVacationSortOrder] = useState<string>("start_asc");
 
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
@@ -619,8 +620,22 @@ export default function Vacations() {
           )}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-base md:text-lg">Férias Cadastradas</CardTitle>
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={vacationSortOrder} onValueChange={setVacationSortOrder}>
+                  <SelectTrigger className="w-[220px]">
+                    <SelectValue placeholder="Ordenar por..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="start_asc">Data Saída (mais próxima)</SelectItem>
+                    <SelectItem value="start_desc">Data Saída (mais distante)</SelectItem>
+                    <SelectItem value="expiry_desc">Vencimento (mais recente)</SelectItem>
+                    <SelectItem value="expiry_asc">Vencimento (mais antigo)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -638,7 +653,26 @@ export default function Vacations() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {vacations.map((vacation) => {
+                    {[...vacations].sort((a, b) => {
+                      switch (vacationSortOrder) {
+                        case "start_asc":
+                          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+                        case "start_desc":
+                          return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+                        case "expiry_desc":
+                          if (!a.expiry_date && !b.expiry_date) return 0;
+                          if (!a.expiry_date) return 1;
+                          if (!b.expiry_date) return -1;
+                          return new Date(b.expiry_date).getTime() - new Date(a.expiry_date).getTime();
+                        case "expiry_asc":
+                          if (!a.expiry_date && !b.expiry_date) return 0;
+                          if (!a.expiry_date) return 1;
+                          if (!b.expiry_date) return -1;
+                          return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
+                        default:
+                          return 0;
+                      }
+                    }).map((vacation) => {
                       const today = startOfDay(new Date());
                       const startDate = startOfDay(parseISO(vacation.start_date));
                       const endDate = startOfDay(parseISO(vacation.end_date));
