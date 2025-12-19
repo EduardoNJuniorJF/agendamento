@@ -30,6 +30,7 @@ interface Profile {
   id: string;
   full_name: string | null;
   email: string;
+  sector: string | null;
 }
 
 interface Vacation {
@@ -106,21 +107,45 @@ export default function Vacations() {
   useEffect(() => {
     loadData();
     loadReminders();
-  }, []);
+  }, [sector, role]);
 
   const loadData = async () => {
     try {
       const [profilesRes, agentsRes, vacationsRes, timeOffsRes] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email").order("full_name"),
-        supabase.from("agents").select("id, name, color").eq("is_active", true).order("name"),
-        supabase.from("vacations").select("*, profiles(full_name, email)").order("start_date", { ascending: false }),
-        supabase.from("time_off").select("*, agents(name, color)").order("date", { ascending: false }),
+        supabase.from("profiles").select("id, full_name, email, sector").order("full_name"),
+        supabase.from("agents").select("id, name, color, sector").eq("is_active", true).order("name"),
+        supabase.from("vacations").select("*, profiles(full_name, email, sector)").order("start_date", { ascending: false }),
+        supabase.from("time_off").select("*, agents(name, color, sector)").order("date", { ascending: false }),
       ]);
 
-      if (profilesRes.data) setProfiles(profilesRes.data);
-      if (agentsRes.data) setAgents(agentsRes.data);
-      if (vacationsRes.data) setVacations(vacationsRes.data as Vacation[]);
-      if (timeOffsRes.data) setTimeOffs(timeOffsRes.data as TimeOff[]);
+      // Filtrar profiles por setor (para o formulário)
+      let filteredProfiles = profilesRes.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredProfiles = filteredProfiles.filter((p: any) => p.sector === sector);
+      }
+      
+      // Filtrar agents por setor (para o formulário de folgas)
+      let filteredAgents = agentsRes.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredAgents = filteredAgents.filter((a: any) => a.sector === sector);
+      }
+      
+      // Filtrar férias por setor
+      let filteredVacations = vacationsRes.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredVacations = filteredVacations.filter((v: any) => v.profiles?.sector === sector);
+      }
+      
+      // Filtrar folgas por setor
+      let filteredTimeOffs = timeOffsRes.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredTimeOffs = filteredTimeOffs.filter((t: any) => t.agents?.sector === sector);
+      }
+
+      setProfiles(filteredProfiles);
+      setAgents(filteredAgents);
+      setVacations(filteredVacations as Vacation[]);
+      setTimeOffs(filteredTimeOffs as TimeOff[]);
     } catch (error) {
       console.error("Error loading data:", error);
       toast({

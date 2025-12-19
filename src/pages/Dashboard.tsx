@@ -64,7 +64,7 @@ interface Vacation {
   start_date: string;
   end_date: string;
   days: number | null;
-  profiles: { full_name: string | null; email: string } | null;
+  profiles: { full_name: string | null; email: string; sector: string | null } | null;
 }
 
 interface Stats {
@@ -126,7 +126,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadStats();
-  }, [currentWeek]);
+  }, [currentWeek, sector, role]);
+
+  // Verificar se deve filtrar por setor (Administrativo e Dev veem todos)
+  const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
 
   const loadStats = async () => {
     try {
@@ -145,16 +148,32 @@ export default function Dashboard() {
         supabase.from("agents").select("id, name").eq("is_active", true),
         supabase
           .from("time_off")
-          .select("*, agents(name, color)")
+          .select("*, agents(name, color, sector)")
           .gte("date", format(monday, "yyyy-MM-dd"))
           .lte("date", format(friday, "yyyy-MM-dd"))
           .order("date"),
         supabase
           .from("vacations")
-          .select("*, profiles(full_name, email)")
+          .select("*, profiles(full_name, email, sector)")
           .gte("start_date", format(new Date(), "yyyy-MM-dd"))
           .order("start_date"),
       ]);
+      
+      // Filtrar férias por setor (se necessário)
+      let filteredVacations = vacations.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredVacations = filteredVacations.filter(
+          (v: any) => v.profiles?.sector === sector
+        );
+      }
+      
+      // Filtrar folgas por setor (se necessário)
+      let filteredTimeOffs = timeOffs.data || [];
+      if (shouldFilterBySector && sector) {
+        filteredTimeOffs = filteredTimeOffs.filter(
+          (t: any) => t.agents?.sector === sector
+        );
+      }
 
       // Load agents for each appointment
       const appointmentsWithAgents = await Promise.all(
@@ -177,8 +196,8 @@ export default function Dashboard() {
           totalVehicles: vehicles.data?.length || 0,
           totalAgents: agents.data?.length || 0,
           weekAppointments: appointmentsWithAgents as Appointment[],
-          weekTimeOffs: (timeOffs.data as TimeOff[]) || [],
-          vacations: (vacations.data as Vacation[]) || [],
+          weekTimeOffs: filteredTimeOffs as TimeOff[],
+          vacations: filteredVacations as Vacation[],
         });
       }
     } catch (error) {
