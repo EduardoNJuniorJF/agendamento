@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, X, Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, X, Check, ChevronsUpDown, Umbrella, Calendar } from "lucide-react";
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,7 @@ export default function NewAppointment() {
   const [cities, setCities] = useState<string[]>([]);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [agentsOnVacation, setAgentsOnVacation] = useState<Set<string>>(new Set());
+  const [agentsOnTimeOff, setAgentsOnTimeOff] = useState<Set<string>>(new Set());
   const [currentUserName, setCurrentUserName] = useState<string>("");
   const [cityOpen, setCityOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -153,9 +154,11 @@ export default function NewAppointment() {
   const checkAllAgentsVacations = async (date: string) => {
     if (!date || agents.length === 0) {
       setAgentsOnVacation(new Set());
+      setAgentsOnTimeOff(new Set());
       return;
     }
 
+    // Check vacations
     const vacationChecks = await Promise.all(
       agents.map(async (agent) => {
         const onVacation = await checkVacation(agent.id, date);
@@ -164,11 +167,21 @@ export default function NewAppointment() {
     );
 
     const vacationSet = new Set(vacationChecks.filter((check) => check.onVacation).map((check) => check.agentId));
-
     setAgentsOnVacation(vacationSet);
 
-    // Remove agents on vacation from selection
-    setSelectedAgentIds((prev) => prev.filter((id) => !vacationSet.has(id)));
+    // Check time_off (folgas)
+    const { data: timeOffData } = await supabase
+      .from("time_off")
+      .select("agent_id")
+      .eq("date", date)
+      .eq("approved", true);
+
+    const timeOffSet = new Set(timeOffData?.map((t) => t.agent_id).filter((id): id is string => id !== null) || []);
+    setAgentsOnTimeOff(timeOffSet);
+
+    // Remove unavailable agents from selection
+    const allUnavailable = new Set([...vacationSet, ...timeOffSet]);
+    setSelectedAgentIds((prev) => prev.filter((id) => !allUnavailable.has(id)));
   };
 
   useEffect(() => {
@@ -438,22 +451,33 @@ export default function NewAppointment() {
                     <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto">
                       {agents.map((agent) => {
                         const isOnVacation = agentsOnVacation.has(agent.id);
+                        const isOnTimeOff = agentsOnTimeOff.has(agent.id);
+                        const isUnavailable = isOnVacation || isOnTimeOff;
                         return (
                           <div key={agent.id} className="flex items-center space-x-2">
                             <Checkbox
                               id={agent.id}
                               checked={selectedAgentIds.includes(agent.id)}
                               onCheckedChange={() => toggleAgentSelection(agent.id)}
-                              disabled={isOnVacation}
+                              disabled={isUnavailable}
                             />
                             <label
                               htmlFor={agent.id}
-                              className={`text-sm font-medium leading-none cursor-pointer flex-1 ${
-                                isOnVacation ? "opacity-50 cursor-not-allowed line-through" : ""
+                              className={`text-sm font-medium leading-none cursor-pointer flex-1 flex items-center gap-2 ${
+                                isUnavailable ? "opacity-50 cursor-not-allowed line-through" : ""
                               }`}
                             >
                               {agent.name}
-                              {isOnVacation && <span className="ml-2 text-xs text-muted-foreground">(de férias)</span>}
+                              {isOnVacation && (
+                                <span className="flex items-center gap-1 text-xs text-orange-500">
+                                  <Umbrella className="h-3 w-3" /> Férias
+                                </span>
+                              )}
+                              {isOnTimeOff && !isOnVacation && (
+                                <span className="flex items-center gap-1 text-xs text-blue-500">
+                                  <Calendar className="h-3 w-3" /> Folga
+                                </span>
+                              )}
                             </label>
                           </div>
                         );
