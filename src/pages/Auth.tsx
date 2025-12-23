@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import logo from '@/assets/logo-auth.svg';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import logo from "@/assets/logo-auth.svg";
 
 export default function Auth() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -22,12 +22,12 @@ export default function Auth() {
     const { error } = await signIn(username, password);
 
     if (error) {
-      toast.error('Erro ao fazer login', {
+      toast.error("Erro ao fazer login", {
         description: error.message,
       });
     } else {
-      toast.success('Login realizado com sucesso!');
-      navigate('/');
+      toast.success("Login realizado com sucesso!");
+      navigate("/");
     }
 
     setLoading(false);
@@ -41,9 +41,7 @@ export default function Auth() {
             <img src={logo} alt="Logo" className="h-16" />
           </div>
           <CardTitle className="text-2xl text-center">Bem-vindo</CardTitle>
-          <CardDescription className="text-center">
-            Entre com suas credenciais para acessar o sistema
-          </CardDescription>
+          <CardDescription className="text-center">Entre com suas credenciais para acessar o sistema</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,7 +50,7 @@ export default function Auth() {
               <Input
                 id="username"
                 type="text"
-                placeholder="Admin, User ou Financeiro"
+                placeholder="Usuário"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -72,7 +70,7 @@ export default function Auth() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
         </CardContent>
