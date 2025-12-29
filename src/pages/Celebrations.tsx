@@ -24,8 +24,18 @@ import {
   X,
   Download,
   ExternalLink,
+  Flag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface LocalHoliday {
+  id: string;
+  name: string;
+  day: number;
+  month: number;
+  year: number | null;
+  location: string;
+}
 
 interface Birthday {
   id: string;
@@ -454,6 +464,17 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
+  
+  // Local holidays state
+  const [isHolidayDialogOpen, setIsHolidayDialogOpen] = useState(false);
+  const [editingHoliday, setEditingHoliday] = useState<LocalHoliday | null>(null);
+  const [holidayFormData, setHolidayFormData] = useState({ 
+    name: "", 
+    day: 1, 
+    month: 1, 
+    year: null as number | null, 
+    location: "tres_rios" 
+  });
 
   const { data: seasonalDates = [], isLoading } = useQuery({
     queryKey: ["seasonal_dates"],
@@ -461,6 +482,16 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
       const { data, error } = await supabase.from("seasonal_dates").select("*").order("month").order("day");
       if (error) throw error;
       return data as SeasonalDate[];
+    },
+  });
+
+  // Fetch local holidays
+  const { data: localHolidays = [], isLoading: isLoadingHolidays } = useQuery({
+    queryKey: ["local_holidays"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("local_holidays").select("*").order("month").order("day");
+      if (error) throw error;
+      return data as LocalHoliday[];
     },
   });
 
@@ -502,10 +533,93 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
     onError: () => toast.error("Erro ao excluir data sazonal"),
   });
 
+  // Local holiday mutations
+  const createHolidayMutation = useMutation({
+    mutationFn: async (data: Omit<LocalHoliday, "id">) => {
+      const { error } = await supabase.from("local_holidays").insert(data);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["local_holidays"] });
+      toast.success("Feriado cadastrado com sucesso!");
+      resetHolidayForm();
+    },
+    onError: () => toast.error("Erro ao cadastrar feriado"),
+  });
+
+  const updateHolidayMutation = useMutation({
+    mutationFn: async ({ id, ...data }: LocalHoliday) => {
+      const { error } = await supabase.from("local_holidays").update(data).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["local_holidays"] });
+      toast.success("Feriado atualizado com sucesso!");
+      resetHolidayForm();
+    },
+    onError: () => toast.error("Erro ao atualizar feriado"),
+  });
+
+  const deleteHolidayMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("local_holidays").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["local_holidays"] });
+      toast.success("Feriado excluído com sucesso!");
+    },
+    onError: () => toast.error("Erro ao excluir feriado"),
+  });
+
   const resetForm = () => {
     setFormData({ name: "", day: 1, month: 1, image_url: "", location: "brasil" });
     setEditingDate(null);
     setIsDialogOpen(false);
+  };
+
+  const resetHolidayForm = () => {
+    setHolidayFormData({ name: "", day: 1, month: 1, year: null, location: "tres_rios" });
+    setEditingHoliday(null);
+    setIsHolidayDialogOpen(false);
+  };
+
+  const handleEditHoliday = (holiday: LocalHoliday) => {
+    setEditingHoliday(holiday);
+    setHolidayFormData({
+      name: holiday.name,
+      day: holiday.day,
+      month: holiday.month,
+      year: holiday.year,
+      location: holiday.location,
+    });
+    setIsHolidayDialogOpen(true);
+  };
+
+  const handleSubmitHoliday = () => {
+    if (!holidayFormData.name) {
+      toast.error("Preencha o nome do feriado");
+      return;
+    }
+
+    if (editingHoliday) {
+      updateHolidayMutation.mutate({
+        id: editingHoliday.id,
+        name: holidayFormData.name,
+        day: holidayFormData.day,
+        month: holidayFormData.month,
+        year: holidayFormData.year,
+        location: holidayFormData.location,
+      });
+    } else {
+      createHolidayMutation.mutate({
+        name: holidayFormData.name,
+        day: holidayFormData.day,
+        month: holidayFormData.month,
+        year: holidayFormData.year,
+        location: holidayFormData.location,
+      });
+    }
   };
 
   const handleEdit = (date: SeasonalDate) => {
@@ -576,20 +690,122 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
               <CalendarDays className="h-5 w-5" />
               Calendário de Datas Sazonais
             </CardTitle>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
               {canManage && (
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        resetForm();
-                        setIsDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nova Data
-                    </Button>
-                  </DialogTrigger>
+                <>
+                  <Dialog open={isHolidayDialogOpen} onOpenChange={setIsHolidayDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          resetHolidayForm();
+                          setIsHolidayDialogOpen(true);
+                        }}
+                      >
+                        <Flag className="h-4 w-4 mr-2" />
+                        Novo Feriado
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{editingHoliday ? "Editar Feriado" : "Novo Feriado Local"}</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="holiday_name">Nome do Feriado *</Label>
+                          <Input
+                            id="holiday_name"
+                            value={holidayFormData.name}
+                            onChange={(e) => setHolidayFormData((prev) => ({ ...prev, name: e.target.value }))}
+                            placeholder="Ex: Aniversário da Cidade..."
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Dia</Label>
+                            <Select
+                              value={holidayFormData.day.toString()}
+                              onValueChange={(v) => setHolidayFormData((prev) => ({ ...prev, day: parseInt(v) }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Array.from({ length: 31 }, (_, i) => (
+                                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                    {i + 1}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Mês</Label>
+                            <Select
+                              value={holidayFormData.month.toString()}
+                              onValueChange={(v) => setHolidayFormData((prev) => ({ ...prev, month: parseInt(v) }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {MONTHS.map((month, i) => (
+                                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                    {month}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Ano (deixe vazio para feriado recorrente)</Label>
+                          <Input
+                            type="number"
+                            value={holidayFormData.year ?? ""}
+                            onChange={(e) => setHolidayFormData((prev) => ({ 
+                              ...prev, 
+                              year: e.target.value ? parseInt(e.target.value) : null 
+                            }))}
+                            placeholder="Ex: 2025 (opcional)"
+                          />
+                        </div>
+                        <div>
+                          <Label>Localização</Label>
+                          <Select
+                            value={holidayFormData.location}
+                            onValueChange={(v) => setHolidayFormData((prev) => ({ ...prev, location: v }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tres_rios">Três Rios</SelectItem>
+                              <SelectItem value="rio_de_janeiro">Rio de Janeiro (Estado)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" onClick={resetHolidayForm}>
+                            Cancelar
+                          </Button>
+                          <Button onClick={handleSubmitHoliday}>{editingHoliday ? "Atualizar" : "Cadastrar"}</Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          setIsDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Data
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>{editingDate ? "Editar Data Sazonal" : "Nova Data Sazonal"}</DialogTitle>
@@ -698,6 +914,7 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                     </div>
                   </DialogContent>
                 </Dialog>
+                </>
               )}
               <div className="flex items-center gap-2">
                 <Button
@@ -828,6 +1045,70 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                 );
               })}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Local Holidays List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Flag className="h-5 w-5" />
+            Feriados Locais Cadastrados
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingHolidays ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          ) : localHolidays.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              Nenhum feriado local cadastrado
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Ano</TableHead>
+                  <TableHead>Localização</TableHead>
+                  {canManage && <TableHead className="text-right">Ações</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {localHolidays.map((holiday) => (
+                  <TableRow key={holiday.id}>
+                    <TableCell className="font-medium">{holiday.name}</TableCell>
+                    <TableCell>
+                      {holiday.day.toString().padStart(2, '0')}/{MONTHS[holiday.month - 1]}
+                    </TableCell>
+                    <TableCell>
+                      {holiday.year ? holiday.year : <span className="text-muted-foreground">Todo ano</span>}
+                    </TableCell>
+                    <TableCell>
+                      {holiday.location === 'tres_rios' ? 'Três Rios' : 'Rio de Janeiro (Estado)'}
+                    </TableCell>
+                    {canManage && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditHoliday(holiday)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => deleteHolidayMutation.mutate(holiday.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
