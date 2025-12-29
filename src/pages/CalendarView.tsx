@@ -72,6 +72,7 @@ interface Appointment {
   updated_by_name?: string;
   last_action?: string;
   last_action_at?: string;
+  appointment_type?: string | null;
   agents?: Array<{ name: string; color: string | null }>;
   vehicles?: { model: string; plate: string };
 }
@@ -289,6 +290,14 @@ export default function CalendarView() {
             <div className="truncate text-sm" style={{ color: "#ffa100" }}>
               {apt.vehicles.model} ({apt.vehicles.plate})
             </div>
+          </div>
+        )}
+        {apt.appointment_type && (
+          <div>
+            <div className="font-medium text-xs text-muted-foreground">Status:</div>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+              {apt.appointment_type}
+            </Badge>
           </div>
         )}
         <div className="flex flex-wrap gap-1 pt-1">
