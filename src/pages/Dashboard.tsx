@@ -55,7 +55,7 @@ interface TimeOff {
   date: string;
   type: string;
   approved: boolean;
-  agents: { name: string; color: string | null } | null;
+  profiles: { full_name: string | null; email: string; sector: string | null } | null;
 }
 
 interface Vacation {
@@ -163,7 +163,7 @@ export default function Dashboard() {
         supabase.from("agents").select("id, name").eq("is_active", true),
         supabase
           .from("time_off")
-          .select("*, agents(name, color, sector)")
+          .select("*, profiles(full_name, email, sector)")
           .gte("date", format(monday, "yyyy-MM-dd"))
           .lte("date", format(friday, "yyyy-MM-dd"))
           .order("date"),
@@ -186,7 +186,7 @@ export default function Dashboard() {
       let filteredTimeOffs = timeOffs.data || [];
       if (shouldFilterBySector && sector) {
         filteredTimeOffs = filteredTimeOffs.filter(
-          (t: any) => t.agents?.sector === sector
+          (t: any) => t.profiles?.sector === sector
         );
       }
 
@@ -615,7 +615,7 @@ export default function Dashboard() {
                               <div className="flex items-center gap-1.5 md:gap-2 mb-1">
                                 <Umbrella className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
                                 <span className="font-medium text-[10px] md:text-xs">
-                                  {timeOff.agents?.name || "Geral"}
+                                  {timeOff.profiles?.full_name || timeOff.profiles?.email || "Geral"}
                                 </span>
                               </div>
                               <Badge

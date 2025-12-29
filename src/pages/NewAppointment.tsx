@@ -17,7 +17,7 @@ import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
-type Agent = Database["public"]["Tables"]["agents"]["Row"];
+type Agent = Database["public"]["Tables"]["agents"]["Row"] & { user_id?: string | null };
 type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
 
 interface FormData {
@@ -94,7 +94,7 @@ export default function NewAppointment() {
 
   const loadData = async () => {
     const [agentsRes, vehiclesRes, citiesRes] = await Promise.all([
-      supabase.from("agents").select("*").eq("is_active", true).order("name"),
+      supabase.from("agents").select("*, user_id").eq("is_active", true).order("name"),
       supabase.from("vehicles").select("*").eq("status", "available").order("model"),
       supabase.from("city_bonus_levels").select("city_name").order("city_name"),
     ]);
@@ -172,14 +172,17 @@ export default function NewAppointment() {
     const vacationSet = new Set(vacationChecks.filter((check) => check.onVacation).map((check) => check.agentId));
     setAgentsOnVacation(vacationSet);
 
-    // Check time_off (folgas)
+    // Check time_off (folgas) - need to match user_id from profiles to agents.user_id
     const { data: timeOffData } = await supabase
       .from("time_off")
-      .select("agent_id")
+      .select("user_id")
       .eq("date", date)
       .eq("approved", true);
 
-    const timeOffSet = new Set(timeOffData?.map((t) => t.agent_id).filter((id): id is string => id !== null) || []);
+    // Get agents that have matching user_ids in time_off
+    const timeOffUserIds = new Set(timeOffData?.map((t) => t.user_id).filter((id): id is string => id !== null) || []);
+    const agentsOnTimeOffIds = agents.filter(agent => agent.user_id && timeOffUserIds.has(agent.user_id)).map(agent => agent.id);
+    const timeOffSet = new Set(agentsOnTimeOffIds);
     setAgentsOnTimeOff(timeOffSet);
 
     // Remove unavailable agents from selection

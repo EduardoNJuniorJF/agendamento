@@ -50,10 +50,10 @@ interface Vacation {
 interface TimeOff {
   id: string;
   date: string;
-  agent_id: string | null;
+  user_id: string | null;
   type: string;
   approved: boolean;
-  agents: { name: string; color: string | null } | null;
+  profiles: { full_name: string | null; email: string } | null;
 }
 
 interface VacationReminder {
@@ -101,7 +101,7 @@ export default function Vacations() {
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
     date: "",
-    agent_id: "",
+    user_id: "",
     type: "completa",
     approved: false,
   });
@@ -133,7 +133,7 @@ export default function Vacations() {
           .from("vacations")
           .select("*, profiles(full_name, email, sector)")
           .order("start_date", { ascending: false }),
-        supabase.from("time_off").select("*, agents(name, color, sector)").order("date", { ascending: false }),
+        supabase.from("time_off").select("*, profiles(full_name, email, sector)").order("date", { ascending: false }),
       ]);
 
       // Filtrar profiles por setor (para o formulário)
@@ -310,7 +310,7 @@ export default function Vacations() {
 
       setTimeOffForm({
         date: "",
-        agent_id: "",
+        user_id: "",
         type: "completa",
         approved: false,
       });
@@ -378,7 +378,7 @@ export default function Vacations() {
   const editTimeOff = (timeOff: TimeOff) => {
     setTimeOffForm({
       date: timeOff.date,
-      agent_id: timeOff.agent_id || "",
+      user_id: timeOff.user_id || "",
       type: timeOff.type,
       approved: timeOff.approved,
     });
@@ -800,18 +800,18 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="agent_timeoff">Funcionário</Label>
+                      <Label htmlFor="user_timeoff">Funcionário (Opcional)</Label>
                       <Select
-                        value={timeOffForm.agent_id || "no-agent"}
+                        value={timeOffForm.user_id || "no-user"}
                         onValueChange={(value) =>
-                          setTimeOffForm({ ...timeOffForm, agent_id: value === "no-agent" ? "" : value })
+                          setTimeOffForm({ ...timeOffForm, user_id: value === "no-user" ? "" : value })
                         }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione (opcional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no-agent">Nenhum</SelectItem>
+                          <SelectItem value="no-user">Nenhum</SelectItem>
                           {profiles.map((profile) => (
                             <SelectItem key={profile.id} value={profile.id}>
                               {profile.full_name || profile.email}
@@ -860,9 +860,9 @@ export default function Vacations() {
                         className="w-full sm:w-auto"
                         onClick={() => {
                           setEditingTimeOffId(null);
-                          setTimeOffForm({
+      setTimeOffForm({
                             date: "",
-                            agent_id: "",
+                            user_id: "",
                             type: "completa",
                             approved: false,
                           });
@@ -900,14 +900,10 @@ export default function Vacations() {
                           {format(parseISO(timeOff.date), "dd/MM/yyyy")}
                         </TableCell>
                         <TableCell>
-                          {timeOff.agents ? (
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: timeOff.agents.color || "#3b82f6" }}
-                              />
-                              <span className="text-xs md:text-sm">{timeOff.agents.name}</span>
-                            </div>
+                          {timeOff.profiles ? (
+                            <span className="text-xs md:text-sm">
+                              {timeOff.profiles.full_name || timeOff.profiles.email}
+                            </span>
                           ) : (
                             <span className="text-xs md:text-sm">-</span>
                           )}
