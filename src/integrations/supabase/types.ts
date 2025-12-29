@@ -248,6 +248,39 @@ export type Database = {
         }
         Relationships: []
       }
+      local_holidays: {
+        Row: {
+          created_at: string | null
+          day: number
+          id: string
+          location: string
+          month: number
+          name: string
+          updated_at: string | null
+          year: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          day: number
+          id?: string
+          location?: string
+          month: number
+          name: string
+          updated_at?: string | null
+          year?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          day?: number
+          id?: string
+          location?: string
+          month?: number
+          name?: string
+          updated_at?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
