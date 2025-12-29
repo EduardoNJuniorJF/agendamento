@@ -770,21 +770,6 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                             placeholder="Ex: 2025 (opcional)"
                           />
                         </div>
-                        <div>
-                          <Label>Localização</Label>
-                          <Select
-                            value={holidayFormData.location}
-                            onValueChange={(v) => setHolidayFormData((prev) => ({ ...prev, location: v }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="tres_rios">Três Rios</SelectItem>
-                              <SelectItem value="rio_de_janeiro">Rio de Janeiro (Estado)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
                         <div className="flex justify-end gap-2">
                           <Button variant="outline" onClick={resetHolidayForm}>
                             Cancelar
@@ -1073,7 +1058,6 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                   <TableHead>Nome</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Ano</TableHead>
-                  <TableHead>Localização</TableHead>
                   {canManage && <TableHead className="text-right">Ações</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -1086,9 +1070,6 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                     </TableCell>
                     <TableCell>
                       {holiday.year ? holiday.year : <span className="text-muted-foreground">Todo ano</span>}
-                    </TableCell>
-                    <TableCell>
-                      {holiday.location === 'tres_rios' ? 'Três Rios' : 'Rio de Janeiro (Estado)'}
                     </TableCell>
                     {canManage && (
                       <TableCell className="text-right">
