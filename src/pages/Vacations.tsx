@@ -76,13 +76,13 @@ export default function Vacations() {
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const { toast } = useToast();
   const { canEditVacations, sector, role } = useAuth();
-  
+
   // Administrativo pode editar de todos os setores
   // Outros admins só podem editar do seu setor
   const canEdit = canEditVacations();
-  
+
   // Filtrar dados por setor (Administrativo vê todos)
-  const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
+  const shouldFilterBySector = sector !== "Administrativo" && role !== "dev";
 
   // Vacation form
   const [vacationForm, setVacationForm] = useState({
@@ -115,10 +115,8 @@ export default function Vacations() {
 
   const loadLocalHolidays = async () => {
     try {
-      const { data, error } = await supabase
-        .from("local_holidays")
-        .select("id, name, day, month, year");
-      
+      const { data, error } = await supabase.from("local_holidays").select("id, name, day, month, year");
+
       if (error) throw error;
       setLocalHolidays(data || []);
     } catch (error) {
@@ -131,7 +129,10 @@ export default function Vacations() {
       const [profilesRes, agentsRes, vacationsRes, timeOffsRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email, sector").order("full_name"),
         supabase.from("agents").select("id, name, color, sector").eq("is_active", true).order("name"),
-        supabase.from("vacations").select("*, profiles(full_name, email, sector)").order("start_date", { ascending: false }),
+        supabase
+          .from("vacations")
+          .select("*, profiles(full_name, email, sector)")
+          .order("start_date", { ascending: false }),
         supabase.from("time_off").select("*, agents(name, color, sector)").order("date", { ascending: false }),
       ]);
 
@@ -140,19 +141,19 @@ export default function Vacations() {
       if (shouldFilterBySector && sector) {
         filteredProfiles = filteredProfiles.filter((p: any) => p.sector === sector);
       }
-      
+
       // Filtrar agents por setor (para o formulário de folgas)
       let filteredAgents = agentsRes.data || [];
       if (shouldFilterBySector && sector) {
         filteredAgents = filteredAgents.filter((a: any) => a.sector === sector);
       }
-      
+
       // Filtrar férias por setor
       let filteredVacations = vacationsRes.data || [];
       if (shouldFilterBySector && sector) {
         filteredVacations = filteredVacations.filter((v: any) => v.profiles?.sector === sector);
       }
-      
+
       // Filtrar folgas por setor
       let filteredTimeOffs = timeOffsRes.data || [];
       if (shouldFilterBySector && sector) {
@@ -229,7 +230,7 @@ export default function Vacations() {
     if (vacationForm.expiry_date && vacationForm.deadline) {
       const expiryDate = parseISO(vacationForm.expiry_date);
       const deadlineDate = parseISO(vacationForm.deadline);
-      
+
       if (startDate < expiryDate) {
         toast({
           title: "Data fora do período concessivo",
@@ -238,7 +239,7 @@ export default function Vacations() {
         });
         return;
       }
-      
+
       if (startDate > deadlineDate) {
         toast({
           title: "Data fora do período concessivo",
@@ -450,7 +451,7 @@ export default function Vacations() {
                             className="w-full justify-between"
                           >
                             {vacationForm.user_id
-                              ? profiles.find((p) => p.id === vacationForm.user_id)?.full_name || 
+                              ? profiles.find((p) => p.id === vacationForm.user_id)?.full_name ||
                                 profiles.find((p) => p.id === vacationForm.user_id)?.email
                               : "Selecione um funcionário..."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -474,7 +475,7 @@ export default function Vacations() {
                                     <Check
                                       className={cn(
                                         "mr-2 h-4 w-4",
-                                        vacationForm.user_id === profile.id ? "opacity-100" : "opacity-0"
+                                        vacationForm.user_id === profile.id ? "opacity-100" : "opacity-0",
                                       )}
                                     />
                                     {profile.full_name || profile.email}
@@ -669,106 +670,108 @@ export default function Vacations() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {[...vacations].sort((a, b) => {
-                      switch (vacationSortOrder) {
-                        case "start_asc":
-                          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
-                        case "start_desc":
-                          return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-                        case "expiry_desc":
-                          if (!a.expiry_date && !b.expiry_date) return 0;
-                          if (!a.expiry_date) return 1;
-                          if (!b.expiry_date) return -1;
-                          return new Date(b.expiry_date).getTime() - new Date(a.expiry_date).getTime();
-                        case "expiry_asc":
-                          if (!a.expiry_date && !b.expiry_date) return 0;
-                          if (!a.expiry_date) return 1;
-                          if (!b.expiry_date) return -1;
-                          return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
-                        default:
-                          return 0;
-                      }
-                    }).map((vacation) => {
-                      const today = startOfDay(new Date());
-                      const startDate = startOfDay(parseISO(vacation.start_date));
-                      const endDate = startOfDay(parseISO(vacation.end_date));
-                      
-                      let status: 'scheduled' | 'in_progress' | 'completed' = 'scheduled';
-                      let rowClass = '';
-                      
-                      if (today > endDate) {
-                        status = 'completed';
-                        rowClass = 'bg-green-100 dark:bg-green-900/30';
-                      } else if (today >= startDate && today <= endDate) {
-                        status = 'in_progress';
-                        rowClass = 'bg-orange-100 dark:bg-orange-900/30';
-                      }
-                      
-                      const statusConfig = {
-                        scheduled: { label: 'Agendado', variant: 'outline' as const },
-                        in_progress: { label: 'Em andamento', variant: 'secondary' as const },
-                        completed: { label: 'Finalizada', variant: 'default' as const },
-                      };
-                      
-                      return (
-                        <TableRow key={vacation.id} className={rowClass}>
-                          <TableCell>
-                            <span className="text-xs md:text-sm">
-                              {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={statusConfig[status].variant}
-                              className={cn(
-                                "text-xs",
-                                status === 'in_progress' && "bg-orange-500 text-white hover:bg-orange-600",
-                                status === 'completed' && "bg-green-600 text-white hover:bg-green-700"
+                    {[...vacations]
+                      .sort((a, b) => {
+                        switch (vacationSortOrder) {
+                          case "start_asc":
+                            return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+                          case "start_desc":
+                            return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+                          case "expiry_desc":
+                            if (!a.expiry_date && !b.expiry_date) return 0;
+                            if (!a.expiry_date) return 1;
+                            if (!b.expiry_date) return -1;
+                            return new Date(b.expiry_date).getTime() - new Date(a.expiry_date).getTime();
+                          case "expiry_asc":
+                            if (!a.expiry_date && !b.expiry_date) return 0;
+                            if (!a.expiry_date) return 1;
+                            if (!b.expiry_date) return -1;
+                            return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
+                          default:
+                            return 0;
+                        }
+                      })
+                      .map((vacation) => {
+                        const today = startOfDay(new Date());
+                        const startDate = startOfDay(parseISO(vacation.start_date));
+                        const endDate = startOfDay(parseISO(vacation.end_date));
+
+                        let status: "scheduled" | "in_progress" | "completed" = "scheduled";
+                        let rowClass = "";
+
+                        if (today > endDate) {
+                          status = "completed";
+                          rowClass = "bg-green-100 dark:bg-green-900/30";
+                        } else if (today >= startDate && today <= endDate) {
+                          status = "in_progress";
+                          rowClass = "bg-orange-100 dark:bg-orange-900/30";
+                        }
+
+                        const statusConfig = {
+                          scheduled: { label: "Agendado", variant: "outline" as const },
+                          in_progress: { label: "Em andamento", variant: "secondary" as const },
+                          completed: { label: "Finalizada", variant: "default" as const },
+                        };
+
+                        return (
+                          <TableRow key={vacation.id} className={rowClass}>
+                            <TableCell>
+                              <span className="text-xs md:text-sm">
+                                {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={statusConfig[status].variant}
+                                className={cn(
+                                  "text-xs",
+                                  status === "in_progress" && "bg-orange-500 text-white hover:bg-orange-600",
+                                  status === "completed" && "bg-green-600 text-white hover:bg-green-700",
+                                )}
+                              >
+                                {statusConfig[status].label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {vacation.period_number}º Período
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs md:text-sm">
+                              {format(parseISO(vacation.start_date), "dd/MM/yyyy")}
+                            </TableCell>
+                            <TableCell className="text-xs md:text-sm">
+                              {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
+                            </TableCell>
+                            <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
+                            <TableCell className="text-xs md:text-sm">
+                              {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
+                            </TableCell>
+                            <TableCell>
+                              {canEdit && (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => editVacation(vacation)}
+                                  >
+                                    <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => handleDeleteVacation(vacation.id)}
+                                  >
+                                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                                  </Button>
+                                </div>
                               )}
-                            >
-                              {statusConfig[status].label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {vacation.period_number}º Período
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs md:text-sm">
-                            {format(parseISO(vacation.start_date), "dd/MM/yyyy")}
-                          </TableCell>
-                          <TableCell className="text-xs md:text-sm">
-                            {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
-                          </TableCell>
-                          <TableCell className="text-xs md:text-sm">{vacation.days} dias</TableCell>
-                          <TableCell className="text-xs md:text-sm">
-                            {vacation.expiry_date ? format(parseISO(vacation.expiry_date), "dd/MM/yyyy") : "-"}
-                          </TableCell>
-                          <TableCell>
-                            {canEdit && (
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => editVacation(vacation)}
-                                >
-                                  <Edit className="h-3 w-3 md:h-4 md:w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => handleDeleteVacation(vacation.id)}
-                                >
-                                  <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                   </TableBody>
                 </Table>
               </div>
@@ -797,7 +800,7 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="agent_timeoff">Funcionário (Opcional)</Label>
+                      <Label htmlFor="agent_timeoff">Funcionário</Label>
                       <Select
                         value={timeOffForm.agent_id || "no-agent"}
                         onValueChange={(value) =>
