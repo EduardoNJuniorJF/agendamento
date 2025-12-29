@@ -800,7 +800,7 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="user_timeoff">Funcionário (Opcional)</Label>
+                      <Label htmlFor="user_timeoff">Funcionário</Label>
                       <Select
                         value={timeOffForm.user_id || "no-user"}
                         onValueChange={(value) =>
@@ -811,7 +811,7 @@ export default function Vacations() {
                           <SelectValue placeholder="Selecione (opcional)" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no-user">Nenhum</SelectItem>
+                          <SelectItem value="no-user">Selecione um funcionário...</SelectItem>
                           {profiles.map((profile) => (
                             <SelectItem key={profile.id} value={profile.id}>
                               {profile.full_name || profile.email}
@@ -860,7 +860,7 @@ export default function Vacations() {
                         className="w-full sm:w-auto"
                         onClick={() => {
                           setEditingTimeOffId(null);
-      setTimeOffForm({
+                          setTimeOffForm({
                             date: "",
                             user_id: "",
                             type: "completa",
