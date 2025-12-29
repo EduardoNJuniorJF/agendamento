@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { format, getDaysInMonth, startOfMonth, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { isHoliday, getHolidayName, LocalHolidayData } from "@/lib/holidays";
+import { Badge } from "@/components/ui/badge";
 import {
   Cake,
   CalendarDays,
@@ -964,18 +966,25 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                 const today = new Date();
                 const isToday =
                   day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                
+                // Check for holidays (fixed + local)
+                const dateToCheck = new Date(currentYear, currentMonth, day);
+                const isDayHoliday = isHoliday(dateToCheck, localHolidays as LocalHolidayData[]);
+                const holidayName = isDayHoliday ? getHolidayName(dateToCheck, localHolidays as LocalHolidayData[]) : null;
 
                 return (
                   <div
                     key={day}
                     className={cn(
-                      "h-16 border rounded-lg flex flex-col items-center justify-center relative group",
+                      "h-20 border rounded-lg flex flex-col items-center justify-start p-1 relative group",
                       isToday && "ring-2 ring-offset-2 ring-destructive",
-                      hasDate
-                        ? "bg-primary/10 border-primary cursor-pointer hover:bg-primary/20 transition-colors"
-                        : isToday
-                          ? "bg-destructive/10 border-destructive"
-                          : "border-border",
+                      isDayHoliday && !hasDate
+                        ? "bg-red-50/50 border-red-200"
+                        : hasDate
+                          ? "bg-primary/10 border-primary cursor-pointer hover:bg-primary/20 transition-colors"
+                          : isToday
+                            ? "bg-destructive/10 border-destructive"
+                            : "border-border",
                     )}
                     onClick={() => {
                       if (hasDate && datesForDay[0].image_url) {
@@ -985,42 +994,52 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                   >
                     <span
                       className={cn(
-                        "text-lg font-bold",
-                        isToday && !hasDate && "text-destructive",
+                        "text-sm font-bold",
+                        isToday && !hasDate && !isDayHoliday && "text-destructive",
+                        isDayHoliday && "text-red-600",
                         hasDate ? "text-primary" : "text-foreground",
                       )}
                     >
                       {day}
                     </span>
+                    
+                    {/* Show holiday badge */}
+                    {isDayHoliday && holidayName && (
+                      <Badge variant="destructive" className="text-[7px] px-1 py-0 mt-0.5 max-w-full truncate">
+                        {holidayName}
+                      </Badge>
+                    )}
+                    
+                    {/* Show seasonal date */}
                     {hasDate && (
                       <>
-                        <span className="text-sm font-medium text-primary text-center px-1 truncate w-full">
+                        <span className="text-[9px] font-medium text-primary text-center px-0.5 truncate w-full mt-0.5">
                           {datesForDay[0].name}
                         </span>
                         {/* Edit/Delete buttons - shown on hover */}
                         {canManage && (
-                          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-0.5 right-0.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 bg-background/80 hover:bg-background"
+                              className="h-5 w-5 bg-background/80 hover:bg-background"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(datesForDay[0]);
                               }}
                             >
-                              <Pencil className="h-3 w-3" />
+                              <Pencil className="h-2.5 w-2.5" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                              className="h-5 w-5 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 deleteMutation.mutate(datesForDay[0].id);
                               }}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-2.5 w-2.5" />
                             </Button>
                           </div>
                         )}

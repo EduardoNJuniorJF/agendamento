@@ -20,7 +20,7 @@ import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO, difference
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { isHoliday, getHolidayName } from "@/lib/holidays";
+import { isHoliday, getHolidayName, LocalHolidayData } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Hook para verificar se pode ver/editar elementos do dashboard baseado no setor
@@ -93,6 +93,7 @@ export default function Dashboard() {
     weekTimeOffs: [],
     vacations: [],
   });
+  const [localHolidays, setLocalHolidays] = useState<LocalHolidayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -126,7 +127,21 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadStats();
+    loadLocalHolidays();
   }, [currentWeek, sector, role]);
+
+  const loadLocalHolidays = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("local_holidays")
+        .select("id, name, day, month, year");
+      
+      if (error) throw error;
+      setLocalHolidays(data || []);
+    } catch (error) {
+      console.error("Error loading local holidays:", error);
+    }
+  };
 
   // Verificar se deve filtrar por setor (Administrativo e Dev veem todos)
   const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
@@ -439,8 +454,8 @@ export default function Dashboard() {
               <div className="grid grid-cols-5 gap-2 md:gap-4 min-w-[640px]">
                 {weekDays.map((day) => {
                   const dayAppointments = getAppointmentsForDay(day);
-                  const isDayHoliday = isHoliday(day);
-                  const holidayName = isDayHoliday ? getHolidayName(day) : null;
+                  const isDayHoliday = isHoliday(day, localHolidays);
+                  const holidayName = isDayHoliday ? getHolidayName(day, localHolidays) : null;
                   return (
                     <DroppableDay
                       key={day.toISOString()}

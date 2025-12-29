@@ -1,5 +1,14 @@
 import { addDays, isWeekend, isSameDay, parseISO } from "date-fns";
 
+// Tipo para feriados locais do banco de dados
+export interface LocalHolidayData {
+  id: string;
+  name: string;
+  day: number;
+  month: number;
+  year: number | null;
+}
+
 // Feriados Nacionais (fixos)
 const nationalHolidays = [
   { month: 1, day: 1, name: "Confraternização Universal" },
@@ -41,7 +50,35 @@ const movableHolidays2026 = [
   { date: "2026-06-04", name: "Corpus Christi" },
 ];
 
-export function isHoliday(date: Date): boolean {
+// Função para verificar se uma data é um feriado local cadastrado
+export function isLocalHoliday(date: Date, localHolidays: LocalHolidayData[]): boolean {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  return localHolidays.some((h) => {
+    const matchesMonthDay = h.month === month && h.day === day;
+    const matchesYear = h.year === null || h.year === year;
+    return matchesMonthDay && matchesYear;
+  });
+}
+
+// Função para obter o nome do feriado local
+export function getLocalHolidayName(date: Date, localHolidays: LocalHolidayData[]): string | null {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const holiday = localHolidays.find((h) => {
+    const matchesMonthDay = h.month === month && h.day === day;
+    const matchesYear = h.year === null || h.year === year;
+    return matchesMonthDay && matchesYear;
+  });
+
+  return holiday ? holiday.name : null;
+}
+
+export function isHoliday(date: Date, localHolidays: LocalHolidayData[] = []): boolean {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -70,10 +107,15 @@ export function isHoliday(date: Date): boolean {
     return true;
   }
 
+  // Verifica feriados locais cadastrados no banco
+  if (isLocalHoliday(date, localHolidays)) {
+    return true;
+  }
+
   return false;
 }
 
-export function isWeekendOrHoliday(date: Date): boolean {
+export function isWeekendOrHoliday(date: Date, localHolidays: LocalHolidayData[] = []): boolean {
   // Verifica se é fim de semana (domingo)
   const dayOfWeek = date.getDay();
   if (dayOfWeek === 0 || dayOfWeek === 7) {
@@ -81,10 +123,10 @@ export function isWeekendOrHoliday(date: Date): boolean {
   }
 
   // Verifica se é feriado
-  return isHoliday(date);
+  return isHoliday(date, localHolidays);
 }
 
-export function isBeforeWeekendOrHoliday(date: Date): boolean {
+export function isBeforeWeekendOrHoliday(date: Date, localHolidays: LocalHolidayData[] = []): boolean {
   // Verifica se é sexta-feira (dia antes do fim de semana)
   const dayOfWeek = date.getDay();
   if (dayOfWeek === 5) {
@@ -94,14 +136,14 @@ export function isBeforeWeekendOrHoliday(date: Date): boolean {
 
   // Verifica se o dia seguinte é feriado
   const nextDay = addDays(date, 1);
-  if (isHoliday(nextDay)) {
+  if (isHoliday(nextDay, localHolidays)) {
     return true;
   }
 
   return false;
 }
 
-export function isTwoDaysBeforeWeekendOrHoliday(date: Date): boolean {
+export function isTwoDaysBeforeWeekendOrHoliday(date: Date, localHolidays: LocalHolidayData[] = []): boolean {
   // Conforme legislação trabalhista, férias não podem começar nos 2 dias que antecedem
   // feriados ou dia de descanso semanal remunerado (DSR - sábado/domingo)
 
@@ -113,13 +155,13 @@ export function isTwoDaysBeforeWeekendOrHoliday(date: Date): boolean {
 
   // Verifica se 1 dia depois (amanhã) é feriado ou fim de semana
   const nextDay = addDays(date, 1);
-  if (isWeekendOrHoliday(nextDay)) {
+  if (isWeekendOrHoliday(nextDay, localHolidays)) {
     return true; // Está 1 dia antes de feriado/fim de semana
   }
 
   // Verifica se 2 dias depois é feriado ou fim de semana
   const twoDaysAfter = addDays(date, 2);
-  if (isWeekendOrHoliday(twoDaysAfter)) {
+  if (isWeekendOrHoliday(twoDaysAfter, localHolidays)) {
     return true; // Está 2 dias antes de feriado/fim de semana
   }
 
@@ -133,7 +175,7 @@ export function calculateReturnDate(startDate: string, vacationDays: number): st
   return returnDate.toISOString().split("T")[0];
 }
 
-export function getHolidayName(date: Date): string | null {
+export function getHolidayName(date: Date, localHolidays: LocalHolidayData[] = []): string | null {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -160,6 +202,10 @@ export function getHolidayName(date: Date): string | null {
     const movable = movableHolidays2026.find((h) => h.date === dateStr);
     if (movable) return movable.name;
   }
+
+  // Verifica feriados locais cadastrados
+  const localName = getLocalHolidayName(date, localHolidays);
+  if (localName) return localName;
 
   return null;
 }

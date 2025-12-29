@@ -31,7 +31,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { isHoliday, getHolidayName } from "@/lib/holidays";
+import { isHoliday, getHolidayName, LocalHolidayData } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DndContext,
@@ -78,6 +78,7 @@ interface Appointment {
 
 export default function CalendarView() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [localHolidays, setLocalHolidays] = useState<LocalHolidayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [viewMode, setViewMode] = useState<"month" | "week">("week");
@@ -103,7 +104,21 @@ export default function CalendarView() {
 
   useEffect(() => {
     loadAppointments();
+    loadLocalHolidays();
   }, [currentMonth, viewMode]);
+
+  const loadLocalHolidays = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("local_holidays")
+        .select("id, name, day, month, year");
+      
+      if (error) throw error;
+      setLocalHolidays(data || []);
+    } catch (error) {
+      console.error("Error loading local holidays:", error);
+    }
+  };
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -500,8 +515,8 @@ export default function CalendarView() {
         <div key={weekIndex} className="grid grid-cols-5 gap-2 md:gap-4">
           {week.map((day) => {
             const dayAppointments = getAppointmentsForDay(day);
-            const isDayHoliday = isHoliday(day);
-            const holidayName = isDayHoliday ? getHolidayName(day) : null;
+            const isDayHoliday = isHoliday(day, localHolidays);
+            const holidayName = isDayHoliday ? getHolidayName(day, localHolidays) : null;
 
             return (
               <DroppableDay
@@ -587,8 +602,8 @@ export default function CalendarView() {
     <div className="space-y-4 md:space-y-6">
       {getCurrentWeekDays().map((day) => {
         const dayAppointments = getAppointmentsForDay(day);
-        const isDayHoliday = isHoliday(day);
-        const holidayName = isDayHoliday ? getHolidayName(day) : null;
+        const isDayHoliday = isHoliday(day, localHolidays);
+        const holidayName = isDayHoliday ? getHolidayName(day, localHolidays) : null;
 
         return (
           <div key={day.toISOString()} className="flex flex-col md:flex-row bg-card rounded-lg border p-2 md:p-4">

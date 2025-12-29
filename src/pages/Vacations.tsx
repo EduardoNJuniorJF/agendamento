@@ -19,6 +19,7 @@ import {
   getHolidayName,
   isWeekendOrHoliday,
   isTwoDaysBeforeWeekendOrHoliday,
+  LocalHolidayData,
 } from "@/lib/holidays";
 import { addMonths } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -69,6 +70,7 @@ export default function Vacations() {
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [timeOffs, setTimeOffs] = useState<TimeOff[]>([]);
   const [reminders, setReminders] = useState<VacationReminder[]>([]);
+  const [localHolidays, setLocalHolidays] = useState<LocalHolidayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("vacations");
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -108,7 +110,21 @@ export default function Vacations() {
   useEffect(() => {
     loadData();
     loadReminders();
+    loadLocalHolidays();
   }, [sector, role]);
+
+  const loadLocalHolidays = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("local_holidays")
+        .select("id, name, day, month, year");
+      
+      if (error) throw error;
+      setLocalHolidays(data || []);
+    } catch (error) {
+      console.error("Error loading local holidays:", error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -185,8 +201,8 @@ export default function Vacations() {
     const startDate = parseISO(vacationForm.start_date);
 
     // REGRA 1: Férias não podem iniciar em sábado, domingo ou feriado
-    if (isWeekendOrHoliday(startDate)) {
-      const holidayName = getHolidayName(startDate);
+    if (isWeekendOrHoliday(startDate, localHolidays)) {
+      const holidayName = getHolidayName(startDate, localHolidays);
       toast({
         title: "Data inválida para início de férias",
         description: holidayName
@@ -199,7 +215,7 @@ export default function Vacations() {
 
     // REGRA 2: Férias não podem iniciar nos 2 dias que antecedem feriado ou dia de descanso semanal remunerado (DSR)
     // Exemplos: não pode iniciar na quinta-feira (2 dias antes do sábado) ou na quarta-feira (2 dias antes de feriado na sexta)
-    if (isTwoDaysBeforeWeekendOrHoliday(startDate)) {
+    if (isTwoDaysBeforeWeekendOrHoliday(startDate, localHolidays)) {
       toast({
         title: "Data inválida para início de férias",
         description:
