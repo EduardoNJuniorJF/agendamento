@@ -549,7 +549,9 @@ export default function NewAppointment() {
                 <Label htmlFor="appointment_type">Status</Label>
                 <Select
                   value={formData.appointment_type || "none"}
-                  onValueChange={(value) => setFormData({ ...formData, appointment_type: value === "none" ? null : value })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, appointment_type: value === "none" ? null : value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o status" />
@@ -560,12 +562,11 @@ export default function NewAppointment() {
                     <SelectItem value="Bug">Bug</SelectItem>
                     <SelectItem value="Configuração">Configuração</SelectItem>
                     <SelectItem value="Conversão">Conversão</SelectItem>
-                    <SelectItem value="Entrega">Entrega</SelectItem>
+                    <SelectItem value="Material">Entrega de Material</SelectItem>
                     <SelectItem value="Etapa 1">Etapa 1</SelectItem>
                     <SelectItem value="Etapa 2">Etapa 2</SelectItem>
                     <SelectItem value="Etapa 3">Etapa 3</SelectItem>
                     <SelectItem value="Filial">Filial</SelectItem>
-                    <SelectItem value="Material">Material</SelectItem>
                     <SelectItem value="Reciclagem">Reciclagem</SelectItem>
                     <SelectItem value="Retorno">Retorno</SelectItem>
                     <SelectItem value="Reunião">Reunião</SelectItem>
