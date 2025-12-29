@@ -30,6 +30,7 @@ interface FormData {
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
   expense_status: "não_separar" | "separar_dinheiro" | "separar_dia_anterior";
   is_penalized: boolean;
+  appointment_type: string | null;
 }
 
 export default function NewAppointment() {
@@ -51,6 +52,7 @@ export default function NewAppointment() {
     status: "scheduled",
     expense_status: "não_separar",
     is_penalized: false,
+    appointment_type: null,
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -134,6 +136,7 @@ export default function NewAppointment() {
       status: data.status,
       expense_status: data.expense_status,
       is_penalized: data.is_penalized || false,
+      appointment_type: data.appointment_type || null,
     });
   };
 
@@ -244,6 +247,7 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            appointment_type: formData.appointment_type,
             updated_by_name: currentUserName,
             last_action: "updated",
             last_action_at: new Date().toISOString(),
@@ -282,6 +286,7 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            appointment_type: formData.appointment_type,
             created_by_name: currentUserName,
             last_action: "created",
             last_action_at: new Date().toISOString(),
@@ -523,21 +528,52 @@ export default function NewAppointment() {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="expenses">Despesas</Label>
-              <Select
-                value={formData.expense_status || "não_separar"}
-                onValueChange={(value: any) => setFormData({ ...formData, expense_status: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de despesa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="não_separar">Não Separar</SelectItem>
-                  <SelectItem value="separar_dinheiro">Separar dinheiro</SelectItem>
-                  <SelectItem value="separar_dia_anterior">Separar no dia anterior</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="expenses">Despesas</Label>
+                <Select
+                  value={formData.expense_status || "não_separar"}
+                  onValueChange={(value: any) => setFormData({ ...formData, expense_status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de despesa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="não_separar">Não Separar</SelectItem>
+                    <SelectItem value="separar_dinheiro">Separar dinheiro</SelectItem>
+                    <SelectItem value="separar_dia_anterior">Separar no dia anterior</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="appointment_type">Status</Label>
+                <Select
+                  value={formData.appointment_type || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, appointment_type: value === "none" ? null : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Selecione o status</SelectItem>
+                    <SelectItem value="Agendar/Ligar">Agendar/Ligar</SelectItem>
+                    <SelectItem value="Bug">Bug</SelectItem>
+                    <SelectItem value="Configuração">Configuração</SelectItem>
+                    <SelectItem value="Conversão">Conversão</SelectItem>
+                    <SelectItem value="Entrega">Entrega</SelectItem>
+                    <SelectItem value="Etapa 1">Etapa 1</SelectItem>
+                    <SelectItem value="Etapa 2">Etapa 2</SelectItem>
+                    <SelectItem value="Etapa 3">Etapa 3</SelectItem>
+                    <SelectItem value="Filial">Filial</SelectItem>
+                    <SelectItem value="Material">Material</SelectItem>
+                    <SelectItem value="Reciclagem">Reciclagem</SelectItem>
+                    <SelectItem value="Retorno">Retorno</SelectItem>
+                    <SelectItem value="Reunião">Reunião</SelectItem>
+                    <SelectItem value="Rota">Rota</SelectItem>
+                    <SelectItem value="Treinamento">Treinamento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {editingId && (
