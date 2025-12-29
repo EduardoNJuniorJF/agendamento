@@ -797,7 +797,7 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="agent_timeoff">Agente (Opcional)</Label>
+                      <Label htmlFor="agent_timeoff">Funcionário (Opcional)</Label>
                       <Select
                         value={timeOffForm.agent_id || "no-agent"}
                         onValueChange={(value) =>
@@ -809,9 +809,9 @@ export default function Vacations() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="no-agent">Nenhum</SelectItem>
-                          {agents.map((agent) => (
-                            <SelectItem key={agent.id} value={agent.id}>
-                              {agent.name}
+                          {profiles.map((profile) => (
+                            <SelectItem key={profile.id} value={profile.id}>
+                              {profile.full_name || profile.email}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -884,7 +884,7 @@ export default function Vacations() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[100px]">Data</TableHead>
-                      <TableHead className="min-w-[120px]">Agente</TableHead>
+                      <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
                       <TableHead className="min-w-[100px]">Status</TableHead>
                       <TableHead className="min-w-[100px]">Ações</TableHead>
