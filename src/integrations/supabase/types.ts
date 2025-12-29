@@ -355,38 +355,38 @@ export type Database = {
       }
       time_off: {
         Row: {
-          agent_id: string | null
           approved: boolean | null
           created_at: string | null
           date: string
           id: string
           type: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          agent_id?: string | null
           approved?: boolean | null
           created_at?: string | null
           date: string
           id?: string
           type?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          agent_id?: string | null
           approved?: boolean | null
           created_at?: string | null
           date?: string
           id?: string
           type?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "time_off_agent_id_fkey"
-            columns: ["agent_id"]
+            foreignKeyName: "time_off_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "agents"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
