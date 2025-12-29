@@ -562,7 +562,7 @@ export default function NewAppointment() {
                     <SelectItem value="Bug">Bug</SelectItem>
                     <SelectItem value="Configuração">Configuração</SelectItem>
                     <SelectItem value="Conversão">Conversão</SelectItem>
-                    <SelectItem value="Material">Entrega de Material</SelectItem>
+                    <SelectItem value="Entrega de Material">Entrega de Material</SelectItem>
                     <SelectItem value="Etapa 1">Etapa 1</SelectItem>
                     <SelectItem value="Etapa 2">Etapa 2</SelectItem>
                     <SelectItem value="Etapa 3">Etapa 3</SelectItem>
