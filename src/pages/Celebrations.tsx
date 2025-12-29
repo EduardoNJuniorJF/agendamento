@@ -150,11 +150,17 @@ function BirthdaysSection({ canManage }: { canManage: boolean }) {
     },
   });
 
-  // Filter birthdays by selected month
-  const filteredBirthdays = birthdays.filter((birthday) => {
-    const birthMonth = new Date(birthday.birth_date + "T12:00:00").getMonth() + 1;
-    return birthMonth === selectedMonth;
-  });
+  // Filter birthdays by selected month and sort by day
+  const filteredBirthdays = birthdays
+    .filter((birthday) => {
+      const birthMonth = new Date(birthday.birth_date + "T12:00:00").getMonth() + 1;
+      return birthMonth === selectedMonth;
+    })
+    .sort((a, b) => {
+      const dayA = new Date(a.birth_date + "T12:00:00").getDate();
+      const dayB = new Date(b.birth_date + "T12:00:00").getDate();
+      return dayA - dayB;
+    });
 
   const createMutation = useMutation({
     mutationFn: async (data: Omit<Birthday, "id">) => {
