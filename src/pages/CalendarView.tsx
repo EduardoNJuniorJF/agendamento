@@ -401,31 +401,11 @@ export default function CalendarView() {
   };
 
   const getStatusColor = (type: string) => {
-    switch (type) {
-      case "Agendar/Ligar": return "#6366f1"; // indigo
-      case "Bug": return "#ef4444"; // red
-      case "Configuração": return "#8b5cf6"; // violet
-      case "Conversão": return "#22c55e"; // green
-      case "Entrega": return "#f59e0b"; // amber
-      case "Etapa 1": return "#3b82f6"; // blue
-      case "Etapa 2": return "#0ea5e9"; // sky
-      case "Etapa 3": return "#06b6d4"; // cyan
-      case "Filial": return "#ec4899"; // pink
-      case "Material": return "#f97316"; // orange
-      case "Reciclagem": return "#14b8a6"; // teal
-      case "Retorno": return "#a855f7"; // purple
-      case "Reunião": return "#eab308"; // yellow
-      case "Rota": return "#64748b"; // slate
-      case "Treinamento": return "#10b981"; // emerald
-      default: return "#6b7280"; // gray
-    }
+    return "#f97316"; // orange (cor do Material para todos)
   };
 
   const getStatusTextColor = (type: string) => {
-    switch (type) {
-      case "Reunião": return "#000000"; // yellow needs dark text
-      default: return "#ffffff";
-    }
+    return "#ffffff";
   };
 
   const getExpenseColor = (status: string) => {
