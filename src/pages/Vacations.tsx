@@ -498,6 +498,7 @@ export default function Vacations() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="0">Período Integral</SelectItem>
                           <SelectItem value="1">1º Período</SelectItem>
                           <SelectItem value="2">2º Período</SelectItem>
                         </SelectContent>
