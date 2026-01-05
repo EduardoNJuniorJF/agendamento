@@ -735,7 +735,7 @@ export default function Vacations() {
                             </TableCell>
                             <TableCell>
                               <Badge variant="outline" className="text-xs">
-                                {vacation.period_number}º Período
+                                {vacation.period_number === 0 ? "Integral" : `${vacation.period_number}º Período`}
                               </Badge>
                             </TableCell>
                             <TableCell className="text-xs md:text-sm">
