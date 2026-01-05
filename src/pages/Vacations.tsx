@@ -593,7 +593,7 @@ export default function Vacations() {
                         className="bg-muted cursor-not-allowed"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Prazo de 12 meses após o vencimento para conceder as férias
+                        Prazo de 11 meses após o vencimento para conceder as férias
                       </p>
                     </div>
 
