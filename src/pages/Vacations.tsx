@@ -572,7 +572,7 @@ export default function Vacations() {
                           // Calcula automaticamente a data limite (12 meses após o vencimento)
                           if (e.target.value) {
                             const expiryDate = parseISO(e.target.value);
-                            const deadlineDate = addMonths(expiryDate, 12);
+                            const deadlineDate = addMonths(expiryDate, 11);
                             updates.deadline = format(deadlineDate, "yyyy-MM-dd");
                           } else {
                             updates.deadline = "";
