@@ -822,7 +822,7 @@ export default function Vacations() {
                     </div>
 
                     <div>
-                      <Label htmlFor="type">Tipo</Label>
+                      <Label htmlFor="type">Período</Label>
                       <Select
                         value={timeOffForm.type}
                         onValueChange={(value) => setTimeOffForm({ ...timeOffForm, type: value })}
@@ -831,6 +831,7 @@ export default function Vacations() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="integral">Período Integral</SelectItem>
                           <SelectItem value="completa">Folga Completa</SelectItem>
                           <SelectItem value="parcial">Folga Parcial</SelectItem>
                         </SelectContent>
