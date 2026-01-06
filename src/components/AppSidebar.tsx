@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper } from "lucide-react";
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -107,9 +107,12 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 space-y-2">
         <Separator />
 
-        {!collapsed && userName && (
-          <div className="px-2 py-1">
-            <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+        {userName && (
+          <div className="flex items-center gap-2 px-2 py-1">
+            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            {!collapsed && (
+              <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+            )}
           </div>
         )}
 
