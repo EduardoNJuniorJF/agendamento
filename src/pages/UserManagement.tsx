@@ -431,24 +431,9 @@ export default function UserManagement() {
                 )}
               </Button>
             </form>
-{/*
-            <div className="mt-6 p-4 bg-muted rounded-lg space-y-2">
-              <h4 className="font-medium text-sm">Tipos de Usuário:</h4>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>
-                  <strong>Administrador:</strong> Controle total e irrestrito ao sistema
-                </li>
-                <li>
-                  <strong>Usuário:</strong> Pode alterar apenas Calendário e Dashboard
-                </li>
-                <li>
-                  <strong>Leitor:</strong> Apenas visualização e impressão
-                </li>
-              </ul>
-            </div>
           </CardContent>
         </Card>
-*/}
+
         {/* Users List Card */}
         <Card>
           <CardHeader>
