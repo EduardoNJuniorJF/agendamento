@@ -157,7 +157,7 @@ export default function Vacations() {
       // Filtrar folgas por setor
       let filteredTimeOffs = timeOffsRes.data || [];
       if (shouldFilterBySector && sector) {
-        filteredTimeOffs = filteredTimeOffs.filter((t: any) => t.agents?.sector === sector);
+        filteredTimeOffs = filteredTimeOffs.filter((t: any) => t.profiles?.sector === sector);
       }
 
       setProfiles(filteredProfiles);
