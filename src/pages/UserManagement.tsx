@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, Loader2, Pencil, Trash2, Users, UserCheck } from "lucide-react";
+import { UserPlus, Loader2, Pencil, Trash2, Users, UserCheck, Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface User {
@@ -47,6 +47,7 @@ export default function UserManagement() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [formData, setFormData] = useState({
     username: "",
@@ -456,6 +457,15 @@ export default function UserManagement() {
               Usuários Cadastrados
             </CardTitle>
             <CardDescription>Lista de todos os usuários do sistema</CardDescription>
+            <div className="relative mt-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por nome, usuário ou e-mail..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {loadingUsers ? (
@@ -478,6 +488,16 @@ export default function UserManagement() {
                   <TableBody>
                     {users
                       .filter((user) => user.email !== "dev@sistema.com" && user.username?.toLowerCase() !== "dev")
+                      .filter((user) => {
+                        if (!searchQuery.trim()) return true;
+                        const query = searchQuery.toLowerCase();
+                        return (
+                          user.username?.toLowerCase().includes(query) ||
+                          user.full_name?.toLowerCase().includes(query) ||
+                          user.email.toLowerCase().includes(query) ||
+                          user.sector?.toLowerCase().includes(query)
+                        );
+                      })
                       .map((user) => (
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">{user.username || "-"}</TableCell>
