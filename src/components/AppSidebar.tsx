@@ -26,6 +26,7 @@ export function AppSidebar() {
     signOut, 
     role, 
     sector,
+    userName,
     canAccessCalendar,
     canAccessFleet,
     canAccessBonus,
@@ -105,6 +106,12 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 space-y-2">
         <Separator />
+
+        {!collapsed && userName && (
+          <div className="px-2 py-1">
+            <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+          </div>
+        )}
 
         <div className="space-y-2">
           <SidebarMenuButton asChild>
