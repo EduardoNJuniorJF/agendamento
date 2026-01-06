@@ -1,15 +1,4 @@
-import {
-  LayoutDashboard,
-  Calendar,
-  Car,
-  Users,
-  Umbrella,
-  LogOut,
-  Key,
-  Receipt,
-  UserPlus,
-  PartyPopper,
-} from "lucide-react";
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,8 +22,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { signOut, role, sector, canAccessCalendar, canAccessFleet, canAccessBonus, canAccessUserManagement } =
-    useAuth();
+  const { 
+    signOut, 
+    role, 
+    sector,
+    userName,
+    canAccessCalendar,
+    canAccessFleet,
+    canAccessBonus,
+    canAccessUserManagement
+  } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
   const collapsed = state === "collapsed";
@@ -61,23 +58,21 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems
-                .filter((item) => item.show)
-                .map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        end
-                        className="hover:bg-sidebar-accent transition-smooth"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+              {menuItems.filter(item => item.show).map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="hover:bg-sidebar-accent transition-smooth"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -106,10 +101,20 @@ export function AppSidebar() {
             </SidebarGroup>
           </>
         )}
+
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-1">
         <Separator />
+
+        {userName && (
+          <div className="flex items-center gap-2 px-2 py-0.5">
+            <User className="h-4 w-4 flex-shrink-0" />
+            {!collapsed && (
+              <p className="text-sm font-medium truncate">{userName}</p>
+            )}
+          </div>
+        )}
 
         <div className="space-y-1">
           <SidebarMenuButton asChild>
