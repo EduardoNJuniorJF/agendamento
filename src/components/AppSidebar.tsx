@@ -109,9 +109,9 @@ export function AppSidebar() {
 
         {userName && (
           <div className="flex items-center gap-2 px-2 py-1">
-            <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <User className="h-4 w-4 flex-shrink-0" />
             {!collapsed && (
-              <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+              <p className="text-sm font-medium truncate">{userName}</p>
             )}
           </div>
         )}
