@@ -11,7 +11,7 @@ interface UpdateUserRequest {
   fullName?: string
   email?: string
   role?: 'admin' | 'user' | 'financeiro'
-  sector?: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo'
+  sector?: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | 'Loja'
 }
 
 Deno.serve(async (req) => {
