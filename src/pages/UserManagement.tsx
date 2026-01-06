@@ -55,7 +55,7 @@ export default function UserManagement() {
     password: "",
     fullName: "",
     role: "user" as "admin" | "user" | "financeiro",
-    sector: "" as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "",
+    sector: "" as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja" | "",
     isAgent: false,
     agentColor: "#3b82f6",
   });
@@ -65,7 +65,7 @@ export default function UserManagement() {
     email: "",
     fullName: "",
     role: "user" as "admin" | "user" | "financeiro" | "dev",
-    sector: "" as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "",
+    sector: "" as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja" | "",
   });
 
   if (role !== "admin" && role !== "dev") {
@@ -162,7 +162,7 @@ export default function UserManagement() {
       email: user.email,
       fullName: user.full_name || "",
       role: user.role,
-      sector: (user.sector as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo") || "",
+      sector: (user.sector as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja") || "",
     });
     setIsEditDialogOpen(true);
   };
@@ -364,7 +364,7 @@ export default function UserManagement() {
                   <Label htmlFor="sector">Setor *</Label>
                   <Select
                     value={formData.sector}
-                    onValueChange={(value: "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo") =>
+                    onValueChange={(value: "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja") =>
                       setFormData({ ...formData, sector: value })
                     }
                     disabled={loading}
@@ -377,6 +377,7 @@ export default function UserManagement() {
                       <SelectItem value="Suporte">Suporte</SelectItem>
                       <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
                       <SelectItem value="Administrativo">Administrativo</SelectItem>
+                      <SelectItem value="Loja">Loja</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -571,7 +572,7 @@ export default function UserManagement() {
                                       <Select
                                         value={editFormData.sector}
                                         onValueChange={(
-                                          value: "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo",
+                                          value: "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja",
                                         ) => setEditFormData({ ...editFormData, sector: value })}
                                       >
                                         <SelectTrigger id="edit-sector">
@@ -582,6 +583,7 @@ export default function UserManagement() {
                                           <SelectItem value="Suporte">Suporte</SelectItem>
                                           <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
                                           <SelectItem value="Administrativo">Administrativo</SelectItem>
+                                          <SelectItem value="Loja">Loja</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>

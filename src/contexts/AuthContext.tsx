@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 type UserRole = 'dev' | 'admin' | 'user' | 'financeiro';
-type UserSector = 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | null;
+type UserSector = 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | 'Loja' | null;
 
 interface AuthContextType {
   user: User | null;
