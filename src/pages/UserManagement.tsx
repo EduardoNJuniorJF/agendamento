@@ -431,7 +431,7 @@ export default function UserManagement() {
                 )}
               </Button>
             </form>
-
+{/*
             <div className="mt-6 p-4 bg-muted rounded-lg space-y-2">
               <h4 className="font-medium text-sm">Tipos de Usuário:</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
@@ -448,7 +448,7 @@ export default function UserManagement() {
             </div>
           </CardContent>
         </Card>
-
+*/}
         {/* Users List Card */}
         <Card>
           <CardHeader>
