@@ -483,6 +483,11 @@ export default function UserManagement() {
                           user.sector?.toLowerCase().includes(query)
                         );
                       })
+                      .sort((a, b) => {
+                        const nameA = (a.full_name || a.username || a.email).toLowerCase();
+                        const nameB = (b.full_name || b.username || b.email).toLowerCase();
+                        return nameA.localeCompare(nameB, 'pt-BR');
+                      })
                       .map((user) => (
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">{user.username || "-"}</TableCell>
