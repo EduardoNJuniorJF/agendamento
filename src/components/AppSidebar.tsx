@@ -104,11 +104,11 @@ export function AppSidebar() {
 
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-2">
+      <SidebarFooter className="p-4 space-y-1">
         <Separator />
 
         {userName && (
-          <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex items-center gap-2 px-2 py-0.5">
             <User className="h-4 w-4 flex-shrink-0" />
             {!collapsed && (
               <p className="text-sm font-medium truncate">{userName}</p>
@@ -116,7 +116,7 @@ export function AppSidebar() {
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <SidebarMenuButton asChild>
             <NavLink
               to="/change-password"
