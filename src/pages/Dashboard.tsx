@@ -689,7 +689,7 @@ export default function Dashboard() {
                             }
                             className="mt-1.5 text-[9px] md:text-[10px]"
                           >
-                            {daysUntilStart <= 0 ? "Em andamento" : `${daysUntilStart} dias para inicio das férias`}
+                            {daysUntilStart <= 0 ? "Em andamento" : `${daysUntilStart} dias para o início das férias`}
                           </Badge>
                         </div>
                       );
