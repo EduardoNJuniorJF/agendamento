@@ -105,9 +105,9 @@ export default function Dashboard() {
   const showCalendarStats = canAccessCalendar();
   const showFleetStats = canAccessFleet();
   // Para Suporte e Desenvolvimento, mostrar apenas férias/folgas do setor
-  const isLimitedDashboard = sector === 'Suporte' || sector === 'Desenvolvimento';
+  const isLimitedDashboard = sector === "Suporte" || sector === "Desenvolvimento";
   // Administrativo: apenas visualização
-  const isReadOnly = sector === 'Administrativo' && role !== 'dev';
+  const isReadOnly = sector === "Administrativo" && role !== "dev";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -132,10 +132,8 @@ export default function Dashboard() {
 
   const loadLocalHolidays = async () => {
     try {
-      const { data, error } = await supabase
-        .from("local_holidays")
-        .select("id, name, day, month, year");
-      
+      const { data, error } = await supabase.from("local_holidays").select("id, name, day, month, year");
+
       if (error) throw error;
       setLocalHolidays(data || []);
     } catch (error) {
@@ -144,7 +142,7 @@ export default function Dashboard() {
   };
 
   // Verificar se deve filtrar por setor (Administrativo e Dev veem todos)
-  const shouldFilterBySector = sector !== 'Administrativo' && role !== 'dev';
+  const shouldFilterBySector = sector !== "Administrativo" && role !== "dev";
 
   const loadStats = async () => {
     try {
@@ -173,21 +171,17 @@ export default function Dashboard() {
           .gte("start_date", format(new Date(), "yyyy-MM-dd"))
           .order("start_date"),
       ]);
-      
+
       // Filtrar férias por setor (se necessário)
       let filteredVacations = vacations.data || [];
       if (shouldFilterBySector && sector) {
-        filteredVacations = filteredVacations.filter(
-          (v: any) => v.profiles?.sector === sector
-        );
+        filteredVacations = filteredVacations.filter((v: any) => v.profiles?.sector === sector);
       }
-      
+
       // Filtrar folgas por setor (se necessário)
       let filteredTimeOffs = timeOffs.data || [];
       if (shouldFilterBySector && sector) {
-        filteredTimeOffs = filteredTimeOffs.filter(
-          (t: any) => t.profiles?.sector === sector
-        );
+        filteredTimeOffs = filteredTimeOffs.filter((t: any) => t.profiles?.sector === sector);
       }
 
       // Load agents for each appointment
@@ -414,170 +408,171 @@ export default function Dashboard() {
 
         {/* Calendário da Semana - Segunda linha (escondido para Suporte/Desenvolvimento) */}
         {showCalendarStats && (
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <CardTitle className="text-lg md:text-xl">Calendário da Semana</CardTitle>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="text-center">
-                  <p className="text-xs md:text-sm font-medium">
-                    Semana de {format(weekDays[0], "dd/MM/yyyy", { locale: ptBR })} a{" "}
-                    {format(weekDays[4], "dd/MM/yyyy", { locale: ptBR })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 justify-center">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" onClick={() => setCurrentWeek(new Date())} size="sm" className="h-8">
-                    Hoje
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <CardTitle className="text-lg md:text-xl">Calendário da Semana</CardTitle>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="text-center">
+                    <p className="text-xs md:text-sm font-medium">
+                      Semana de {format(weekDays[0], "dd/MM/yyyy", { locale: ptBR })} a{" "}
+                      {format(weekDays[4], "dd/MM/yyyy", { locale: ptBR })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 justify-center">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setCurrentWeek(addWeeks(currentWeek, -1))}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" onClick={() => setCurrentWeek(new Date())} size="sm" className="h-8">
+                      Hoje
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="px-2 md:px-6">
-            <div className="overflow-x-auto pb-4 -mx-2 px-2">
-              <div className="grid grid-cols-5 gap-2 md:gap-4 min-w-[640px]">
-                {weekDays.map((day) => {
-                  const dayAppointments = getAppointmentsForDay(day);
-                  const isDayHoliday = isHoliday(day, localHolidays);
-                  const holidayName = isDayHoliday ? getHolidayName(day, localHolidays) : null;
-                  return (
-                    <DroppableDay
-                      key={day.toISOString()}
-                      id={format(day, "yyyy-MM-dd")}
-                      className="border rounded-lg p-2 md:p-3 min-h-[280px] md:min-h-[300px]"
-                    >
-                      <div
-                        className="text-center mb-2 md:mb-3 cursor-pointer hover:bg-muted/50 rounded-md p-1 transition-colors"
-                        onClick={() => navigate(`/calendar?date=${format(day, "yyyy-MM-dd")}`)}
+            </CardHeader>
+            <CardContent className="px-2 md:px-6">
+              <div className="overflow-x-auto pb-4 -mx-2 px-2">
+                <div className="grid grid-cols-5 gap-2 md:gap-4 min-w-[640px]">
+                  {weekDays.map((day) => {
+                    const dayAppointments = getAppointmentsForDay(day);
+                    const isDayHoliday = isHoliday(day, localHolidays);
+                    const holidayName = isDayHoliday ? getHolidayName(day, localHolidays) : null;
+                    return (
+                      <DroppableDay
+                        key={day.toISOString()}
+                        id={format(day, "yyyy-MM-dd")}
+                        className="border rounded-lg p-2 md:p-3 min-h-[280px] md:min-h-[300px]"
                       >
-                        {/*<div className="font-semibold text-xs md:text-sm">{format(day, "EEEE", { locale: ptBR })}</div>
+                        <div
+                          className="text-center mb-2 md:mb-3 cursor-pointer hover:bg-muted/50 rounded-md p-1 transition-colors"
+                          onClick={() => navigate(`/calendar?date=${format(day, "yyyy-MM-dd")}`)}
+                        >
+                          {/*<div className="font-semibold text-xs md:text-sm">{format(day, "EEEE", { locale: ptBR })}</div>
                         <div className="text-xl md:text-2xl font-bold">{format(day, "dd", { locale: ptBR })}</div>
                         <div className="text-[10px] md:text-xs text-muted-foreground">
                           {format(day, "MMM", { locale: ptBR })}
                         </div>*/}
 
-                        {/*novo cabeçalho*/}
-                        <div className="flex items-center justify-center space-x-1">
-                          <div className="font-semibold text-xs md:text-sm">
-                            {format(day, "EEEE", { locale: ptBR })}
+                          {/*novo cabeçalho*/}
+                          <div className="flex items-center justify-center space-x-1">
+                            <div className="font-semibold text-xs md:text-sm">
+                              {format(day, "EEEE", { locale: ptBR })}
+                            </div>
+                            <div className="text-xl md:text-2xl font-bold">{format(day, "dd", { locale: ptBR })}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground">
+                              {format(day, "MMM", { locale: ptBR })}
+                            </div>
                           </div>
-                          <div className="text-xl md:text-2xl font-bold">{format(day, "dd", { locale: ptBR })}</div>
-                          <div className="text-[10px] md:text-xs text-muted-foreground">
-                            {format(day, "MMM", { locale: ptBR })}
-                          </div>
-                        </div>
-                        {/*fim do novo cabeçalho*/}
+                          {/*fim do novo cabeçalho*/}
 
-                        <Badge variant="secondary" className="mt-1 text-[9px] md:text-[10px] px-1.5 py-0.5">
-                          {dayAppointments.length} {dayAppointments.length === 1 ? "atendimento" : "atendimentos"}
-                        </Badge>
-                        {isDayHoliday && holidayName && (
-                          <Badge
-                            variant="destructive"
-                            className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center w-full"
-                          >
-                            <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                            <span className="truncate">{holidayName}</span>
+                          <Badge variant="secondary" className="mt-1 text-[9px] md:text-[10px] px-1.5 py-0.5">
+                            {dayAppointments.length} {dayAppointments.length === 1 ? "atendimento" : "atendimentos"}
                           </Badge>
-                        )}
-                      </div>
-                      <div className="space-y-1.5 md:space-y-2">
-                        {dayAppointments.length === 0 ? (
-                          <p className="text-[10px] md:text-xs text-muted-foreground text-center py-3 md:py-4">
-                            Nenhum agendamento
-                          </p>
-                        ) : (
-                          dayAppointments.map((apt) => (
-                            <DraggableAppointmentCard
-                              key={apt.id}
-                              id={apt.id}
-                              backgroundColor={
-                                apt.agents && apt.agents.length > 0 && apt.agents[0].color
-                                  ? `${apt.agents[0].color}15`
-                                  : "hsl(var(--primary) / 0.1)"
-                              }
-                              borderColor={
-                                apt.agents && apt.agents.length > 0 && apt.agents[0].color
-                                  ? apt.agents[0].color
-                                  : "hsl(var(--primary) / 0.2)"
-                              }
+                          {isDayHoliday && holidayName && (
+                            <Badge
+                              variant="destructive"
+                              className="mt-1 md:mt-2 text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 flex items-center gap-1 justify-center w-full"
                             >
-                              <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                {canEditCalendar() && !isReadOnly && (
-                                  <>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
-                                      onClick={() => handleEditAppointment(apt.id)}
-                                    >
-                                      <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                                      onClick={() => handleDeleteAppointment(apt.id)}
-                                    >
-                                      <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                              <div className="space-y-1">
-                                <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
-                                  <div className="font-semibold text-[10px] md:text-xs">{apt.title}</div>
+                              <PartyPopper className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                              <span className="truncate">{holidayName}</span>
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="space-y-1.5 md:space-y-2">
+                          {dayAppointments.length === 0 ? (
+                            <p className="text-[10px] md:text-xs text-muted-foreground text-center py-3 md:py-4">
+                              Nenhum agendamento
+                            </p>
+                          ) : (
+                            dayAppointments.map((apt) => (
+                              <DraggableAppointmentCard
+                                key={apt.id}
+                                id={apt.id}
+                                backgroundColor={
+                                  apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                                    ? `${apt.agents[0].color}15`
+                                    : "hsl(var(--primary) / 0.1)"
+                                }
+                                borderColor={
+                                  apt.agents && apt.agents.length > 0 && apt.agents[0].color
+                                    ? apt.agents[0].color
+                                    : "hsl(var(--primary) / 0.2)"
+                                }
+                              >
+                                <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex gap-0.5 md:gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                  {canEditCalendar() && !isReadOnly && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-background"
+                                        onClick={() => handleEditAppointment(apt.id)}
+                                      >
+                                        <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                                        onClick={() => handleDeleteAppointment(apt.id)}
+                                      >
+                                        <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                      </Button>
+                                    </>
+                                  )}
                                 </div>
+                                <div className="space-y-1">
+                                  <div>
+                                    <div className="font-medium text-[9px] md:text-[10px]">Cliente / Ticket:</div>
+                                    <div className="font-semibold text-[10px] md:text-xs">{apt.title}</div>
+                                  </div>
 
-                              <div>
-                                  <div className="font-medium text-[9px] md:text-[10px]">Despesas:</div>
-                                  <Badge
-                                    className="text-[9px] md:text-[10px] mt-0.5"
-                                    style={{
-                                      backgroundColor:
-                                        apt.expense_status === "separar_dia_anterior"
-                                          ? "#11734b"
-                                          : apt.expense_status === "separar_dinheiro"
-                                            ? "#d4edbc"
-                                            : "#ffcfc9",
-                                      color:
-                                        apt.expense_status === "separar_dinheiro" || apt.expense_status === "não_separar"
-                                          ? "#000"
-                                          : "#fff",
-                                    }}
-                                  >
-                                    {getExpenseLabel(apt.expense_status)}
-                                  </Badge>
+                                  <div>
+                                    <div className="font-medium text-[9px] md:text-[10px]">Despesas:</div>
+                                    <Badge
+                                      className="text-[9px] md:text-[10px] mt-0.5"
+                                      style={{
+                                        backgroundColor:
+                                          apt.expense_status === "separar_dia_anterior"
+                                            ? "#11734b"
+                                            : apt.expense_status === "separar_dinheiro"
+                                              ? "#d4edbc"
+                                              : "#ffcfc9",
+                                        color:
+                                          apt.expense_status === "separar_dinheiro" ||
+                                          apt.expense_status === "não_separar"
+                                            ? "#000"
+                                            : "#fff",
+                                      }}
+                                    >
+                                      {getExpenseLabel(apt.expense_status)}
+                                    </Badge>
+                                  </div>
                                 </div>
-                              </div>
-                            </DraggableAppointmentCard>
-                          ))
-                        )}
-                      </div>
-                    </DroppableDay>
-                  );
-                })}
+                              </DraggableAppointmentCard>
+                            ))
+                          )}
+                        </div>
+                      </DroppableDay>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         )}
 
         {/* Folgas e Férias - Terceira linha */}
@@ -643,7 +638,8 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stats.vacations.filter((v) => differenceInDays(parseISO(v.start_date), startOfDay(new Date())) <= 60).length === 0 ? (
+              {stats.vacations.filter((v) => differenceInDays(parseISO(v.start_date), startOfDay(new Date())) <= 60)
+                .length === 0 ? (
                 <p className="text-xs md:text-sm text-muted-foreground text-center py-6 md:py-8">
                   Nenhuma férias nos próximos 60 dias
                 </p>
@@ -656,48 +652,48 @@ export default function Dashboard() {
                       return differenceInDays(startDate, today) <= 60;
                     })
                     .map((vacation) => {
-                    const today = startOfDay(new Date());
-                    const startDate = parseISO(vacation.start_date);
-                    const daysUntilStart = differenceInDays(startDate, today);
+                      const today = startOfDay(new Date());
+                      const startDate = parseISO(vacation.start_date);
+                      const daysUntilStart = differenceInDays(startDate, today);
 
-                    let cardColorClass = "bg-muted/30 border-border";
-                    if (daysUntilStart <= 30) {
-                      cardColorClass = "bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-700";
-                    } else if (daysUntilStart <= 60) {
-                      cardColorClass = "bg-orange-100 border-orange-300 dark:bg-orange-900/30 dark:border-orange-700";
-                    }
+                      let cardColorClass = "bg-muted/30 border-border";
+                      if (daysUntilStart <= 30) {
+                        cardColorClass = "bg-red-100 border-red-300 dark:bg-red-900/30 dark:border-red-700";
+                      } else if (daysUntilStart <= 60) {
+                        cardColorClass = "bg-orange-100 border-orange-300 dark:bg-orange-900/30 dark:border-orange-700";
+                      }
 
-                    return (
-                      <div key={vacation.id} className={`border rounded p-2 md:p-3 text-xs ${cardColorClass}`}>
-                        <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-                          <CalendarDays className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
-                          <span className="font-semibold text-[10px] md:text-xs">
-                            {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
-                          </span>
+                      return (
+                        <div key={vacation.id} className={`border rounded p-2 md:p-3 text-xs ${cardColorClass}`}>
+                          <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                            <CalendarDays className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
+                            <span className="font-semibold text-[10px] md:text-xs">
+                              {vacation.profiles?.full_name || vacation.profiles?.email || "Usuário não definido"}
+                            </span>
+                          </div>
+                          <div className="text-[10px] md:text-xs text-muted-foreground space-y-0.5">
+                            <div>
+                              <span className="font-medium">Início:</span> {format(startDate, "dd/MM/yyyy")}
+                            </div>
+                            <div>
+                              <span className="font-medium">Fim:</span>{" "}
+                              {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
+                            </div>
+                            <div>
+                              <span className="font-medium">Dias:</span> {vacation.days || "-"}
+                            </div>
+                          </div>
+                          <Badge
+                            variant={
+                              daysUntilStart <= 30 ? "destructive" : daysUntilStart <= 60 ? "secondary" : "outline"
+                            }
+                            className="mt-1.5 text-[9px] md:text-[10px]"
+                          >
+                            {daysUntilStart <= 0 ? "Em andamento" : `${daysUntilStart} dias para inicio das férias`}
+                          </Badge>
                         </div>
-                        <div className="text-[10px] md:text-xs text-muted-foreground space-y-0.5">
-                          <div>
-                            <span className="font-medium">Início:</span> {format(startDate, "dd/MM/yyyy")}
-                          </div>
-                          <div>
-                            <span className="font-medium">Fim:</span>{" "}
-                            {format(parseISO(vacation.end_date), "dd/MM/yyyy")}
-                          </div>
-                          <div>
-                            <span className="font-medium">Dias:</span> {vacation.days || "-"}
-                          </div>
-                        </div>
-                        <Badge
-                          variant={
-                            daysUntilStart <= 30 ? "destructive" : daysUntilStart <= 60 ? "secondary" : "outline"
-                          }
-                          className="mt-1.5 text-[9px] md:text-[10px]"
-                        >
-                          {daysUntilStart <= 0 ? "Em andamento" : `${daysUntilStart} dias restantes`}
-                        </Badge>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               )}
             </CardContent>
