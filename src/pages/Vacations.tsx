@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown } from "lucide-react";
+import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown, Clock } from "lucide-react";
 import { format, differenceInDays, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import TimeBankTab from "@/components/vacations/TimeBankTab";
 
 interface Profile {
   id: string;
@@ -53,6 +55,8 @@ interface TimeOff {
   user_id: string | null;
   type: string;
   approved: boolean;
+  is_bonus_time_off: boolean;
+  bonus_reason: string | null;
   profiles: { full_name: string | null; email: string } | null;
 }
 
@@ -75,7 +79,7 @@ export default function Vacations() {
   const [activeTab, setActiveTab] = useState("vacations");
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const { toast } = useToast();
-  const { canEditVacations, sector, role } = useAuth();
+  const { canEditVacations, sector, role, user } = useAuth();
 
   // Administrativo pode editar de todos os setores
   // Outros admins só podem editar do seu setor
@@ -104,8 +108,13 @@ export default function Vacations() {
     user_id: "",
     type: "completa",
     approved: false,
+    is_bonus_time_off: false,
+    bonus_reason: "",
   });
   const [editingTimeOffId, setEditingTimeOffId] = useState<string | null>(null);
+
+  // Check if user is Dev for time bank access
+  const isDev = role === "dev";
 
   useEffect(() => {
     loadData();
@@ -133,7 +142,7 @@ export default function Vacations() {
           .from("vacations")
           .select("*, profiles(full_name, email, sector)")
           .order("start_date", { ascending: false }),
-        supabase.from("time_off").select("*, profiles(full_name, email, sector)").order("date", { ascending: false }),
+        supabase.from("time_off").select("*, profiles(full_name, email, sector)").order("date", { ascending: false }) as any,
       ]);
 
       // Filtrar profiles por setor (para o formulário)
@@ -296,15 +305,59 @@ export default function Vacations() {
       return;
     }
 
-    try {
-      if (editingTimeOffId) {
-        const { error } = await supabase.from("time_off").update(timeOffForm).eq("id", editingTimeOffId);
+    // Validate bonus reason if it's a bonus time off
+    if (timeOffForm.is_bonus_time_off && !timeOffForm.bonus_reason) {
+      toast({
+        title: "Erro",
+        description: "Selecione o motivo do abono",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    try {
+      // Prepare data for insertion/update
+      const timeOffData = {
+        date: timeOffForm.date,
+        user_id: timeOffForm.user_id || null,
+        type: timeOffForm.type,
+        approved: timeOffForm.approved,
+        is_bonus_time_off: timeOffForm.is_bonus_time_off,
+        bonus_reason: timeOffForm.is_bonus_time_off ? timeOffForm.bonus_reason : null,
+      };
+
+      if (editingTimeOffId) {
+        const { error } = await supabase.from("time_off").update(timeOffData).eq("id", editingTimeOffId);
         if (error) throw error;
         toast({ title: "Sucesso", description: "Folga atualizada!" });
       } else {
-        const { error } = await supabase.from("time_off").insert(timeOffForm);
+        // Insert the time off
+        const { data: insertedTimeOff, error } = await supabase
+          .from("time_off")
+          .insert(timeOffData)
+          .select()
+          .single();
         if (error) throw error;
+
+        // Deduct from time bank if user is selected
+        if (timeOffForm.user_id) {
+          const hoursChange = timeOffForm.is_bonus_time_off ? 0 : -8;
+          const bonusChange = timeOffForm.is_bonus_time_off ? -1 : 0;
+          const description = timeOffForm.is_bonus_time_off
+            ? `Folga abonada: ${timeOffForm.bonus_reason}`
+            : "Folga - desconto de 8 horas";
+
+          await supabase.rpc("upsert_time_bank", {
+            p_user_id: timeOffForm.user_id,
+            p_hours_change: hoursChange,
+            p_bonus_change: bonusChange,
+            p_description: description,
+            p_transaction_type: timeOffForm.is_bonus_time_off ? "debit_bonus" : "debit_hours",
+            p_related_time_off_id: insertedTimeOff?.id,
+            p_created_by: user?.id,
+          });
+        }
+
         toast({ title: "Sucesso", description: "Folga cadastrada!" });
       }
 
@@ -313,6 +366,8 @@ export default function Vacations() {
         user_id: "",
         type: "completa",
         approved: false,
+        is_bonus_time_off: false,
+        bonus_reason: "",
       });
       setEditingTimeOffId(null);
       loadData();
@@ -381,6 +436,8 @@ export default function Vacations() {
       user_id: timeOff.user_id || "",
       type: timeOff.type,
       approved: timeOff.approved,
+      is_bonus_time_off: timeOff.is_bonus_time_off || false,
+      bonus_reason: timeOff.bonus_reason || "",
     });
     setEditingTimeOffId(timeOff.id);
     setActiveTab("time-off");
@@ -428,6 +485,12 @@ export default function Vacations() {
             <Calendar className="h-4 w-4 mr-2" />
             Folgas
           </TabsTrigger>
+          {isDev && (
+            <TabsTrigger value="time-bank">
+              <Clock className="h-4 w-4 mr-2" />
+              Banco de Horas
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Vacations Tab */}
@@ -840,16 +903,57 @@ export default function Vacations() {
                     </div>
 
                     <div className="flex items-center space-x-2 pt-8">
-                      <input
+                      <Checkbox
                         id="approved"
-                        type="checkbox"
                         checked={timeOffForm.approved}
-                        onChange={(e) => setTimeOffForm({ ...timeOffForm, approved: e.target.checked })}
-                        className="h-4 w-4"
+                        onCheckedChange={(checked) => setTimeOffForm({ ...timeOffForm, approved: checked as boolean })}
                       />
-                      <Label htmlFor="approved">Liberado</Label>
+                      <Label htmlFor="approved" className="cursor-pointer">Liberado</Label>
                     </div>
+
+                    {/* Bonus Time Off Fields */}
+                    <div className="flex items-center space-x-2 pt-4">
+                      <Checkbox
+                        id="is_bonus_time_off"
+                        checked={timeOffForm.is_bonus_time_off}
+                        onCheckedChange={(checked) => setTimeOffForm({ 
+                          ...timeOffForm, 
+                          is_bonus_time_off: checked as boolean,
+                          bonus_reason: checked ? timeOffForm.bonus_reason : ""
+                        })}
+                      />
+                      <Label htmlFor="is_bonus_time_off" className="cursor-pointer">Folga Abonada?</Label>
+                    </div>
+
+                    {timeOffForm.is_bonus_time_off && (
+                      <div>
+                        <Label htmlFor="bonus_reason">Motivo do Abono *</Label>
+                        <Select
+                          value={timeOffForm.bonus_reason}
+                          onValueChange={(value) => setTimeOffForm({ ...timeOffForm, bonus_reason: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o motivo..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="TRE/TSE">TRE/TSE</SelectItem>
+                            <SelectItem value="Abonado pela Chefia">Abonado pela Chefia</SelectItem>
+                            <SelectItem value="Troca de feriado">Troca de feriado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Info about deduction */}
+                  <Alert className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      {timeOffForm.is_bonus_time_off
+                        ? "Será descontado 1 abono do banco de horas do funcionário."
+                        : "Será descontado 8 horas do banco de horas do funcionário."}
+                    </AlertDescription>
+                  </Alert>
 
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Button type="submit" className="w-full sm:w-auto">
@@ -867,6 +971,8 @@ export default function Vacations() {
                             user_id: "",
                             type: "completa",
                             approved: false,
+                            is_bonus_time_off: false,
+                            bonus_reason: "",
                           });
                         }}
                       >
@@ -950,6 +1056,13 @@ export default function Vacations() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Time Bank Tab - Only visible to Dev */}
+        {isDev && (
+          <TabsContent value="time-bank" className="space-y-6">
+            <TimeBankTab profiles={profiles} onRefresh={loadData} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
