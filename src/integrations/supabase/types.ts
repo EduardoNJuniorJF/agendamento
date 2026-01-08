@@ -353,30 +353,129 @@ export type Database = {
         }
         Relationships: []
       }
+      time_bank: {
+        Row: {
+          accumulated_hours: number
+          bonuses: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accumulated_hours?: number
+          bonuses?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accumulated_hours?: number
+          bonuses?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_bank_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_bank_transactions: {
+        Row: {
+          bonus_change: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          hours_change: number
+          id: string
+          related_time_off_id: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          bonus_change?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          hours_change?: number
+          id?: string
+          related_time_off_id?: string | null
+          transaction_type?: string
+          user_id: string
+        }
+        Update: {
+          bonus_change?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          hours_change?: number
+          id?: string
+          related_time_off_id?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_bank_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_bank_transactions_related_time_off_id_fkey"
+            columns: ["related_time_off_id"]
+            isOneToOne: false
+            referencedRelation: "time_off"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_bank_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_off: {
         Row: {
           approved: boolean | null
+          bonus_reason: string | null
           created_at: string | null
           date: string
           id: string
+          is_bonus_time_off: boolean | null
           type: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
           approved?: boolean | null
+          bonus_reason?: string | null
           created_at?: string | null
           date: string
           id?: string
+          is_bonus_time_off?: boolean | null
           type?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           approved?: boolean | null
+          bonus_reason?: string | null
           created_at?: string | null
           date?: string
           id?: string
+          is_bonus_time_off?: boolean | null
           type?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -536,6 +635,18 @@ export type Database = {
       is_agent_on_vacation: {
         Args: { p_agent_id: string; p_date: string }
         Returns: boolean
+      }
+      upsert_time_bank: {
+        Args: {
+          p_bonus_change?: number
+          p_created_by?: string
+          p_description?: string
+          p_hours_change?: number
+          p_related_time_off_id?: string
+          p_transaction_type?: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
