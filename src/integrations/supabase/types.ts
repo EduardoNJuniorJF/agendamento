@@ -490,6 +490,41 @@ export type Database = {
           },
         ]
       }
+      user_bonus_balances: {
+        Row: {
+          bonus_type: string
+          created_at: string
+          id: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bonus_type: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bonus_type?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bonus_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -635,6 +670,16 @@ export type Database = {
       is_agent_on_vacation: {
         Args: { p_agent_id: string; p_date: string }
         Returns: boolean
+      }
+      upsert_bonus_balance: {
+        Args: {
+          p_bonus_type: string
+          p_created_by?: string
+          p_description?: string
+          p_quantity_change: number
+          p_user_id: string
+        }
+        Returns: undefined
       }
       upsert_time_bank: {
         Args: {
