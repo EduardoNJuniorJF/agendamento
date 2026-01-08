@@ -148,16 +148,13 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     }
   };
 
-  // Get employees with their time bank data (including those without records)
-  const allEmployeesWithBank = profiles.map((profile) => {
-    const bankRecord = timeBank.find((tb) => tb.user_id === profile.id);
-    return {
-      id: profile.id,
-      name: profile.full_name || profile.email,
-      accumulated_hours: bankRecord?.accumulated_hours || 0,
-      bonuses: bankRecord?.bonuses || 0,
-    };
-  });
+  // Only show employees that have time bank records
+  const employeesWithBank = timeBank.map((tb) => ({
+    id: tb.user_id,
+    name: tb.profiles?.full_name || tb.profiles?.email || "Usuário",
+    accumulated_hours: tb.accumulated_hours || 0,
+    bonuses: tb.bonuses || 0,
+  }));
 
   if (loading) {
     return <div className="p-4">Carregando...</div>;
@@ -255,14 +252,14 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allEmployeesWithBank.length === 0 ? (
+                {employeesWithBank.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground">
-                      Nenhum funcionário encontrado
+                      Nenhum registro no banco de horas
                     </TableCell>
                   </TableRow>
                 ) : (
-                  allEmployeesWithBank.map((employee) => (
+                  employeesWithBank.map((employee) => (
                     <TableRow key={employee.id}>
                       <TableCell className="font-medium">{employee.name}</TableCell>
                       <TableCell>
