@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Clock, Gift } from "lucide-react";
+import { Plus, Clock, Gift, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -58,6 +58,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   const [timeBank, setTimeBank] = useState<TimeBank[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -148,6 +149,53 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     }
   };
 
+  const handleEdit = (employee: { id: string; name: string; accumulated_hours: number; bonuses: number }) => {
+    setEditingUserId(employee.id);
+    setForm({
+      user_id: employee.id,
+      hours: 0,
+      bonuses: 0,
+      description: "",
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setForm({
+      user_id: "",
+      hours: 0,
+      bonuses: 0,
+      description: "",
+    });
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (!confirm("Deseja excluir este registro do banco de horas? Esta ação não pode ser desfeita.")) return;
+
+    try {
+      const { error } = await supabase
+        .from("time_bank")
+        .delete()
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Registro excluído!",
+      });
+
+      loadTimeBank();
+      onRefresh();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   // Only show employees that have time bank records
   const employeesWithBank = timeBank.map((tb) => ({
     id: tb.user_id,
@@ -166,8 +214,8 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Cadastrar Horas/Abonos
+            {editingUserId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {editingUserId ? "Ajustar Saldo" : "Cadastrar Horas/Abonos"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -178,6 +226,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                 <Select
                   value={form.user_id}
                   onValueChange={(value) => setForm({ ...form, user_id: value })}
+                  disabled={!!editingUserId}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione..." />
@@ -225,9 +274,16 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
               </div>
             </div>
 
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : "Registrar"}
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Salvando..." : editingUserId ? "Atualizar" : "Registrar"}
+              </Button>
+              {editingUserId && (
+                <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                  Cancelar
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -249,12 +305,13 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                   <TableHead className="min-w-[120px]">Horas Acumuladas</TableHead>
                   <TableHead className="min-w-[100px]">Abonos</TableHead>
                   <TableHead className="min-w-[200px]">Observação</TableHead>
+                  <TableHead className="min-w-[100px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {employeesWithBank.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Nenhum registro no banco de horas
                     </TableCell>
                   </TableRow>
@@ -283,6 +340,26 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatHoursDisplay(employee.accumulated_hours)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleEdit(employee)}
+                          >
+                            <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleDelete(employee.id)}
+                          >
+                            <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
