@@ -37,6 +37,7 @@ interface EmployeeWithBank {
   name: string;
   accumulated_hours: number;
   bonuses: number;
+  bonus_breakdown: { bonus_type: string; quantity: number }[];
 }
 
 // Helper function to format hours as readable text
@@ -64,6 +65,7 @@ const formatHoursDisplay = (hours: number): string => {
 
 export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   const [timeBank, setTimeBank] = useState<TimeBank[]>([]);
+  const [bonusBalances, setBonusBalances] = useState<Record<string, { bonus_type: string; quantity: number }[]>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -90,7 +92,28 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
 
   useEffect(() => {
     loadTimeBank();
+    loadBonusBalances();
   }, []);
+
+  const loadBonusBalances = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_bonus_balances")
+        .select("user_id, bonus_type, quantity")
+        .gt("quantity", 0);
+
+      if (error) throw error;
+
+      const grouped: Record<string, { bonus_type: string; quantity: number }[]> = {};
+      (data || []).forEach((row: any) => {
+        if (!grouped[row.user_id]) grouped[row.user_id] = [];
+        grouped[row.user_id].push({ bonus_type: row.bonus_type, quantity: Number(row.quantity) || 0 });
+      });
+      setBonusBalances(grouped);
+    } catch (error) {
+      console.error("Error loading bonus balances:", error);
+    }
+  };
 
   const loadTimeBank = async () => {
     try {
@@ -180,6 +203,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       });
 
       loadTimeBank();
+      loadBonusBalances();
       onRefresh();
     } catch (error: any) {
       toast({
@@ -243,8 +267,9 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       });
 
       handleCloseEditDialog();
-      loadTimeBank();
-      onRefresh();
+       loadTimeBank();
+       loadBonusBalances();
+       onRefresh();
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -284,12 +309,19 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   };
 
   // Only show employees that have time bank records
-  const employeesWithBank: EmployeeWithBank[] = timeBank.map((tb) => ({
-    id: tb.user_id,
-    name: tb.profiles?.full_name || tb.profiles?.email || "Usuário",
-    accumulated_hours: tb.accumulated_hours || 0,
-    bonuses: tb.bonuses || 0,
-  }));
+  const employeesWithBank: EmployeeWithBank[] = timeBank.map((tb) => {
+    const breakdown = bonusBalances[tb.user_id] || [];
+    const typedTotal = breakdown.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
+
+    return {
+      id: tb.user_id,
+      name: tb.profiles?.full_name || tb.profiles?.email || "Usuário",
+      accumulated_hours: tb.accumulated_hours || 0,
+      // Prefer typed bonus totals; fallback to legacy column
+      bonuses: breakdown.length > 0 ? typedTotal : (tb.bonuses || 0),
+      bonus_breakdown: breakdown,
+    };
+  });
 
   if (loading) {
     return <div className="p-4">Carregando...</div>;
@@ -394,6 +426,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                   <TableHead className="min-w-[180px]">Funcionário</TableHead>
                   <TableHead className="min-w-[120px]">Horas Acumuladas</TableHead>
                   <TableHead className="min-w-[100px]">Abonos</TableHead>
+                  <TableHead className="min-w-[220px]">Tipos de Abono</TableHead>
                   <TableHead className="min-w-[200px]">Observação</TableHead>
                   <TableHead className="min-w-[100px]">Ações</TableHead>
                 </TableRow>
@@ -401,9 +434,9 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
               <TableBody>
                 {employeesWithBank.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      Nenhum registro no banco de horas
-                    </TableCell>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        Nenhum registro no banco de horas
+                      </TableCell>
                   </TableRow>
                 ) : (
                   employeesWithBank.map((employee) => (
@@ -431,6 +464,19 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                           {employee.bonuses >= 0 ? "+" : ""}
                           {employee.bonuses}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {employee.bonus_breakdown.length === 0 ? (
+                          <span className="text-muted-foreground">-</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {employee.bonus_breakdown.map((b) => (
+                              <Badge key={b.bonus_type} variant="outline" className="text-xs">
+                                {b.bonus_type}: {b.quantity}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatHoursDisplay(employee.accumulated_hours)}
