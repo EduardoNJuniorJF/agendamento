@@ -1132,7 +1132,7 @@ export default function Vacations() {
         {/* Time Bank Tab - Only visible to Dev */}
         {isDev && (
           <TabsContent value="time-bank" className="space-y-6">
-            <TimeBankTab profiles={profiles} onRefresh={loadData} />
+            <TimeBankTab profiles={profiles} onRefresh={() => { loadData(); loadUserBonusBalances(); }} />
           </TabsContent>
         )}
       </Tabs>
