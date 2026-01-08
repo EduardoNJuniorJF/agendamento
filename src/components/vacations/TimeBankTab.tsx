@@ -66,7 +66,6 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     user_id: "",
     hours: 0,
     bonuses: 0,
-    description: "",
   });
 
   useEffect(() => {
@@ -117,7 +116,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
         p_user_id: form.user_id,
         p_hours_change: form.hours,
         p_bonus_change: form.bonuses,
-        p_description: form.description || `Crédito manual: ${form.hours}h, ${form.bonuses} abono(s)`,
+        p_description: `Crédito manual: ${form.hours}h, ${form.bonuses} abono(s)`,
         p_transaction_type: "credit",
         p_created_by: user?.id,
       });
@@ -133,7 +132,6 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
         user_id: "",
         hours: 0,
         bonuses: 0,
-        description: "",
       });
 
       loadTimeBank();
@@ -155,7 +153,6 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       user_id: employee.id,
       hours: 0,
       bonuses: 0,
-      description: "",
     });
   };
 
@@ -165,7 +162,6 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       user_id: "",
       hours: 0,
       bonuses: 0,
-      description: "",
     });
   };
 
@@ -260,16 +256,6 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                   value={form.bonuses}
                   onChange={(e) => setForm({ ...form, bonuses: parseFloat(e.target.value) || 0 })}
                   placeholder="Ex: 1 ou -1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Input
-                  id="description"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Motivo do lançamento"
                 />
               </div>
             </div>
