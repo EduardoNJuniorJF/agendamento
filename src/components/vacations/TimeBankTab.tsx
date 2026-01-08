@@ -69,11 +69,15 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Bonus types options
+  const BONUS_TYPES = ["TRE/TSE", "Liberado pela Chefia", "Troca de Feriado"];
+
   // Form for new registrations
   const [form, setForm] = useState({
     user_id: "",
     hours: 0,
     bonuses: 0,
+    bonus_type: "",
   });
 
   // Edit dialog state
@@ -125,19 +129,43 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       return;
     }
 
+    // Validate bonus type if adding bonuses
+    if (form.bonuses > 0 && !form.bonus_type) {
+      toast({
+        title: "Erro",
+        description: "Selecione o tipo de abono",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      const { error } = await supabase.rpc("upsert_time_bank", {
-        p_user_id: form.user_id,
-        p_hours_change: form.hours,
-        p_bonus_change: form.bonuses,
-        p_description: `Crédito manual: ${form.hours}h, ${form.bonuses} abono(s)`,
-        p_transaction_type: "credit",
-        p_created_by: user?.id,
-      });
+      // If adding bonuses, use the new upsert_bonus_balance function
+      if (form.bonuses !== 0 && form.bonus_type) {
+        const { error: bonusError } = await supabase.rpc("upsert_bonus_balance", {
+          p_user_id: form.user_id,
+          p_bonus_type: form.bonus_type,
+          p_quantity_change: form.bonuses,
+          p_description: `Crédito manual: ${form.bonuses} abono(s) - ${form.bonus_type}`,
+          p_created_by: user?.id,
+        });
+        if (bonusError) throw bonusError;
+      }
 
-      if (error) throw error;
+      // If adding hours, use the existing upsert_time_bank function
+      if (form.hours !== 0) {
+        const { error: hoursError } = await supabase.rpc("upsert_time_bank", {
+          p_user_id: form.user_id,
+          p_hours_change: form.hours,
+          p_bonus_change: 0,
+          p_description: `Crédito manual: ${form.hours}h`,
+          p_transaction_type: "credit",
+          p_created_by: user?.id,
+        });
+        if (hoursError) throw hoursError;
+      }
 
       toast({
         title: "Sucesso",
@@ -148,6 +176,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
         user_id: "",
         hours: 0,
         bonuses: 0,
+        bonus_type: "",
       });
 
       loadTimeBank();
@@ -319,6 +348,27 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                   placeholder="Ex: 1 ou -1"
                 />
               </div>
+
+              {form.bonuses > 0 && (
+                <div>
+                  <Label htmlFor="bonus_type">Tipo de Abono *</Label>
+                  <Select
+                    value={form.bonus_type}
+                    onValueChange={(value) => setForm({ ...form, bonus_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BONUS_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <Button type="submit" disabled={submitting}>

@@ -68,6 +68,12 @@ interface VacationReminder {
   reminder_type: string;
 }
 
+interface UserBonusBalance {
+  user_id: string;
+  bonus_type: string;
+  quantity: number;
+}
+
 export default function Vacations() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [agents, setAgents] = useState<{ id: string; name: string; color: string | null }[]>([]);
@@ -75,6 +81,7 @@ export default function Vacations() {
   const [timeOffs, setTimeOffs] = useState<TimeOff[]>([]);
   const [reminders, setReminders] = useState<VacationReminder[]>([]);
   const [localHolidays, setLocalHolidays] = useState<LocalHolidayData[]>([]);
+  const [userBonusBalances, setUserBonusBalances] = useState<UserBonusBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("vacations");
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -120,6 +127,7 @@ export default function Vacations() {
     loadData();
     loadReminders();
     loadLocalHolidays();
+    loadUserBonusBalances();
   }, [sector, role]);
 
   const loadLocalHolidays = async () => {
@@ -130,6 +138,20 @@ export default function Vacations() {
       setLocalHolidays(data || []);
     } catch (error) {
       console.error("Error loading local holidays:", error);
+    }
+  };
+
+  const loadUserBonusBalances = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_bonus_balances")
+        .select("user_id, bonus_type, quantity")
+        .gt("quantity", 0);
+
+      if (error) throw error;
+      setUserBonusBalances(data || []);
+    } catch (error) {
+      console.error("Error loading user bonus balances:", error);
     }
   };
 
@@ -342,21 +364,31 @@ export default function Vacations() {
         // Deduct from time bank if user is selected
         if (timeOffForm.user_id) {
           const isBonusTimeOff = timeOffData.is_bonus_time_off;
-          const hoursChange = isBonusTimeOff ? 0 : -8;
-          const bonusChange = isBonusTimeOff ? -1 : 0;
-          const description = isBonusTimeOff
-            ? `Folga abonada: ${timeOffData.bonus_reason}`
-            : "Folga - desconto de 8 horas";
-
-          await supabase.rpc("upsert_time_bank", {
-            p_user_id: timeOffForm.user_id,
-            p_hours_change: hoursChange,
-            p_bonus_change: bonusChange,
-            p_description: description,
-            p_transaction_type: isBonusTimeOff ? "debit_bonus" : "debit_hours",
-            p_related_time_off_id: insertedTimeOff?.id,
-            p_created_by: user?.id,
-          });
+          
+          if (isBonusTimeOff && timeOffData.bonus_reason) {
+            // Deduct from user_bonus_balances using the new function
+            await supabase.rpc("upsert_bonus_balance", {
+              p_user_id: timeOffForm.user_id,
+              p_bonus_type: timeOffData.bonus_reason,
+              p_quantity_change: -1,
+              p_description: `Folga abonada: ${timeOffData.bonus_reason}`,
+              p_created_by: user?.id,
+            });
+          } else {
+            // Deduct hours from time_bank
+            await supabase.rpc("upsert_time_bank", {
+              p_user_id: timeOffForm.user_id,
+              p_hours_change: -8,
+              p_bonus_change: 0,
+              p_description: "Folga - desconto de 8 horas",
+              p_transaction_type: "debit_hours",
+              p_related_time_off_id: insertedTimeOff?.id,
+              p_created_by: user?.id,
+            });
+          }
+          
+          // Reload bonus balances after deduction
+          loadUserBonusBalances();
         }
 
         toast({ title: "Sucesso", description: "Folga cadastrada!" });
@@ -929,19 +961,46 @@ export default function Vacations() {
                     {timeOffForm.is_bonus_time_off && (
                       <div>
                         <Label htmlFor="bonus_reason">Motivo do Abono *</Label>
-                        <Select
-                          value={timeOffForm.bonus_reason}
-                          onValueChange={(value) => setTimeOffForm({ ...timeOffForm, bonus_reason: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o motivo..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="TRE/TSE">TRE/TSE</SelectItem>
-                            <SelectItem value="Abonado pela Chefia">Abonado pela Chefia</SelectItem>
-                            <SelectItem value="Troca de feriado">Troca de feriado</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        {(() => {
+                          // Get available bonus types for selected user
+                          const availableBonuses = userBonusBalances.filter(
+                            (b) => b.user_id === timeOffForm.user_id && b.quantity > 0
+                          );
+                          
+                          if (!timeOffForm.user_id) {
+                            return (
+                              <p className="text-sm text-muted-foreground mt-2">
+                                Selecione um funcionário primeiro
+                              </p>
+                            );
+                          }
+                          
+                          if (availableBonuses.length === 0) {
+                            return (
+                              <p className="text-sm text-destructive mt-2">
+                                Este funcionário não possui abonos disponíveis
+                              </p>
+                            );
+                          }
+                          
+                          return (
+                            <Select
+                              value={timeOffForm.bonus_reason}
+                              onValueChange={(value) => setTimeOffForm({ ...timeOffForm, bonus_reason: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o motivo..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableBonuses.map((bonus) => (
+                                  <SelectItem key={bonus.bonus_type} value={bonus.bonus_type}>
+                                    {bonus.bonus_type} ({bonus.quantity} disponível{bonus.quantity > 1 ? 's' : ''})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
