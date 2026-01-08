@@ -308,17 +308,25 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     }
   };
 
-  // Only show employees that have time bank records
-  const employeesWithBank: EmployeeWithBank[] = timeBank.map((tb) => {
-    const breakdown = bonusBalances[tb.user_id] || [];
+  // Show employees that have either a time bank record OR typed bonus balances
+  const employeesWithBank: EmployeeWithBank[] = Array.from(
+    new Set<string>([
+      ...timeBank.map((tb) => tb.user_id),
+      ...Object.keys(bonusBalances),
+    ])
+  ).map((userId) => {
+    const tb = timeBank.find((row) => row.user_id === userId);
+    const profile = profiles.find((p) => p.id === userId);
+
+    const breakdown = bonusBalances[userId] || [];
     const typedTotal = breakdown.reduce((sum, b) => sum + (Number(b.quantity) || 0), 0);
 
     return {
-      id: tb.user_id,
-      name: tb.profiles?.full_name || tb.profiles?.email || "Usuário",
-      accumulated_hours: tb.accumulated_hours || 0,
+      id: userId,
+      name: profile?.full_name || profile?.email || tb?.profiles?.full_name || tb?.profiles?.email || "Usuário",
+      accumulated_hours: tb?.accumulated_hours || 0,
       // Prefer typed bonus totals; fallback to legacy column
-      bonuses: breakdown.length > 0 ? typedTotal : (tb.bonuses || 0),
+      bonuses: breakdown.length > 0 ? typedTotal : (tb?.bonuses || 0),
       bonus_breakdown: breakdown,
     };
   });
