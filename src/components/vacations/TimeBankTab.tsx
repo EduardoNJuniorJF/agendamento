@@ -307,8 +307,12 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                       <TableCell className="font-medium">{employee.name}</TableCell>
                       <TableCell>
                         <Badge
-                          variant={employee.accumulated_hours >= 0 ? "default" : "destructive"}
-                          className="text-sm"
+                          variant="outline"
+                          className={`text-sm ${
+                            employee.accumulated_hours >= 0 
+                              ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700" 
+                              : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700"
+                          }`}
                         >
                           {employee.accumulated_hours >= 0 ? "+" : ""}
                           {employee.accumulated_hours}h
