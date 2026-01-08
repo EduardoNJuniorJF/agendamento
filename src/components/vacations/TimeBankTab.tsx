@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Clock, Gift, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +30,13 @@ interface TimeBank {
 interface TimeBankTabProps {
   profiles: Profile[];
   onRefresh: () => void;
+}
+
+interface EmployeeWithBank {
+  id: string;
+  name: string;
+  accumulated_hours: number;
+  bonuses: number;
 }
 
 // Helper function to format hours as readable text
@@ -58,12 +66,20 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   const [timeBank, setTimeBank] = useState<TimeBank[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Form for new registrations
   const [form, setForm] = useState({
     user_id: "",
+    hours: 0,
+    bonuses: 0,
+  });
+
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<EmployeeWithBank | null>(null);
+  const [editForm, setEditForm] = useState({
     hours: 0,
     bonuses: 0,
   });
@@ -147,22 +163,68 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     }
   };
 
-  const handleEdit = (employee: { id: string; name: string; accumulated_hours: number; bonuses: number }) => {
-    setEditingUserId(employee.id);
-    setForm({
-      user_id: employee.id,
-      hours: 0,
-      bonuses: 0,
+  const handleOpenEditDialog = (employee: EmployeeWithBank) => {
+    setEditingEmployee(employee);
+    setEditForm({
+      hours: employee.accumulated_hours,
+      bonuses: employee.bonuses,
     });
+    setEditDialogOpen(true);
   };
 
-  const handleCancelEdit = () => {
-    setEditingUserId(null);
-    setForm({
-      user_id: "",
-      hours: 0,
-      bonuses: 0,
-    });
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingEmployee(null);
+    setEditForm({ hours: 0, bonuses: 0 });
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingEmployee) return;
+
+    setSubmitting(true);
+
+    try {
+      // Calculate the difference to apply
+      const hoursDiff = editForm.hours - editingEmployee.accumulated_hours;
+      const bonusesDiff = editForm.bonuses - editingEmployee.bonuses;
+
+      if (hoursDiff === 0 && bonusesDiff === 0) {
+        toast({
+          title: "Aviso",
+          description: "Nenhuma alteração detectada",
+        });
+        handleCloseEditDialog();
+        return;
+      }
+
+      const { error } = await supabase.rpc("upsert_time_bank", {
+        p_user_id: editingEmployee.id,
+        p_hours_change: hoursDiff,
+        p_bonus_change: bonusesDiff,
+        p_description: `Ajuste manual: ${hoursDiff >= 0 ? '+' : ''}${hoursDiff}h, ${bonusesDiff >= 0 ? '+' : ''}${bonusesDiff} abono(s)`,
+        p_transaction_type: "adjustment",
+        p_created_by: user?.id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Saldo atualizado!",
+      });
+
+      handleCloseEditDialog();
+      loadTimeBank();
+      onRefresh();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async (userId: string) => {
@@ -193,7 +255,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   };
 
   // Only show employees that have time bank records
-  const employeesWithBank = timeBank.map((tb) => ({
+  const employeesWithBank: EmployeeWithBank[] = timeBank.map((tb) => ({
     id: tb.user_id,
     name: tb.profiles?.full_name || tb.profiles?.email || "Usuário",
     accumulated_hours: tb.accumulated_hours || 0,
@@ -210,19 +272,18 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {editingUserId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            {editingUserId ? "Ajustar Saldo" : "Cadastrar Horas/Abonos"}
+            <Plus className="h-5 w-5" />
+            Cadastrar Horas/Abonos
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="user">Funcionário *</Label>
                 <Select
                   value={form.user_id}
                   onValueChange={(value) => setForm({ ...form, user_id: value })}
-                  disabled={!!editingUserId}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione..." />
@@ -260,16 +321,9 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit" disabled={submitting}>
-                {submitting ? "Salvando..." : editingUserId ? "Atualizar" : "Registrar"}
-              </Button>
-              {editingUserId && (
-                <Button type="button" variant="outline" onClick={handleCancelEdit}>
-                  Cancelar
-                </Button>
-              )}
-            </div>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Salvando..." : "Registrar"}
+            </Button>
           </form>
         </CardContent>
       </Card>
@@ -337,7 +391,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                             size="sm"
                             variant="ghost"
                             className="h-7 w-7 p-0"
-                            onClick={() => handleEdit(employee)}
+                            onClick={() => handleOpenEditDialog(employee)}
                           >
                             <Edit className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
@@ -359,6 +413,49 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Saldo - {editingEmployee?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="edit-hours">Horas Acumuladas</Label>
+              <Input
+                id="edit-hours"
+                type="number"
+                value={editForm.hours}
+                onChange={(e) => setEditForm({ ...editForm, hours: parseFloat(e.target.value) || 0 })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Valor atual: {editingEmployee?.accumulated_hours}h
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="edit-bonuses">Abonos</Label>
+              <Input
+                id="edit-bonuses"
+                type="number"
+                value={editForm.bonuses}
+                onChange={(e) => setEditForm({ ...editForm, bonuses: parseFloat(e.target.value) || 0 })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Valor atual: {editingEmployee?.bonuses}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseEditDialog}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEditSubmit} disabled={submitting}>
+              {submitting ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
