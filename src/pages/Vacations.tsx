@@ -341,10 +341,11 @@ export default function Vacations() {
 
         // Deduct from time bank if user is selected
         if (timeOffForm.user_id) {
-          const hoursChange = timeOffForm.is_bonus_time_off ? 0 : -8;
-          const bonusChange = timeOffForm.is_bonus_time_off ? -1 : 0;
-          const description = timeOffForm.is_bonus_time_off
-            ? `Folga abonada: ${timeOffForm.bonus_reason}`
+          const isBonusTimeOff = timeOffData.is_bonus_time_off;
+          const hoursChange = isBonusTimeOff ? 0 : -8;
+          const bonusChange = isBonusTimeOff ? -1 : 0;
+          const description = isBonusTimeOff
+            ? `Folga abonada: ${timeOffData.bonus_reason}`
             : "Folga - desconto de 8 horas";
 
           await supabase.rpc("upsert_time_bank", {
@@ -352,7 +353,7 @@ export default function Vacations() {
             p_hours_change: hoursChange,
             p_bonus_change: bonusChange,
             p_description: description,
-            p_transaction_type: timeOffForm.is_bonus_time_off ? "debit_bonus" : "debit_hours",
+            p_transaction_type: isBonusTimeOff ? "debit_bonus" : "debit_hours",
             p_related_time_off_id: insertedTimeOff?.id,
             p_created_by: user?.id,
           });
@@ -997,6 +998,7 @@ export default function Vacations() {
                       <TableHead className="min-w-[100px]">Data</TableHead>
                       <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
+                      <TableHead className="min-w-[120px]">Desconto</TableHead>
                       <TableHead className="min-w-[100px]">Status</TableHead>
                       <TableHead className="min-w-[100px]">Ações</TableHead>
                     </TableRow>
@@ -1018,7 +1020,18 @@ export default function Vacations() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
-                            {timeOff.type === "completa" ? "Completa" : "Parcial"}
+                            {timeOff.type === "integral" ? "Período Integral" : timeOff.type === "completa" ? "Completa" : "Parcial"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${timeOff.is_bonus_time_off 
+                              ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700" 
+                              : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                            }`}
+                          >
+                            {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
                           </Badge>
                         </TableCell>
                         <TableCell>
