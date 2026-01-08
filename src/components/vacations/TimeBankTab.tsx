@@ -285,12 +285,21 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
     if (!confirm("Deseja excluir este registro do banco de horas? Esta ação não pode ser desfeita.")) return;
 
     try {
-      const { error } = await supabase
+      // Delete from time_bank
+      const { error: timeBankError } = await supabase
         .from("time_bank")
         .delete()
         .eq("user_id", userId);
 
-      if (error) throw error;
+      if (timeBankError) throw timeBankError;
+
+      // Also delete from user_bonus_balances
+      const { error: bonusError } = await supabase
+        .from("user_bonus_balances")
+        .delete()
+        .eq("user_id", userId);
+
+      if (bonusError) throw bonusError;
 
       toast({
         title: "Sucesso",
@@ -298,6 +307,7 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
       });
 
       loadTimeBank();
+      loadBonusBalances();
       onRefresh();
     } catch (error: any) {
       toast({
