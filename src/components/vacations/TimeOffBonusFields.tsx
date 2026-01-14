@@ -15,6 +15,8 @@ const BONUS_REASONS = [
   { value: "TRE/TSE", label: "TRE/TSE" },
   { value: "Abonado pela Chefia", label: "Abonado pela Chefia" },
   { value: "Troca de feriado", label: "Troca de feriado" },
+  { value: "Atestado", label: "Atestado" },
+  { value: "Licença Médica", label: "Licença Médica" },
 ];
 
 export default function TimeOffBonusFields({
