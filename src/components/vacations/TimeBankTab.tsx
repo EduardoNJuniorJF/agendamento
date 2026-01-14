@@ -72,7 +72,14 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
   const { user } = useAuth();
 
   // Bonus types options
-  const BONUS_TYPES = ["TRE/TSE", "Liberado pela Chefia", "Troca de Feriado"];
+  const BONUS_TYPES = [
+    "TRE/TSE",
+    "Liberado pela Chefia",
+    "Troca de Feriado",
+    "Atestado",
+    "Licença Médica",
+  ];
+
 
   // Form for new registrations
   const [form, setForm] = useState({
