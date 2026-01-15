@@ -135,6 +135,12 @@ export default function Vacations() {
   const [editingVacationId, setEditingVacationId] = useState<string | null>(null);
   const [vacationSortOrder, setVacationSortOrder] = useState<string>("start_asc");
 
+  // Vacation list filters and pagination
+  const [vacationMonth, setVacationMonth] = useState<Date>(new Date());
+  const [vacationFilterUser, setVacationFilterUser] = useState<string>("");
+  const [vacationFilterPeriod, setVacationFilterPeriod] = useState<string>("");
+  const [vacationFilterStatus, setVacationFilterStatus] = useState<string>("");
+
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
     date: "",
@@ -810,22 +816,117 @@ export default function Vacations() {
           )}
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-base md:text-lg">Férias Cadastradas</CardTitle>
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                <Select value={vacationSortOrder} onValueChange={setVacationSortOrder}>
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Ordenar por..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="start_asc">Data Saída (mais próxima)</SelectItem>
-                    <SelectItem value="start_desc">Data Saída (mais distante)</SelectItem>
-                    <SelectItem value="expiry_desc">Vencimento (mais recente)</SelectItem>
-                    <SelectItem value="expiry_asc">Vencimento (mais antigo)</SelectItem>
-                  </SelectContent>
-                </Select>
+            <CardHeader className="space-y-4 pb-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardTitle className="text-base md:text-lg">Férias Cadastradas</CardTitle>
+                
+                {/* Month Navigation */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setVacationMonth(subMonths(vacationMonth, 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="min-w-[140px] text-center font-medium capitalize">
+                    {format(vacationMonth, "MMMM yyyy", { locale: ptBR })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setVacationMonth(addMonthsFn(vacationMonth, 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Funcionário</Label>
+                  <Select value={vacationFilterUser} onValueChange={setVacationFilterUser}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.full_name || profile.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Período</Label>
+                  <Select value={vacationFilterPeriod} onValueChange={setVacationFilterPeriod}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="0">Integral</SelectItem>
+                      <SelectItem value="1">1º Período</SelectItem>
+                      <SelectItem value="2">2º Período</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Status</Label>
+                  <Select value={vacationFilterStatus} onValueChange={setVacationFilterStatus}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="scheduled">Agendado</SelectItem>
+                      <SelectItem value="in_progress">Em andamento</SelectItem>
+                      <SelectItem value="completed">Finalizada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Ordenar por</Label>
+                  <Select value={vacationSortOrder} onValueChange={setVacationSortOrder}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Ordenar por..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="start_asc">Data Saída (mais próxima)</SelectItem>
+                      <SelectItem value="start_desc">Data Saída (mais distante)</SelectItem>
+                      <SelectItem value="expiry_desc">Vencimento (mais recente)</SelectItem>
+                      <SelectItem value="expiry_asc">Vencimento (mais antigo)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              {(vacationFilterUser || vacationFilterPeriod || vacationFilterStatus) && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setVacationFilterUser("");
+                      setVacationFilterPeriod("");
+                      setVacationFilterStatus("");
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Limpar filtros
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -843,8 +944,55 @@ export default function Vacations() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {[...vacations]
-                      .sort((a, b) => {
+                    {(() => {
+                      const monthStart = startOfMonth(vacationMonth);
+                      const monthEnd = endOfMonth(vacationMonth);
+                      const today = startOfDay(new Date());
+
+                      // Helper function to get vacation status
+                      const getVacationStatus = (vacation: Vacation) => {
+                        const startDate = startOfDay(parseISO(vacation.start_date));
+                        const endDate = startOfDay(parseISO(vacation.end_date));
+                        
+                        if (today > endDate) return "completed";
+                        if (today >= startDate && today <= endDate) return "in_progress";
+                        return "scheduled";
+                      };
+
+                      // Filter vacations
+                      const filteredVacations = vacations.filter((vacation) => {
+                        const vacationStart = parseISO(vacation.start_date);
+                        const vacationEnd = parseISO(vacation.end_date);
+                        
+                        // Check if the vacation overlaps with the selected month
+                        const isInMonth = 
+                          (vacationStart >= monthStart && vacationStart <= monthEnd) ||
+                          (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
+                          (vacationStart <= monthStart && vacationEnd >= monthEnd);
+                        
+                        if (!isInMonth) return false;
+
+                        // Filter by user
+                        if (vacationFilterUser && vacationFilterUser !== "all" && vacation.user_id !== vacationFilterUser) {
+                          return false;
+                        }
+
+                        // Filter by period
+                        if (vacationFilterPeriod && vacationFilterPeriod !== "all" && vacation.period_number.toString() !== vacationFilterPeriod) {
+                          return false;
+                        }
+
+                        // Filter by status
+                        if (vacationFilterStatus && vacationFilterStatus !== "all") {
+                          const status = getVacationStatus(vacation);
+                          if (status !== vacationFilterStatus) return false;
+                        }
+
+                        return true;
+                      });
+
+                      // Sort vacations
+                      const sortedVacations = [...filteredVacations].sort((a, b) => {
                         switch (vacationSortOrder) {
                           case "start_asc":
                             return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
@@ -863,9 +1011,19 @@ export default function Vacations() {
                           default:
                             return 0;
                         }
-                      })
-                      .map((vacation) => {
-                        const today = startOfDay(new Date());
+                      });
+
+                      if (sortedVacations.length === 0) {
+                        return (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                              Nenhuma férias encontrada para este mês
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+
+                      return sortedVacations.map((vacation) => {
                         const startDate = startOfDay(parseISO(vacation.start_date));
                         const endDate = startOfDay(parseISO(vacation.end_date));
 
@@ -944,7 +1102,8 @@ export default function Vacations() {
                             </TableCell>
                           </TableRow>
                         );
-                      })}
+                      });
+                    })()}
                   </TableBody>
                 </Table>
               </div>
