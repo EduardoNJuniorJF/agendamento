@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown, Clock } from "lucide-react";
-import { format, differenceInDays, parseISO, startOfDay } from "date-fns";
+import { format, differenceInDays, parseISO, startOfDay, eachDayOfInterval, isWeekend } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -52,6 +52,7 @@ interface Vacation {
 interface TimeOff {
   id: string;
   date: string;
+  end_date: string | null;
   user_id: string | null;
   type: string;
   approved: boolean;
@@ -112,6 +113,7 @@ export default function Vacations() {
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
     date: "",
+    end_date: "",
     user_id: "",
     type: "completa",
     approved: false,
@@ -119,6 +121,39 @@ export default function Vacations() {
     bonus_reason: "",
   });
   const [editingTimeOffId, setEditingTimeOffId] = useState<string | null>(null);
+
+  // Calculate working days between two dates (excluding weekends and holidays)
+  const calculateWorkingDays = (startDate: string, endDate: string | null): number => {
+    if (!endDate || !startDate) return 1;
+    
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    
+    if (end < start) return 1;
+    
+    const days = eachDayOfInterval({ start, end });
+    
+    // Filter out weekends and holidays
+    const workingDays = days.filter(day => {
+      if (isWeekend(day)) return false;
+      
+      // Check if it's a local holiday
+      const isLocalHoliday = localHolidays.some(holiday => {
+        const holidayDate = new Date(day.getFullYear(), holiday.month - 1, holiday.day);
+        return day.getTime() === holidayDate.getTime() && 
+               (holiday.year === null || holiday.year === day.getFullYear());
+      });
+      
+      return !isLocalHoliday;
+    });
+    
+    return workingDays.length || 1;
+  };
+
+  // Get the number of days for deduction display
+  const getDeductionDays = () => {
+    return calculateWorkingDays(timeOffForm.date, timeOffForm.end_date || null);
+  };
 
   // Check if user is Dev for time bank access
   const isDev = role === "dev";
@@ -338,9 +373,13 @@ export default function Vacations() {
     }
 
     try {
+      // Calculate working days for proportional deduction
+      const workingDays = calculateWorkingDays(timeOffForm.date, timeOffForm.end_date || null);
+      
       // Prepare data for insertion/update
       const timeOffData = {
         date: timeOffForm.date,
+        end_date: timeOffForm.end_date || null,
         user_id: timeOffForm.user_id || null,
         type: timeOffForm.type,
         approved: timeOffForm.approved,
@@ -367,20 +406,22 @@ export default function Vacations() {
           
           if (isBonusTimeOff && timeOffData.bonus_reason) {
             // Deduct from user_bonus_balances using the new function
+            // For bonus time off, deduct the number of working days
             await supabase.rpc("upsert_bonus_balance", {
               p_user_id: timeOffForm.user_id,
               p_bonus_type: timeOffData.bonus_reason,
-              p_quantity_change: -1,
-              p_description: `Folga abonada: ${timeOffData.bonus_reason}`,
+              p_quantity_change: -workingDays,
+              p_description: `Folga abonada: ${timeOffData.bonus_reason} (${workingDays} dia${workingDays > 1 ? 's' : ''})`,
               p_created_by: user?.id,
             });
           } else {
-            // Deduct hours from time_bank
+            // Deduct hours from time_bank proportionally (8 hours per working day)
+            const hoursToDeduct = workingDays * 8;
             await supabase.rpc("upsert_time_bank", {
               p_user_id: timeOffForm.user_id,
-              p_hours_change: -8,
+              p_hours_change: -hoursToDeduct,
               p_bonus_change: 0,
-              p_description: "Folga - desconto de 8 horas",
+              p_description: `Folga - desconto de ${hoursToDeduct} horas (${workingDays} dia${workingDays > 1 ? 's' : ''})`,
               p_transaction_type: "debit_hours",
               p_related_time_off_id: insertedTimeOff?.id,
               p_created_by: user?.id,
@@ -391,11 +432,12 @@ export default function Vacations() {
           loadUserBonusBalances();
         }
 
-        toast({ title: "Sucesso", description: "Folga cadastrada!" });
+        toast({ title: "Sucesso", description: `Folga${workingDays > 1 ? 's' : ''} cadastrada${workingDays > 1 ? 's' : ''}!` });
       }
 
       setTimeOffForm({
         date: "",
+        end_date: "",
         user_id: "",
         type: "completa",
         approved: false,
@@ -466,6 +508,7 @@ export default function Vacations() {
   const editTimeOff = (timeOff: TimeOff) => {
     setTimeOffForm({
       date: timeOff.date,
+      end_date: timeOff.end_date || "",
       user_id: timeOff.user_id || "",
       type: timeOff.type,
       approved: timeOff.approved,
@@ -887,13 +930,27 @@ export default function Vacations() {
                 <form onSubmit={handleTimeOffSubmit} className="space-y-3 md:space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <Label htmlFor="date">Data *</Label>
+                      <Label htmlFor="date">Data Início *</Label>
                       <Input
                         id="date"
                         type="date"
                         value={timeOffForm.date}
                         onChange={(e) => setTimeOffForm({ ...timeOffForm, date: e.target.value })}
                       />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="end_date">Data Fim (opcional)</Label>
+                      <Input
+                        id="end_date"
+                        type="date"
+                        value={timeOffForm.end_date}
+                        min={timeOffForm.date}
+                        onChange={(e) => setTimeOffForm({ ...timeOffForm, end_date: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Deixe vazio para folga de 1 dia
+                      </p>
                     </div>
 
                     <div>
@@ -1009,9 +1066,15 @@ export default function Vacations() {
                   <Alert className="mt-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
-                      {timeOffForm.is_bonus_time_off
-                        ? "Será descontado 1 abono do banco de horas do funcionário."
-                        : "Será descontado 8 horas do banco de horas do funcionário."}
+                      {(() => {
+                        const days = getDeductionDays();
+                        if (timeOffForm.is_bonus_time_off) {
+                          return `Será descontado ${days} abono${days > 1 ? 's' : ''} do funcionário.`;
+                        } else {
+                          const hours = days * 8;
+                          return `Será descontado ${hours} hora${hours > 1 ? 's' : ''} (${days} dia${days > 1 ? 's úteis' : ' útil'}) do banco de horas.`;
+                        }
+                      })()}
                     </AlertDescription>
                   </Alert>
 
@@ -1028,6 +1091,7 @@ export default function Vacations() {
                           setEditingTimeOffId(null);
                           setTimeOffForm({
                             date: "",
+                            end_date: "",
                             user_id: "",
                             type: "completa",
                             approved: false,
@@ -1066,7 +1130,15 @@ export default function Vacations() {
                     {timeOffs.map((timeOff) => (
                       <TableRow key={timeOff.id}>
                         <TableCell className="text-xs md:text-sm">
-                          {format(parseISO(timeOff.date), "dd/MM/yyyy")}
+                          {timeOff.end_date 
+                            ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
+                            : format(parseISO(timeOff.date), "dd/MM/yyyy")
+                          }
+                          {timeOff.end_date && (
+                            <Badge variant="outline" className="ml-2 text-[10px]">
+                              {calculateWorkingDays(timeOff.date, timeOff.end_date)} dias
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           {timeOff.profiles ? (

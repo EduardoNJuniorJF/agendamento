@@ -452,6 +452,7 @@ export type Database = {
           bonus_reason: string | null
           created_at: string | null
           date: string
+          end_date: string | null
           id: string
           is_bonus_time_off: boolean | null
           type: string | null
@@ -463,6 +464,7 @@ export type Database = {
           bonus_reason?: string | null
           created_at?: string | null
           date: string
+          end_date?: string | null
           id?: string
           is_bonus_time_off?: boolean | null
           type?: string | null
@@ -474,6 +476,7 @@ export type Database = {
           bonus_reason?: string | null
           created_at?: string | null
           date?: string
+          end_date?: string | null
           id?: string
           is_bonus_time_off?: boolean | null
           type?: string | null
