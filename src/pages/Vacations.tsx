@@ -8,8 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown, Clock, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { format, differenceInDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, startOfMonth, endOfMonth, addMonths as addMonthsFn, subMonths } from "date-fns";
+import {
+  AlertCircle,
+  Calendar,
+  Edit,
+  Plus,
+  Trash2,
+  Umbrella,
+  Check,
+  ChevronsUpDown,
+  ArrowUpDown,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
+import {
+  format,
+  differenceInDays,
+  parseISO,
+  startOfDay,
+  eachDayOfInterval,
+  isWeekend,
+  startOfMonth,
+  endOfMonth,
+  addMonths as addMonthsFn,
+  subMonths,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -132,28 +157,27 @@ export default function Vacations() {
   // Calculate working days between two dates (excluding weekends and holidays)
   const calculateWorkingDays = (startDate: string, endDate: string | null): number => {
     if (!endDate || !startDate) return 1;
-    
+
     const start = parseISO(startDate);
     const end = parseISO(endDate);
-    
+
     if (end < start) return 1;
-    
+
     const days = eachDayOfInterval({ start, end });
-    
+
     // Filter out weekends and holidays
-    const workingDays = days.filter(day => {
+    const workingDays = days.filter((day) => {
       if (isWeekend(day)) return false;
-      
+
       // Check if it's a local holiday
-      const isLocalHoliday = localHolidays.some(holiday => {
+      const isLocalHoliday = localHolidays.some((holiday) => {
         const holidayDate = new Date(day.getFullYear(), holiday.month - 1, holiday.day);
-        return day.getTime() === holidayDate.getTime() && 
-               (holiday.year === null || holiday.year === day.getFullYear());
+        return day.getTime() === holidayDate.getTime() && (holiday.year === null || holiday.year === day.getFullYear());
       });
-      
+
       return !isLocalHoliday;
     });
-    
+
     return workingDays.length || 1;
   };
 
@@ -206,7 +230,10 @@ export default function Vacations() {
           .from("vacations")
           .select("*, profiles(full_name, email, sector)")
           .order("start_date", { ascending: false }),
-        supabase.from("time_off").select("*, profiles(full_name, email, sector)").order("date", { ascending: false }) as any,
+        supabase
+          .from("time_off")
+          .select("*, profiles(full_name, email, sector)")
+          .order("date", { ascending: false }) as any,
       ]);
 
       // Filtrar profiles por setor (para o formulário)
@@ -382,7 +409,7 @@ export default function Vacations() {
     try {
       // Calculate working days for proportional deduction
       const workingDays = calculateWorkingDays(timeOffForm.date, timeOffForm.end_date || null);
-      
+
       // Prepare data for insertion/update
       const timeOffData = {
         date: timeOffForm.date,
@@ -400,17 +427,13 @@ export default function Vacations() {
         toast({ title: "Sucesso", description: "Folga atualizada!" });
       } else {
         // Insert the time off
-        const { data: insertedTimeOff, error } = await supabase
-          .from("time_off")
-          .insert(timeOffData)
-          .select()
-          .single();
+        const { data: insertedTimeOff, error } = await supabase.from("time_off").insert(timeOffData).select().single();
         if (error) throw error;
 
         // Deduct from time bank if user is selected
         if (timeOffForm.user_id) {
           const isBonusTimeOff = timeOffData.is_bonus_time_off;
-          
+
           if (isBonusTimeOff && timeOffData.bonus_reason) {
             // Deduct from user_bonus_balances using the new function
             // For bonus time off, deduct the number of working days
@@ -418,7 +441,7 @@ export default function Vacations() {
               p_user_id: timeOffForm.user_id,
               p_bonus_type: timeOffData.bonus_reason,
               p_quantity_change: -workingDays,
-              p_description: `Folga abonada: ${timeOffData.bonus_reason} (${workingDays} dia${workingDays > 1 ? 's' : ''})`,
+              p_description: `Folga abonada: ${timeOffData.bonus_reason} (${workingDays} dia${workingDays > 1 ? "s" : ""})`,
               p_created_by: user?.id,
             });
           } else {
@@ -428,18 +451,21 @@ export default function Vacations() {
               p_user_id: timeOffForm.user_id,
               p_hours_change: -hoursToDeduct,
               p_bonus_change: 0,
-              p_description: `Folga - desconto de ${hoursToDeduct} horas (${workingDays} dia${workingDays > 1 ? 's' : ''})`,
+              p_description: `Folga - desconto de ${hoursToDeduct} horas (${workingDays} dia${workingDays > 1 ? "s" : ""})`,
               p_transaction_type: "debit_hours",
               p_related_time_off_id: insertedTimeOff?.id,
               p_created_by: user?.id,
             });
           }
-          
+
           // Reload bonus balances after deduction
           loadUserBonusBalances();
         }
 
-        toast({ title: "Sucesso", description: `Folga${workingDays > 1 ? 's' : ''} cadastrada${workingDays > 1 ? 's' : ''}!` });
+        toast({
+          title: "Sucesso",
+          description: `Folga${workingDays > 1 ? "s" : ""} cadastrada${workingDays > 1 ? "s" : ""}!`,
+        });
       }
 
       setTimeOffForm({
@@ -955,9 +981,7 @@ export default function Vacations() {
                         min={timeOffForm.date}
                         onChange={(e) => setTimeOffForm({ ...timeOffForm, end_date: e.target.value })}
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Deixe vazio para folga de 1 dia
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Deixe vazio para folga de 1 dia</p>
                     </div>
 
                     <div>
@@ -1005,7 +1029,9 @@ export default function Vacations() {
                         checked={timeOffForm.approved}
                         onCheckedChange={(checked) => setTimeOffForm({ ...timeOffForm, approved: checked as boolean })}
                       />
-                      <Label htmlFor="approved" className="cursor-pointer">Liberado</Label>
+                      <Label htmlFor="approved" className="cursor-pointer">
+                        Liberado
+                      </Label>
                     </div>
 
                     {/* Bonus Time Off Fields */}
@@ -1013,13 +1039,17 @@ export default function Vacations() {
                       <Checkbox
                         id="is_bonus_time_off"
                         checked={timeOffForm.is_bonus_time_off}
-                        onCheckedChange={(checked) => setTimeOffForm({ 
-                          ...timeOffForm, 
-                          is_bonus_time_off: checked as boolean,
-                          bonus_reason: checked ? timeOffForm.bonus_reason : ""
-                        })}
+                        onCheckedChange={(checked) =>
+                          setTimeOffForm({
+                            ...timeOffForm,
+                            is_bonus_time_off: checked as boolean,
+                            bonus_reason: checked ? timeOffForm.bonus_reason : "",
+                          })
+                        }
                       />
-                      <Label htmlFor="is_bonus_time_off" className="cursor-pointer">Folga Abonada?</Label>
+                      <Label htmlFor="is_bonus_time_off" className="cursor-pointer">
+                        Folga Abonada?
+                      </Label>
                     </div>
 
                     {timeOffForm.is_bonus_time_off && (
@@ -1028,17 +1058,15 @@ export default function Vacations() {
                         {(() => {
                           // Get available bonus types for selected user
                           const availableBonuses = userBonusBalances.filter(
-                            (b) => b.user_id === timeOffForm.user_id && b.quantity > 0
+                            (b) => b.user_id === timeOffForm.user_id && b.quantity > 0,
                           );
-                          
+
                           if (!timeOffForm.user_id) {
                             return (
-                              <p className="text-sm text-muted-foreground mt-2">
-                                Selecione um funcionário primeiro
-                              </p>
+                              <p className="text-sm text-muted-foreground mt-2">Selecione um funcionário primeiro</p>
                             );
                           }
-                          
+
                           if (availableBonuses.length === 0) {
                             return (
                               <p className="text-sm text-destructive mt-2">
@@ -1046,7 +1074,7 @@ export default function Vacations() {
                               </p>
                             );
                           }
-                          
+
                           return (
                             <Select
                               value={timeOffForm.bonus_reason}
@@ -1058,7 +1086,7 @@ export default function Vacations() {
                               <SelectContent>
                                 {availableBonuses.map((bonus) => (
                                   <SelectItem key={bonus.bonus_type} value={bonus.bonus_type}>
-                                    {bonus.bonus_type} ({bonus.quantity} disponível{bonus.quantity > 1 ? 's' : ''})
+                                    {bonus.bonus_type} ({bonus.quantity} disponível{bonus.quantity > 1 ? "s" : ""})
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -1076,10 +1104,10 @@ export default function Vacations() {
                       {(() => {
                         const days = getDeductionDays();
                         if (timeOffForm.is_bonus_time_off) {
-                          return `Será descontado ${days} abono${days > 1 ? 's' : ''} do funcionário.`;
+                          return `Será descontado ${days} abono${days > 1 ? "s" : ""} do funcionário.`;
                         } else {
                           const hours = days * 8;
-                          return `Será descontado ${hours} hora${hours > 1 ? 's' : ''} (${days} dia${days > 1 ? 's úteis' : ' útil'}) do banco de horas.`;
+                          return `Será descontado ${hours} hora${hours > 1 ? "s" : ""} (${days} dia${days > 1 ? "s úteis" : " útil"}) do banco de horas.`;
                         }
                       })()}
                     </AlertDescription>
@@ -1120,24 +1148,16 @@ export default function Vacations() {
             <CardHeader className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <CardTitle className="text-base md:text-lg">Folgas Cadastradas</CardTitle>
-                
+
                 {/* Month Navigation */}
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setTimeOffMonth(subMonths(timeOffMonth, 1))}
-                  >
+                  <Button variant="outline" size="icon" onClick={() => setTimeOffMonth(subMonths(timeOffMonth, 1))}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm font-medium min-w-[140px] text-center capitalize">
                     {format(timeOffMonth, "MMMM yyyy", { locale: ptBR })}
                   </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setTimeOffMonth(addMonthsFn(timeOffMonth, 1))}
-                  >
+                  <Button variant="outline" size="icon" onClick={() => setTimeOffMonth(addMonthsFn(timeOffMonth, 1))}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1186,9 +1206,7 @@ export default function Vacations() {
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="banco_horas">Banco de Horas</SelectItem>
-                      <SelectItem value="Aniversário">Aniversário</SelectItem>
-                      <SelectItem value="Resultado">Resultado</SelectItem>
-                      <SelectItem value="Evento">Evento</SelectItem>
+                      <SelectItem value="Abono">Abono</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1247,12 +1265,13 @@ export default function Vacations() {
                       const filteredTimeOffs = timeOffs.filter((timeOff) => {
                         const timeOffDate = parseISO(timeOff.date);
                         const timeOffEndDate = timeOff.end_date ? parseISO(timeOff.end_date) : timeOffDate;
-                        
+
                         // Check if the time off falls within the selected month
-                        const isInMonth = (timeOffDate >= monthStart && timeOffDate <= monthEnd) ||
-                                          (timeOffEndDate >= monthStart && timeOffEndDate <= monthEnd) ||
-                                          (timeOffDate <= monthStart && timeOffEndDate >= monthEnd);
-                        
+                        const isInMonth =
+                          (timeOffDate >= monthStart && timeOffDate <= monthEnd) ||
+                          (timeOffEndDate >= monthStart && timeOffEndDate <= monthEnd) ||
+                          (timeOffDate <= monthStart && timeOffEndDate >= monthEnd);
+
                         if (!isInMonth) return false;
 
                         // Filter by user
@@ -1270,7 +1289,8 @@ export default function Vacations() {
                           if (timeOffFilterBonusReason === "banco_horas") {
                             if (timeOff.is_bonus_time_off) return false;
                           } else {
-                            if (!timeOff.is_bonus_time_off || timeOff.bonus_reason !== timeOffFilterBonusReason) return false;
+                            if (!timeOff.is_bonus_time_off || timeOff.bonus_reason !== timeOffFilterBonusReason)
+                              return false;
                           }
                         }
 
@@ -1296,10 +1316,9 @@ export default function Vacations() {
                       return filteredTimeOffs.map((timeOff) => (
                         <TableRow key={timeOff.id}>
                           <TableCell className="text-xs md:text-sm">
-                            {timeOff.end_date 
+                            {timeOff.end_date
                               ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
-                              : format(parseISO(timeOff.date), "dd/MM/yyyy")
-                            }
+                              : format(parseISO(timeOff.date), "dd/MM/yyyy")}
                             {timeOff.end_date && (
                               <Badge variant="outline" className="ml-2 text-[10px]">
                                 {calculateWorkingDays(timeOff.date, timeOff.end_date)} dias
@@ -1317,15 +1336,20 @@ export default function Vacations() {
                           </TableCell>
                           <TableCell>
                             <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
-                              {timeOff.type === "integral" ? "Período Integral" : timeOff.type === "completa" ? "Completa" : "Parcial"}
+                              {timeOff.type === "integral"
+                                ? "Período Integral"
+                                : timeOff.type === "completa"
+                                  ? "Completa"
+                                  : "Parcial"}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${timeOff.is_bonus_time_off 
-                                ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700" 
-                                : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${
+                                timeOff.is_bonus_time_off
+                                  ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+                                  : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
                               }`}
                             >
                               {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
@@ -1371,7 +1395,13 @@ export default function Vacations() {
         {/* Time Bank Tab - Only visible to Dev */}
         {isDev && (
           <TabsContent value="time-bank" className="space-y-6">
-            <TimeBankTab profiles={profiles} onRefresh={() => { loadData(); loadUserBonusBalances(); }} />
+            <TimeBankTab
+              profiles={profiles}
+              onRefresh={() => {
+                loadData();
+                loadUserBonusBalances();
+              }}
+            />
           </TabsContent>
         )}
       </Tabs>
