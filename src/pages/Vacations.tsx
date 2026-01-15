@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown, Clock } from "lucide-react";
-import { format, differenceInDays, parseISO, startOfDay, eachDayOfInterval, isWeekend } from "date-fns";
+import { AlertCircle, Calendar, Edit, Plus, Trash2, Umbrella, Check, ChevronsUpDown, ArrowUpDown, Clock, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { format, differenceInDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, startOfMonth, endOfMonth, addMonths as addMonthsFn, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -121,6 +121,13 @@ export default function Vacations() {
     bonus_reason: "",
   });
   const [editingTimeOffId, setEditingTimeOffId] = useState<string | null>(null);
+
+  // Time off list filters and pagination
+  const [timeOffMonth, setTimeOffMonth] = useState<Date>(new Date());
+  const [timeOffFilterUser, setTimeOffFilterUser] = useState<string>("");
+  const [timeOffFilterType, setTimeOffFilterType] = useState<string>("");
+  const [timeOffFilterBonusReason, setTimeOffFilterBonusReason] = useState<string>("");
+  const [timeOffFilterApproved, setTimeOffFilterApproved] = useState<string>("");
 
   // Calculate working days between two dates (excluding weekends and holidays)
   const calculateWorkingDays = (startDate: string, endDate: string | null): number => {
@@ -1110,8 +1117,114 @@ export default function Vacations() {
           )}
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base md:text-lg">Folgas Cadastradas</CardTitle>
+            <CardHeader className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <CardTitle className="text-base md:text-lg">Folgas Cadastradas</CardTitle>
+                
+                {/* Month Navigation */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTimeOffMonth(subMonths(timeOffMonth, 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium min-w-[140px] text-center capitalize">
+                    {format(timeOffMonth, "MMMM yyyy", { locale: ptBR })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setTimeOffMonth(addMonthsFn(timeOffMonth, 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Funcionário</Label>
+                  <Select value={timeOffFilterUser} onValueChange={setTimeOffFilterUser}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.full_name || profile.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground">Período</Label>
+                  <Select value={timeOffFilterType} onValueChange={setTimeOffFilterType}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="integral">Período Integral</SelectItem>
+                      <SelectItem value="completa">Folga Completa</SelectItem>
+                      <SelectItem value="parcial">Folga Parcial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground">Tipo de Desconto</Label>
+                  <Select value={timeOffFilterBonusReason} onValueChange={setTimeOffFilterBonusReason}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="banco_horas">Banco de Horas</SelectItem>
+                      <SelectItem value="Aniversário">Aniversário</SelectItem>
+                      <SelectItem value="Resultado">Resultado</SelectItem>
+                      <SelectItem value="Evento">Evento</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  <Select value={timeOffFilterApproved} onValueChange={setTimeOffFilterApproved}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="approved">Liberado</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              {(timeOffFilterUser || timeOffFilterType || timeOffFilterBonusReason || timeOffFilterApproved) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setTimeOffFilterUser("");
+                    setTimeOffFilterType("");
+                    setTimeOffFilterBonusReason("");
+                    setTimeOffFilterApproved("");
+                  }}
+                  className="w-fit"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Limpar filtros
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -1127,73 +1240,127 @@ export default function Vacations() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {timeOffs.map((timeOff) => (
-                      <TableRow key={timeOff.id}>
-                        <TableCell className="text-xs md:text-sm">
-                          {timeOff.end_date 
-                            ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
-                            : format(parseISO(timeOff.date), "dd/MM/yyyy")
+                    {(() => {
+                      const monthStart = startOfMonth(timeOffMonth);
+                      const monthEnd = endOfMonth(timeOffMonth);
+
+                      const filteredTimeOffs = timeOffs.filter((timeOff) => {
+                        const timeOffDate = parseISO(timeOff.date);
+                        const timeOffEndDate = timeOff.end_date ? parseISO(timeOff.end_date) : timeOffDate;
+                        
+                        // Check if the time off falls within the selected month
+                        const isInMonth = (timeOffDate >= monthStart && timeOffDate <= monthEnd) ||
+                                          (timeOffEndDate >= monthStart && timeOffEndDate <= monthEnd) ||
+                                          (timeOffDate <= monthStart && timeOffEndDate >= monthEnd);
+                        
+                        if (!isInMonth) return false;
+
+                        // Filter by user
+                        if (timeOffFilterUser && timeOffFilterUser !== "all" && timeOff.user_id !== timeOffFilterUser) {
+                          return false;
+                        }
+
+                        // Filter by type
+                        if (timeOffFilterType && timeOffFilterType !== "all" && timeOff.type !== timeOffFilterType) {
+                          return false;
+                        }
+
+                        // Filter by bonus reason
+                        if (timeOffFilterBonusReason && timeOffFilterBonusReason !== "all") {
+                          if (timeOffFilterBonusReason === "banco_horas") {
+                            if (timeOff.is_bonus_time_off) return false;
+                          } else {
+                            if (!timeOff.is_bonus_time_off || timeOff.bonus_reason !== timeOffFilterBonusReason) return false;
                           }
-                          {timeOff.end_date && (
-                            <Badge variant="outline" className="ml-2 text-[10px]">
-                              {calculateWorkingDays(timeOff.date, timeOff.end_date)} dias
+                        }
+
+                        // Filter by approved status
+                        if (timeOffFilterApproved && timeOffFilterApproved !== "all") {
+                          if (timeOffFilterApproved === "approved" && !timeOff.approved) return false;
+                          if (timeOffFilterApproved === "pending" && timeOff.approved) return false;
+                        }
+
+                        return true;
+                      });
+
+                      if (filteredTimeOffs.length === 0) {
+                        return (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                              Nenhuma folga encontrada para este mês
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+
+                      return filteredTimeOffs.map((timeOff) => (
+                        <TableRow key={timeOff.id}>
+                          <TableCell className="text-xs md:text-sm">
+                            {timeOff.end_date 
+                              ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
+                              : format(parseISO(timeOff.date), "dd/MM/yyyy")
+                            }
+                            {timeOff.end_date && (
+                              <Badge variant="outline" className="ml-2 text-[10px]">
+                                {calculateWorkingDays(timeOff.date, timeOff.end_date)} dias
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {timeOff.profiles ? (
+                              <span className="text-xs md:text-sm">
+                                {timeOff.profiles.full_name || timeOff.profiles.email}
+                              </span>
+                            ) : (
+                              <span className="text-xs md:text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
+                              {timeOff.type === "integral" ? "Período Integral" : timeOff.type === "completa" ? "Completa" : "Parcial"}
                             </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {timeOff.profiles ? (
-                            <span className="text-xs md:text-sm">
-                              {timeOff.profiles.full_name || timeOff.profiles.email}
-                            </span>
-                          ) : (
-                            <span className="text-xs md:text-sm">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
-                            {timeOff.type === "integral" ? "Período Integral" : timeOff.type === "completa" ? "Completa" : "Parcial"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${timeOff.is_bonus_time_off 
-                              ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700" 
-                              : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
-                            }`}
-                          >
-                            {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
-                            {timeOff.approved ? "Liberado" : "Pendente"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {canEdit && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => editTimeOff(timeOff)}
-                              >
-                                <Edit className="h-3 w-3 md:h-4 md:w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => handleDeleteTimeOff(timeOff.id)}
-                              >
-                                <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${timeOff.is_bonus_time_off 
+                                ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700" 
+                                : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                              }`}
+                            >
+                              {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
+                              {timeOff.approved ? "Liberado" : "Pendente"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {canEdit && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => editTimeOff(timeOff)}
+                                >
+                                  <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => handleDeleteTimeOff(timeOff.id)}
+                                >
+                                  <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ));
+                    })()}
                   </TableBody>
                 </Table>
               </div>
