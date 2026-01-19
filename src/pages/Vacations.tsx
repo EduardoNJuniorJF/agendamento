@@ -1270,6 +1270,12 @@ export default function Vacations() {
                     </AlertDescription>
                   </Alert>
 
+                  {timeOffForm.is_bonus_time_off && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      <strong>Obs:</strong> Em caso de Atestado Médico ou Licença Médica, são contabilizados apenas os dias úteis (excluindo finais de semana e feriados).
+                    </p>
+                  )}
+
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Button type="submit" className="w-full sm:w-auto">
                       {editingTimeOffId ? "Atualizar" : "Cadastrar"}
