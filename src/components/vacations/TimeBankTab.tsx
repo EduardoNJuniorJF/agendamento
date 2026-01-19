@@ -426,6 +426,9 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
                         ))}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <strong>Obs:</strong> Atestado Médico e Licença Médica contabilizam apenas dias úteis.
+                    </p>
                   </div>
                 )}
               </div>
