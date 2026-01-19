@@ -600,12 +600,10 @@ export default function Vacations() {
             <Calendar className="h-4 w-4 mr-2" />
             Folgas
           </TabsTrigger>
-          {isDev && (
-            <TabsTrigger value="time-bank">
-              <Clock className="h-4 w-4 mr-2" />
-              Banco de Horas
-            </TabsTrigger>
-          )}
+          <TabsTrigger value="time-bank">
+            <Clock className="h-4 w-4 mr-2" />
+            Banco de Horas
+          </TabsTrigger>
         </TabsList>
 
         {/* Vacations Tab */}
@@ -1551,18 +1549,17 @@ export default function Vacations() {
           </Card>
         </TabsContent>
 
-        {/* Time Bank Tab - Only visible to Dev */}
-        {isDev && (
-          <TabsContent value="time-bank" className="space-y-6">
-            <TimeBankTab
-              profiles={profiles}
-              onRefresh={() => {
-                loadData();
-                loadUserBonusBalances();
-              }}
-            />
-          </TabsContent>
-        )}
+        {/* Time Bank Tab - Visible to all, edit restricted */}
+        <TabsContent value="time-bank" className="space-y-6">
+          <TimeBankTab
+            profiles={profiles}
+            canEdit={canEdit}
+            onRefresh={() => {
+              loadData();
+              loadUserBonusBalances();
+            }}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   );

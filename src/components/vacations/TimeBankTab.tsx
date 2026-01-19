@@ -29,6 +29,7 @@ interface TimeBank {
 
 interface TimeBankTabProps {
   profiles: Profile[];
+  canEdit: boolean;
   onRefresh: () => void;
 }
 
@@ -63,7 +64,7 @@ const formatHoursDisplay = (hours: number): string => {
   return result;
 };
 
-export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
+export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTabProps) {
   const [timeBank, setTimeBank] = useState<TimeBank[]>([]);
   const [bonusBalances, setBonusBalances] = useState<Record<string, { bonus_type: string; quantity: number }[]>>({});
   const [loading, setLoading] = useState(true);
@@ -354,86 +355,88 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Form Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Cadastrar Horas/Abonos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="user">Funcionário *</Label>
-                <Select
-                  value={form.user_id}
-                  onValueChange={(value) => setForm({ ...form, user_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {profiles.map((profile) => (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.full_name || profile.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="hours">Horas (+/-)</Label>
-                <Input
-                  id="hours"
-                  type="number"
-                  value={form.hours}
-                  onChange={(e) => setForm({ ...form, hours: parseFloat(e.target.value) || 0 })}
-                  placeholder="Ex: 8 ou -8"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="bonuses">Abonos (+/-)</Label>
-                <Input
-                  id="bonuses"
-                  type="number"
-                  value={form.bonuses}
-                  onChange={(e) => setForm({ ...form, bonuses: parseFloat(e.target.value) || 0 })}
-                  placeholder="Ex: 1 ou -1"
-                />
-              </div>
-
-              {form.bonuses > 0 && (
+      {/* Form Card - Only visible if can edit */}
+      {canEdit && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Cadastrar Horas/Abonos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="bonus_type">Tipo de Abono *</Label>
+                  <Label htmlFor="user">Funcionário *</Label>
                   <Select
-                    value={form.bonus_type}
-                    onValueChange={(value) => setForm({ ...form, bonus_type: value })}
+                    value={form.user_id}
+                    onValueChange={(value) => setForm({ ...form, user_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo..." />
+                      <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {BONUS_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                      {profiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.full_name || profile.email}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
-            </div>
 
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : "Registrar"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+                <div>
+                  <Label htmlFor="hours">Horas (+/-)</Label>
+                  <Input
+                    id="hours"
+                    type="number"
+                    value={form.hours}
+                    onChange={(e) => setForm({ ...form, hours: parseFloat(e.target.value) || 0 })}
+                    placeholder="Ex: 8 ou -8"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="bonuses">Abonos (+/-)</Label>
+                  <Input
+                    id="bonuses"
+                    type="number"
+                    value={form.bonuses}
+                    onChange={(e) => setForm({ ...form, bonuses: parseFloat(e.target.value) || 0 })}
+                    placeholder="Ex: 1 ou -1"
+                  />
+                </div>
+
+                {form.bonuses > 0 && (
+                  <div>
+                    <Label htmlFor="bonus_type">Tipo de Abono *</Label>
+                    <Select
+                      value={form.bonus_type}
+                      onValueChange={(value) => setForm({ ...form, bonus_type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BONUS_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Salvando..." : "Registrar"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Table Card */}
       <Card>
@@ -453,13 +456,13 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                   <TableHead className="min-w-[100px]">Abonos</TableHead>
                   <TableHead className="min-w-[220px]">Tipos de Abono</TableHead>
                   <TableHead className="min-w-[200px]">Observação</TableHead>
-                  <TableHead className="min-w-[100px]">Ações</TableHead>
+                  {canEdit && <TableHead className="min-w-[100px]">Ações</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {employeesWithBank.length === 0 ? (
                   <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={canEdit ? 6 : 5} className="text-center text-muted-foreground">
                         Nenhum registro no banco de horas
                       </TableCell>
                   </TableRow>
@@ -507,24 +510,26 @@ export default function TimeBankTab({ profiles, onRefresh }: TimeBankTabProps) {
                         {formatHoursDisplay(employee.accumulated_hours)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0"
-                            onClick={() => handleOpenEditDialog(employee)}
-                          >
-                            <Edit className="h-3 w-3 md:h-4 md:w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0"
-                            onClick={() => handleDelete(employee.id)}
-                          >
-                            <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                          </Button>
-                        </div>
+                        {canEdit && (
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={() => handleOpenEditDialog(employee)}
+                            >
+                              <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={() => handleDelete(employee.id)}
+                            >
+                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
