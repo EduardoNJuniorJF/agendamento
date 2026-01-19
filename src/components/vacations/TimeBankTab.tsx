@@ -95,8 +95,8 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
   const [editingEmployee, setEditingEmployee] = useState<EmployeeWithBank | null>(null);
   const [editForm, setEditForm] = useState({
     hours: 0,
-    bonuses: 0,
   });
+  const [editBonusChanges, setEditBonusChanges] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadTimeBank();
@@ -228,15 +228,21 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     setEditingEmployee(employee);
     setEditForm({
       hours: employee.accumulated_hours,
-      bonuses: employee.bonuses,
     });
+    // Initialize bonus changes from current breakdown
+    const bonusMap: Record<string, number> = {};
+    employee.bonus_breakdown.forEach((b) => {
+      bonusMap[b.bonus_type] = b.quantity;
+    });
+    setEditBonusChanges(bonusMap);
     setEditDialogOpen(true);
   };
 
   const handleCloseEditDialog = () => {
     setEditDialogOpen(false);
     setEditingEmployee(null);
-    setEditForm({ hours: 0, bonuses: 0 });
+    setEditForm({ hours: 0 });
+    setEditBonusChanges({});
   };
 
   const handleEditSubmit = async () => {
@@ -245,29 +251,39 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     setSubmitting(true);
 
     try {
-      // Calculate the difference to apply
+      // Calculate hours difference
       const hoursDiff = editForm.hours - editingEmployee.accumulated_hours;
-      const bonusesDiff = editForm.bonuses - editingEmployee.bonuses;
 
-      if (hoursDiff === 0 && bonusesDiff === 0) {
-        toast({
-          title: "Aviso",
-          description: "Nenhuma alteração detectada",
+      // Update hours if changed
+      if (hoursDiff !== 0) {
+        const { error: hoursError } = await supabase.rpc("upsert_time_bank", {
+          p_user_id: editingEmployee.id,
+          p_hours_change: hoursDiff,
+          p_bonus_change: 0,
+          p_description: `Ajuste manual: ${hoursDiff >= 0 ? '+' : ''}${hoursDiff}h`,
+          p_transaction_type: "adjustment",
+          p_created_by: user?.id,
         });
-        handleCloseEditDialog();
-        return;
+        if (hoursError) throw hoursError;
       }
 
-      const { error } = await supabase.rpc("upsert_time_bank", {
-        p_user_id: editingEmployee.id,
-        p_hours_change: hoursDiff,
-        p_bonus_change: bonusesDiff,
-        p_description: `Ajuste manual: ${hoursDiff >= 0 ? '+' : ''}${hoursDiff}h, ${bonusesDiff >= 0 ? '+' : ''}${bonusesDiff} abono(s)`,
-        p_transaction_type: "adjustment",
-        p_created_by: user?.id,
-      });
+      // Update each bonus type if changed
+      for (const bonusType of BONUS_TYPES) {
+        const currentQty = editingEmployee.bonus_breakdown.find((b) => b.bonus_type === bonusType)?.quantity || 0;
+        const newQty = editBonusChanges[bonusType] || 0;
+        const diff = newQty - currentQty;
 
-      if (error) throw error;
+        if (diff !== 0) {
+          const { error: bonusError } = await supabase.rpc("upsert_bonus_balance", {
+            p_user_id: editingEmployee.id,
+            p_bonus_type: bonusType,
+            p_quantity_change: diff,
+            p_description: `Ajuste manual: ${diff >= 0 ? '+' : ''}${diff} ${bonusType}`,
+            p_created_by: user?.id,
+          });
+          if (bonusError) throw bonusError;
+        }
+      }
 
       toast({
         title: "Sucesso",
@@ -275,9 +291,9 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
       });
 
       handleCloseEditDialog();
-       loadTimeBank();
-       loadBonusBalances();
-       onRefresh();
+      loadTimeBank();
+      loadBonusBalances();
+      onRefresh();
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -545,7 +561,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Saldo - {editingEmployee?.name}</DialogTitle>
           </DialogHeader>
@@ -562,16 +578,33 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
                 Valor atual: {editingEmployee?.accumulated_hours}h
               </p>
             </div>
-            <div>
-              <Label htmlFor="edit-bonuses">Abonos</Label>
-              <Input
-                id="edit-bonuses"
-                type="number"
-                value={editForm.bonuses}
-                onChange={(e) => setEditForm({ ...editForm, bonuses: parseFloat(e.target.value) || 0 })}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Valor atual: {editingEmployee?.bonuses}
+            
+            <div className="border-t pt-4">
+              <Label className="text-sm font-medium">Abonos por Tipo</Label>
+              <div className="space-y-3 mt-2">
+                {BONUS_TYPES.map((bonusType) => {
+                  const currentQty = editingEmployee?.bonus_breakdown.find((b) => b.bonus_type === bonusType)?.quantity || 0;
+                  return (
+                    <div key={bonusType} className="flex items-center gap-2">
+                      <Label className="text-sm flex-1 text-muted-foreground">{bonusType}</Label>
+                      <Input
+                        type="number"
+                        className="w-20"
+                        value={editBonusChanges[bonusType] ?? currentQty}
+                        onChange={(e) => setEditBonusChanges({
+                          ...editBonusChanges,
+                          [bonusType]: parseFloat(e.target.value) || 0,
+                        })}
+                      />
+                      <span className="text-xs text-muted-foreground w-16">
+                        (atual: {currentQty})
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Obs:</strong> Atestado Médico e Licença Médica contabilizam apenas dias úteis.
               </p>
             </div>
           </div>
