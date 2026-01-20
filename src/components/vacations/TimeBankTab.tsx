@@ -105,10 +105,10 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
 
   const loadBonusBalances = async () => {
     try {
+      // Load ALL bonus balances (including 0 and negative) to properly track employee state
       const { data, error } = await supabase
         .from("user_bonus_balances")
-        .select("user_id, bonus_type, quantity")
-        .gt("quantity", 0);
+        .select("user_id, bonus_type, quantity");
 
       if (error) throw error;
 
