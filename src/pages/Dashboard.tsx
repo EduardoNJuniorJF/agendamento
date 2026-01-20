@@ -53,8 +53,11 @@ interface Appointment {
 interface TimeOff {
   id: string;
   date: string;
+  end_date: string | null;
   type: string;
   approved: boolean;
+  is_bonus_time_off: boolean | null;
+  bonus_reason: string | null;
   profiles: { full_name: string | null; email: string; sector: string | null } | null;
 }
 
@@ -162,8 +165,7 @@ export default function Dashboard() {
         supabase
           .from("time_off")
           .select("*, profiles(full_name, email, sector)")
-          .gte("date", format(monday, "yyyy-MM-dd"))
-          .lte("date", format(friday, "yyyy-MM-dd"))
+          .or(`and(date.gte.${format(monday, "yyyy-MM-dd")},date.lte.${format(friday, "yyyy-MM-dd")}),and(end_date.gte.${format(monday, "yyyy-MM-dd")},end_date.lte.${format(friday, "yyyy-MM-dd")}),and(date.lte.${format(monday, "yyyy-MM-dd")},end_date.gte.${format(friday, "yyyy-MM-dd")})`)
           .order("date"),
         supabase
           .from("vacations")
@@ -234,7 +236,11 @@ export default function Dashboard() {
   };
 
   const getTimeOffsForDay = (day: Date) => {
-    return stats.weekTimeOffs.filter((timeOff) => isSameDay(parseISO(timeOff.date), day));
+    return stats.weekTimeOffs.filter((timeOff) => {
+      const startDate = parseISO(timeOff.date + "T12:00:00");
+      const endDate = timeOff.end_date ? parseISO(timeOff.end_date + "T12:00:00") : startDate;
+      return day >= startOfDay(startDate) && day <= startOfDay(endDate);
+    });
   };
 
   const handleDeleteAppointment = async (id: string) => {
@@ -602,25 +608,48 @@ export default function Dashboard() {
                           {format(day, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                         </div>
                         <div className="space-y-1.5 md:space-y-2">
-                          {dayTimeOffs.map((timeOff) => (
-                            <div
-                              key={timeOff.id}
-                              className="border border-dashed rounded p-1.5 md:p-2 text-xs bg-muted/30"
-                            >
-                              <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-                                <Umbrella className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
-                                <span className="font-medium text-[10px] md:text-xs">
-                                  {timeOff.profiles?.full_name || timeOff.profiles?.email || "Geral"}
-                                </span>
-                              </div>
-                              <Badge
-                                variant={timeOff.type === "completa" ? "default" : "secondary"}
-                                className="text-[9px] md:text-[10px]"
+                          {dayTimeOffs.map((timeOff) => {
+                            const getBonusReasonLabel = (reason: string | null) => {
+                              switch (reason) {
+                                case "tre_tse": return "TRE/TSE";
+                                case "liberado_chefia": return "Liberado pela Chefia";
+                                case "troca_feriado": return "Troca de Feriado";
+                                case "atestado": return "Atestado";
+                                case "licenca_medica": return "Licença Médica";
+                                default: return reason;
+                              }
+                            };
+                            
+                            return (
+                              <div
+                                key={timeOff.id}
+                                className={`border border-dashed rounded p-1.5 md:p-2 text-xs ${timeOff.is_bonus_time_off ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" : "bg-muted/30"}`}
                               >
-                                {timeOff.type === "completa" ? "Folga Completa" : "Folga Parcial"}
-                              </Badge>
-                            </div>
-                          ))}
+                                <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+                                  <Umbrella className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
+                                  <span className="font-medium text-[10px] md:text-xs">
+                                    {timeOff.profiles?.full_name || timeOff.profiles?.email || "Geral"}
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  <Badge
+                                    variant={timeOff.type === "completa" ? "default" : "secondary"}
+                                    className="text-[9px] md:text-[10px]"
+                                  >
+                                    {timeOff.type === "completa" ? "Folga Completa" : "Folga Parcial"}
+                                  </Badge>
+                                  {timeOff.is_bonus_time_off && timeOff.bonus_reason && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[9px] md:text-[10px] bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 border-green-300"
+                                    >
+                                      {getBonusReasonLabel(timeOff.bonus_reason)}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );
