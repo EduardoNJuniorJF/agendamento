@@ -1440,6 +1440,8 @@ export default function Vacations() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[100px]">Data</TableHead>
+                      <TableHead className="min-w-[60px]">Abono</TableHead>
+                      <TableHead className="min-w-[70px]">Afastado</TableHead>
                       <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
                       <TableHead className="min-w-[120px]">Desconto</TableHead>
@@ -1496,7 +1498,7 @@ export default function Vacations() {
                       if (filteredTimeOffs.length === 0) {
                         return (
                           <TableRow>
-                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                               Nenhuma folga encontrada para este mês
                             </TableCell>
                           </TableRow>
@@ -1513,10 +1515,19 @@ export default function Vacations() {
                             {timeOff.end_date
                               ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
                               : format(parseISO(timeOff.date), "dd/MM/yyyy")}
-                            {timeOff.end_date && (
-                              <Badge variant="outline" className="ml-2 text-[10px]">
-                                {workingDays} dia{workingDays > 1 ? "s" : ""} útil{workingDays > 1 ? "s" : ""}
-                              </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs md:text-sm text-center">
+                            {timeOff.is_bonus_time_off ? (
+                              <span className="font-medium">{workingDays}</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-xs md:text-sm text-center">
+                            {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
+                              <span className="font-medium">{timeOff.leave_days}</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -1538,27 +1549,16 @@ export default function Vacations() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs ${
-                                  timeOff.is_bonus_time_off
-                                    ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
-                                    : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
-                                }`}
-                              >
-                                {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
-                              </Badge>
-                              {/* Mostrar detalhes de dias para Atestado/Licença Médica */}
-                              {timeOff.is_bonus_time_off && isAtestadoOrLicenca && (
-                                <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
-                                  <span>Abono: {workingDays} dia{workingDays > 1 ? "s" : ""}</span>
-                                  {timeOff.leave_days && timeOff.leave_days > 0 && (
-                                    <span>Afastado: {timeOff.leave_days} dia{timeOff.leave_days > 1 ? "s" : ""}</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${
+                                timeOff.is_bonus_time_off
+                                  ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+                                  : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                              }`}
+                            >
+                              {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
