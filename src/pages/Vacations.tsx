@@ -1452,8 +1452,8 @@ export default function Vacations() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[100px]">Data</TableHead>
-                      <TableHead className="min-w-[60px]">Abono</TableHead>
                       <TableHead className="min-w-[70px]">Atestado</TableHead>
+                      <TableHead className="min-w-[60px]">Abono</TableHead>
                       <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
                       <TableHead className="min-w-[120px]">Desconto</TableHead>
@@ -1530,15 +1530,15 @@ export default function Vacations() {
                                 : format(parseISO(timeOff.date), "dd/MM/yyyy")}
                             </TableCell>
                             <TableCell className="text-xs md:text-sm">
-                              {timeOff.is_bonus_time_off ? (
-                                <span className="font-medium">{workingDays} dias</span>
+                              {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
+                                <span className="font-medium">{timeOff.leave_days} dias</span>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
                             </TableCell>
                             <TableCell className="text-xs md:text-sm">
-                              {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
-                                <span className="font-medium">{timeOff.leave_days} dias</span>
+                              {timeOff.is_bonus_time_off ? (
+                                <span className="font-medium">{workingDays} dias</span>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
