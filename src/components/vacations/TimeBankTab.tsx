@@ -381,6 +381,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
   };
 
   // Show employees that have either a time bank record OR typed bonus balances
+  // Filter out employees with zero hours AND zero bonuses
   const employeesWithBank: EmployeeWithBank[] = Array.from(
     new Set<string>([
       ...timeBank.map((tb) => tb.user_id),
@@ -401,6 +402,11 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
       bonuses: breakdown.length > 0 ? typedTotal : (tb?.bonuses || 0),
       bonus_breakdown: breakdown,
     };
+  }).filter((employee) => {
+    // Only show employees with non-zero hours OR at least one non-zero bonus
+    const hasNonZeroHours = employee.accumulated_hours !== 0;
+    const hasNonZeroBonus = employee.bonus_breakdown.some((b) => b.quantity !== 0);
+    return hasNonZeroHours || hasNonZeroBonus;
   });
 
   if (loading) {
