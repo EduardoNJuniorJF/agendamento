@@ -1518,14 +1518,14 @@ export default function Vacations() {
                           </TableCell>
                           <TableCell className="text-xs md:text-sm text-center">
                             {timeOff.is_bonus_time_off ? (
-                              <span className="font-medium">{workingDays}</span>
+                              <span className="font-medium">{workingDays} dias</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           <TableCell className="text-xs md:text-sm text-center">
                             {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
-                              <span className="font-medium">{timeOff.leave_days}</span>
+                              <span className="font-medium">{timeOff.leave_days} dias</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
