@@ -427,9 +427,10 @@ export default function Vacations() {
         approved: timeOffForm.approved,
         is_bonus_time_off: timeOffForm.is_bonus_time_off,
         bonus_reason: timeOffForm.is_bonus_time_off ? timeOffForm.bonus_reason : null,
-        leave_days: (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") 
-          ? (timeOffForm.leave_days || null) 
-          : null,
+        leave_days:
+          timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica"
+            ? timeOffForm.leave_days || null
+            : null,
       };
 
       if (editingTimeOffId) {
@@ -824,7 +825,7 @@ export default function Vacations() {
             <CardHeader className="space-y-4 pb-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <CardTitle className="text-base md:text-lg">Férias Cadastradas</CardTitle>
-                
+
                 {/* Month Navigation */}
                 <div className="flex items-center gap-2">
                   <Button
@@ -958,7 +959,7 @@ export default function Vacations() {
                       const getVacationStatus = (vacation: Vacation) => {
                         const startDate = startOfDay(parseISO(vacation.start_date));
                         const endDate = startOfDay(parseISO(vacation.end_date));
-                        
+
                         if (today > endDate) return "completed";
                         if (today >= startDate && today <= endDate) return "in_progress";
                         return "scheduled";
@@ -968,22 +969,30 @@ export default function Vacations() {
                       const filteredVacations = vacations.filter((vacation) => {
                         const vacationStart = parseISO(vacation.start_date);
                         const vacationEnd = parseISO(vacation.end_date);
-                        
+
                         // Check if the vacation overlaps with the selected month
-                        const isInMonth = 
+                        const isInMonth =
                           (vacationStart >= monthStart && vacationStart <= monthEnd) ||
                           (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
                           (vacationStart <= monthStart && vacationEnd >= monthEnd);
-                        
+
                         if (!isInMonth) return false;
 
                         // Filter by user
-                        if (vacationFilterUser && vacationFilterUser !== "all" && vacation.user_id !== vacationFilterUser) {
+                        if (
+                          vacationFilterUser &&
+                          vacationFilterUser !== "all" &&
+                          vacation.user_id !== vacationFilterUser
+                        ) {
                           return false;
                         }
 
                         // Filter by period
-                        if (vacationFilterPeriod && vacationFilterPeriod !== "all" && vacation.period_number.toString() !== vacationFilterPeriod) {
+                        if (
+                          vacationFilterPeriod &&
+                          vacationFilterPeriod !== "all" &&
+                          vacation.period_number.toString() !== vacationFilterPeriod
+                        ) {
                           return false;
                         }
 
@@ -1261,23 +1270,25 @@ export default function Vacations() {
                     )}
 
                     {/* Campo de dias de afastamento para Atestado/Licença Médica */}
-                    {timeOffForm.is_bonus_time_off && 
+                    {timeOffForm.is_bonus_time_off &&
                       (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") && (
-                      <div>
-                        <Label htmlFor="leave_days">Dias de Afastamento</Label>
-                        <Input
-                          id="leave_days"
-                          type="number"
-                          min="0"
-                          value={timeOffForm.leave_days || ""}
-                          onChange={(e) => setTimeOffForm({ ...timeOffForm, leave_days: parseInt(e.target.value) || 0 })}
-                          placeholder="Ex: 5"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Total de dias de afastamento (incluindo finais de semana).
-                        </p>
-                      </div>
-                    )}
+                        <div>
+                          <Label htmlFor="leave_days">Dias de Afastamento</Label>
+                          <Input
+                            id="leave_days"
+                            type="number"
+                            min="0"
+                            value={timeOffForm.leave_days || ""}
+                            onChange={(e) =>
+                              setTimeOffForm({ ...timeOffForm, leave_days: parseInt(e.target.value) || 0 })
+                            }
+                            placeholder="Ex: 5"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Total de dias de afastamento (incluindo finais de semana).
+                          </p>
+                        </div>
+                      )}
                   </div>
 
                   {/* Info about deduction */}
@@ -1298,7 +1309,8 @@ export default function Vacations() {
 
                   {timeOffForm.is_bonus_time_off && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      <strong>Obs:</strong> Em caso de Atestado Médico ou Licença Médica, são contabilizados apenas os dias úteis (excluindo finais de semana e feriados).
+                      <strong>Obs:</strong> Em caso de Atestado Médico ou Licença Médica, são contabilizados apenas os
+                      dias úteis (excluindo finais de semana e feriados).
                     </p>
                   )}
 
@@ -1441,7 +1453,7 @@ export default function Vacations() {
                     <TableRow>
                       <TableHead className="min-w-[100px]">Data</TableHead>
                       <TableHead className="min-w-[60px]">Abono</TableHead>
-                      <TableHead className="min-w-[70px]">Afastado</TableHead>
+                      <TableHead className="min-w-[70px]">Atestado</TableHead>
                       <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
                       <TableHead className="min-w-[120px]">Desconto</TableHead>
@@ -1507,87 +1519,91 @@ export default function Vacations() {
 
                       return filteredTimeOffs.map((timeOff) => {
                         const workingDays = calculateWorkingDays(timeOff.date, timeOff.end_date);
-                        const isAtestadoOrLicenca = timeOff.bonus_reason === "Atestado" || timeOff.bonus_reason === "Licença Médica";
-                        
+                        const isAtestadoOrLicenca =
+                          timeOff.bonus_reason === "Atestado" || timeOff.bonus_reason === "Licença Médica";
+
                         return (
-                        <TableRow key={timeOff.id}>
-                          <TableCell className="text-xs md:text-sm">
-                            {timeOff.end_date
-                              ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
-                              : format(parseISO(timeOff.date), "dd/MM/yyyy")}
-                          </TableCell>
-                          <TableCell className="text-xs md:text-sm">
-                            {timeOff.is_bonus_time_off ? (
-                              <span className="font-medium">{workingDays} dias</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs md:text-sm">
-                            {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
-                              <span className="font-medium">{timeOff.leave_days} dias</span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {timeOff.profiles ? (
-                              <span className="text-xs md:text-sm">
-                                {timeOff.profiles.full_name || timeOff.profiles.email}
-                              </span>
-                            ) : (
-                              <span className="text-xs md:text-sm">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={timeOff.type === "completa" ? "default" : "secondary"} className="text-xs">
-                              {timeOff.type === "integral"
-                                ? "Período Integral"
-                                : timeOff.type === "completa"
-                                  ? "Completa"
-                                  : "Parcial"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                timeOff.is_bonus_time_off
-                                  ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
-                                  : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
-                              }`}
-                            >
-                              {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
-                              {timeOff.approved ? "Liberado" : "Pendente"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {canEdit && (
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => editTimeOff(timeOff)}
-                                >
-                                  <Edit className="h-3 w-3 md:h-4 md:w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => handleDeleteTimeOff(timeOff.id)}
-                                >
-                                  <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
+                          <TableRow key={timeOff.id}>
+                            <TableCell className="text-xs md:text-sm">
+                              {timeOff.end_date
+                                ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
+                                : format(parseISO(timeOff.date), "dd/MM/yyyy")}
+                            </TableCell>
+                            <TableCell className="text-xs md:text-sm">
+                              {timeOff.is_bonus_time_off ? (
+                                <span className="font-medium">{workingDays} dias</span>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs md:text-sm">
+                              {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
+                                <span className="font-medium">{timeOff.leave_days} dias</span>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {timeOff.profiles ? (
+                                <span className="text-xs md:text-sm">
+                                  {timeOff.profiles.full_name || timeOff.profiles.email}
+                                </span>
+                              ) : (
+                                <span className="text-xs md:text-sm">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={timeOff.type === "completa" ? "default" : "secondary"}
+                                className="text-xs"
+                              >
+                                {timeOff.type === "integral"
+                                  ? "Período Integral"
+                                  : timeOff.type === "completa"
+                                    ? "Completa"
+                                    : "Parcial"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${
+                                  timeOff.is_bonus_time_off
+                                    ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+                                    : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                                }`}
+                              >
+                                {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
+                                {timeOff.approved ? "Liberado" : "Pendente"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {canEdit && (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => editTimeOff(timeOff)}
+                                  >
+                                    <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => handleDeleteTimeOff(timeOff.id)}
+                                  >
+                                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
                         );
                       });
                     })()}
