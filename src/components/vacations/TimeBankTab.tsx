@@ -545,17 +545,21 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {employee.bonus_breakdown.length === 0 ? (
-                          <span className="text-muted-foreground">-</span>
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {employee.bonus_breakdown.map((b) => (
-                              <Badge key={b.bonus_type} variant="outline" className="text-xs">
-                                {b.bonus_type}: {b.quantity}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                        {(() => {
+                          const nonZeroBonuses = employee.bonus_breakdown.filter((b) => b.quantity !== 0);
+                          if (nonZeroBonuses.length === 0) {
+                            return <span className="text-muted-foreground">-</span>;
+                          }
+                          return (
+                            <div className="flex flex-wrap gap-1">
+                              {nonZeroBonuses.map((b) => (
+                                <Badge key={b.bonus_type} variant="outline" className="text-xs">
+                                  {b.bonus_type}: {b.quantity}
+                                </Badge>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatHoursDisplay(employee.accumulated_hours)}
