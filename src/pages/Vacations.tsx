@@ -424,9 +424,7 @@ export default function Vacations() {
       let leaveDaysValue: number | null = null;
       if (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") {
         const bonusBalance = userBonusBalances.find(
-          (b) =>
-            b.user_id === timeOffForm.user_id &&
-            b.bonus_type === timeOffForm.bonus_reason
+          (b) => b.user_id === timeOffForm.user_id && b.bonus_type === timeOffForm.bonus_reason,
         );
         leaveDaysValue = bonusBalance?.leave_days || null;
       }
@@ -1287,12 +1285,10 @@ export default function Vacations() {
                           {(() => {
                             // Buscar o leave_days da tabela user_bonus_balances para o usuário com esse tipo de bonus
                             const bonusBalance = userBonusBalances.find(
-                              (b) =>
-                                b.user_id === timeOffForm.user_id &&
-                                b.bonus_type === timeOffForm.bonus_reason
+                              (b) => b.user_id === timeOffForm.user_id && b.bonus_type === timeOffForm.bonus_reason,
                             );
                             const leaveDaysValue = bonusBalance?.leave_days || 0;
-                            
+
                             return (
                               <div className="flex items-center gap-2">
                                 <Input
@@ -1487,7 +1483,7 @@ export default function Vacations() {
                       <TableHead className="min-w-[60px]">Abono</TableHead>
                       <TableHead className="min-w-[120px]">Funcionário</TableHead>
                       <TableHead className="min-w-[100px]">Tipo</TableHead>
-                      <TableHead className="min-w-[120px]">Desconto</TableHead>
+                      <TableHead className="min-w-[120px]">Tipo de Desconto</TableHead>
                       <TableHead className="min-w-[100px]">Status</TableHead>
                       <TableHead className="min-w-[100px]">Ações</TableHead>
                     </TableRow>
