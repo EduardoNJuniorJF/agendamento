@@ -501,6 +501,7 @@ export type Database = {
           bonus_type: string
           created_at: string
           id: string
+          leave_days: number | null
           quantity: number
           updated_at: string
           user_id: string
@@ -509,6 +510,7 @@ export type Database = {
           bonus_type: string
           created_at?: string
           id?: string
+          leave_days?: number | null
           quantity?: number
           updated_at?: string
           user_id: string
@@ -517,6 +519,7 @@ export type Database = {
           bonus_type?: string
           created_at?: string
           id?: string
+          leave_days?: number | null
           quantity?: number
           updated_at?: string
           user_id?: string
