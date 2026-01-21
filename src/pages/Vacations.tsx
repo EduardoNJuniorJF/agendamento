@@ -83,6 +83,7 @@ interface TimeOff {
   approved: boolean;
   is_bonus_time_off: boolean;
   bonus_reason: string | null;
+  leave_days: number | null;
   profiles: { full_name: string | null; email: string } | null;
 }
 
@@ -150,6 +151,7 @@ export default function Vacations() {
     approved: false,
     is_bonus_time_off: false,
     bonus_reason: "",
+    leave_days: 0,
   });
   const [editingTimeOffId, setEditingTimeOffId] = useState<string | null>(null);
 
@@ -425,6 +427,9 @@ export default function Vacations() {
         approved: timeOffForm.approved,
         is_bonus_time_off: timeOffForm.is_bonus_time_off,
         bonus_reason: timeOffForm.is_bonus_time_off ? timeOffForm.bonus_reason : null,
+        leave_days: (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") 
+          ? (timeOffForm.leave_days || null) 
+          : null,
       };
 
       if (editingTimeOffId) {
@@ -482,6 +487,7 @@ export default function Vacations() {
         approved: false,
         is_bonus_time_off: false,
         bonus_reason: "",
+        leave_days: 0,
       });
       setEditingTimeOffId(null);
       loadData();
@@ -553,6 +559,7 @@ export default function Vacations() {
       approved: timeOff.approved,
       is_bonus_time_off: timeOff.is_bonus_time_off || false,
       bonus_reason: timeOff.bonus_reason || "",
+      leave_days: timeOff.leave_days || 0,
     });
     setEditingTimeOffId(timeOff.id);
     setActiveTab("time-off");
@@ -1252,6 +1259,25 @@ export default function Vacations() {
                         })()}
                       </div>
                     )}
+
+                    {/* Campo de dias de afastamento para Atestado/Licença Médica */}
+                    {timeOffForm.is_bonus_time_off && 
+                      (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") && (
+                      <div>
+                        <Label htmlFor="leave_days">Dias de Afastamento</Label>
+                        <Input
+                          id="leave_days"
+                          type="number"
+                          min="0"
+                          value={timeOffForm.leave_days || ""}
+                          onChange={(e) => setTimeOffForm({ ...timeOffForm, leave_days: parseInt(e.target.value) || 0 })}
+                          placeholder="Ex: 5"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Total de dias de afastamento (incluindo finais de semana).
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Info about deduction */}
@@ -1295,6 +1321,7 @@ export default function Vacations() {
                             approved: false,
                             is_bonus_time_off: false,
                             bonus_reason: "",
+                            leave_days: 0,
                           });
                         }}
                       >
@@ -1476,7 +1503,11 @@ export default function Vacations() {
                         );
                       }
 
-                      return filteredTimeOffs.map((timeOff) => (
+                      return filteredTimeOffs.map((timeOff) => {
+                        const workingDays = calculateWorkingDays(timeOff.date, timeOff.end_date);
+                        const isAtestadoOrLicenca = timeOff.bonus_reason === "Atestado" || timeOff.bonus_reason === "Licença Médica";
+                        
+                        return (
                         <TableRow key={timeOff.id}>
                           <TableCell className="text-xs md:text-sm">
                             {timeOff.end_date
@@ -1484,7 +1515,7 @@ export default function Vacations() {
                               : format(parseISO(timeOff.date), "dd/MM/yyyy")}
                             {timeOff.end_date && (
                               <Badge variant="outline" className="ml-2 text-[10px]">
-                                {calculateWorkingDays(timeOff.date, timeOff.end_date)} dias
+                                {workingDays} dia{workingDays > 1 ? "s" : ""} útil{workingDays > 1 ? "s" : ""}
                               </Badge>
                             )}
                           </TableCell>
@@ -1507,16 +1538,27 @@ export default function Vacations() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                timeOff.is_bonus_time_off
-                                  ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
-                                  : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
-                              }`}
-                            >
-                              {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
-                            </Badge>
+                            <div className="flex flex-col gap-1">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${
+                                  timeOff.is_bonus_time_off
+                                    ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+                                    : "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+                                }`}
+                              >
+                                {timeOff.is_bonus_time_off ? timeOff.bonus_reason : "Banco de horas"}
+                              </Badge>
+                              {/* Mostrar detalhes de dias para Atestado/Licença Médica */}
+                              {timeOff.is_bonus_time_off && isAtestadoOrLicenca && (
+                                <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
+                                  <span>Abono: {workingDays} dia{workingDays > 1 ? "s" : ""}</span>
+                                  {timeOff.leave_days && timeOff.leave_days > 0 && (
+                                    <span>Afastado: {timeOff.leave_days} dia{timeOff.leave_days > 1 ? "s" : ""}</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant={timeOff.approved ? "default" : "outline"} className="text-xs">
@@ -1546,7 +1588,8 @@ export default function Vacations() {
                             )}
                           </TableCell>
                         </TableRow>
-                      ));
+                        );
+                      });
                     })()}
                   </TableBody>
                 </Table>
