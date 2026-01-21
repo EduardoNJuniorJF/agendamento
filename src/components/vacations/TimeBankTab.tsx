@@ -184,6 +184,16 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
           p_created_by: user?.id,
         });
         if (bonusError) throw bonusError;
+
+        // Se for Atestado ou Licença Médica, salvar o leave_days na tabela user_bonus_balances
+        if ((form.bonus_type === "Atestado" || form.bonus_type === "Licença Médica") && form.leave_days > 0) {
+          const { error: leaveDaysError } = await supabase
+            .from("user_bonus_balances")
+            .update({ leave_days: form.leave_days })
+            .eq("user_id", form.user_id)
+            .eq("bonus_type", form.bonus_type);
+          if (leaveDaysError) throw leaveDaysError;
+        }
       }
 
       // If adding hours, use the existing upsert_time_bank function

@@ -99,6 +99,7 @@ interface UserBonusBalance {
   user_id: string;
   bonus_type: string;
   quantity: number;
+  leave_days: number | null;
 }
 
 export default function Vacations() {
@@ -217,10 +218,11 @@ export default function Vacations() {
 
   const loadUserBonusBalances = async () => {
     try {
+      // Buscar registros com quantity > 0 OU leave_days preenchido
       const { data, error } = await supabase
         .from("user_bonus_balances")
-        .select("user_id, bonus_type, quantity")
-        .gt("quantity", 0);
+        .select("user_id, bonus_type, quantity, leave_days")
+        .or("quantity.gt.0,leave_days.gt.0");
 
       if (error) throw error;
       setUserBonusBalances(data || []);
@@ -418,17 +420,15 @@ export default function Vacations() {
       // Calculate working days for proportional deduction
       const workingDays = calculateWorkingDays(timeOffForm.date, timeOffForm.end_date || null);
 
-      // Buscar o leave_days do último registro para Atestado/Licença Médica
+      // Buscar o leave_days da tabela user_bonus_balances para Atestado/Licença Médica
       let leaveDaysValue: number | null = null;
       if (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") {
-        const lastTimeOff = timeOffs.find(
-          (t) =>
-            t.user_id === timeOffForm.user_id &&
-            t.bonus_reason === timeOffForm.bonus_reason &&
-            t.leave_days &&
-            t.leave_days > 0
+        const bonusBalance = userBonusBalances.find(
+          (b) =>
+            b.user_id === timeOffForm.user_id &&
+            b.bonus_type === timeOffForm.bonus_reason
         );
-        leaveDaysValue = lastTimeOff?.leave_days || null;
+        leaveDaysValue = bonusBalance?.leave_days || null;
       }
 
       // Prepare data for insertion/update
@@ -1285,15 +1285,13 @@ export default function Vacations() {
                         <div>
                           <Label htmlFor="leave_days">Dias de Afastamento</Label>
                           {(() => {
-                            // Buscar o último leave_days cadastrado para o usuário com esse tipo de bonus_reason
-                            const lastTimeOff = timeOffs.find(
-                              (t) =>
-                                t.user_id === timeOffForm.user_id &&
-                                t.bonus_reason === timeOffForm.bonus_reason &&
-                                t.leave_days &&
-                                t.leave_days > 0
+                            // Buscar o leave_days da tabela user_bonus_balances para o usuário com esse tipo de bonus
+                            const bonusBalance = userBonusBalances.find(
+                              (b) =>
+                                b.user_id === timeOffForm.user_id &&
+                                b.bonus_type === timeOffForm.bonus_reason
                             );
-                            const leaveDaysValue = lastTimeOff?.leave_days || 0;
+                            const leaveDaysValue = bonusBalance?.leave_days || 0;
                             
                             return (
                               <div className="flex items-center gap-2">
@@ -1307,11 +1305,11 @@ export default function Vacations() {
                                 />
                                 {leaveDaysValue > 0 ? (
                                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                    (cadastrado anteriormente)
+                                    (cadastrado no Banco de Horas)
                                   </span>
                                 ) : (
                                   <span className="text-xs text-destructive whitespace-nowrap">
-                                    Nenhum registro encontrado
+                                    Cadastre primeiro na aba "Banco de Horas"
                                   </span>
                                 )}
                               </div>
