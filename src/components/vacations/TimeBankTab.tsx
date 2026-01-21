@@ -88,6 +88,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     hours: 0,
     bonuses: 0,
     bonus_type: "",
+    leave_days: 0, // Dias de afastamento para Atestado/Licença Médica
   });
 
   // Edit dialog state
@@ -208,6 +209,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
         hours: 0,
         bonuses: 0,
         bonus_type: "",
+        leave_days: 0,
       });
 
       loadTimeBank();
@@ -425,27 +427,47 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
                 </div>
 
                 {form.bonuses > 0 && (
-                  <div>
-                    <Label htmlFor="bonus_type">Tipo de Abono *</Label>
-                    <Select
-                      value={form.bonus_type}
-                      onValueChange={(value) => setForm({ ...form, bonus_type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {BONUS_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      <strong>Obs:</strong> Atestado Médico e Licença Médica contabilizam apenas dias úteis.
-                    </p>
-                  </div>
+                  <>
+                    <div>
+                      <Label htmlFor="bonus_type">Tipo de Abono *</Label>
+                      <Select
+                        value={form.bonus_type}
+                        onValueChange={(value) => setForm({ ...form, bonus_type: value, leave_days: 0 })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BONUS_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <strong>Obs:</strong> Atestado Médico e Licença Médica contabilizam apenas dias úteis.
+                      </p>
+                    </div>
+
+                    {/* Campo de dias de afastamento para Atestado/Licença Médica */}
+                    {(form.bonus_type === "Atestado" || form.bonus_type === "Licença Médica") && (
+                      <div>
+                        <Label htmlFor="leave_days">Dias de Afastamento</Label>
+                        <Input
+                          id="leave_days"
+                          type="number"
+                          min="0"
+                          value={form.leave_days}
+                          onChange={(e) => setForm({ ...form, leave_days: parseInt(e.target.value) || 0 })}
+                          placeholder="Ex: 5"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Informe o total de dias que o funcionário ficará afastado (incluindo finais de semana).
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

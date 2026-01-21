@@ -455,6 +455,7 @@ export type Database = {
           end_date: string | null
           id: string
           is_bonus_time_off: boolean | null
+          leave_days: number | null
           type: string | null
           updated_at: string | null
           user_id: string | null
@@ -467,6 +468,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_bonus_time_off?: boolean | null
+          leave_days?: number | null
           type?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -479,6 +481,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_bonus_time_off?: boolean | null
+          leave_days?: number | null
           type?: string | null
           updated_at?: string | null
           user_id?: string | null
