@@ -1516,14 +1516,14 @@ export default function Vacations() {
                               ? `${format(parseISO(timeOff.date), "dd/MM")} → ${format(parseISO(timeOff.end_date), "dd/MM/yyyy")}`
                               : format(parseISO(timeOff.date), "dd/MM/yyyy")}
                           </TableCell>
-                          <TableCell className="text-xs md:text-sm text-center">
+                          <TableCell className="text-xs md:text-sm">
                             {timeOff.is_bonus_time_off ? (
                               <span className="font-medium">{workingDays} dias</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-xs md:text-sm text-center">
+                          <TableCell className="text-xs md:text-sm">
                             {isAtestadoOrLicenca && timeOff.leave_days && timeOff.leave_days > 0 ? (
                               <span className="font-medium">{timeOff.leave_days} dias</span>
                             ) : (
