@@ -418,6 +418,19 @@ export default function Vacations() {
       // Calculate working days for proportional deduction
       const workingDays = calculateWorkingDays(timeOffForm.date, timeOffForm.end_date || null);
 
+      // Buscar o leave_days do último registro para Atestado/Licença Médica
+      let leaveDaysValue: number | null = null;
+      if (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") {
+        const lastTimeOff = timeOffs.find(
+          (t) =>
+            t.user_id === timeOffForm.user_id &&
+            t.bonus_reason === timeOffForm.bonus_reason &&
+            t.leave_days &&
+            t.leave_days > 0
+        );
+        leaveDaysValue = lastTimeOff?.leave_days || null;
+      }
+
       // Prepare data for insertion/update
       const timeOffData = {
         date: timeOffForm.date,
@@ -427,10 +440,7 @@ export default function Vacations() {
         approved: timeOffForm.approved,
         is_bonus_time_off: timeOffForm.is_bonus_time_off,
         bonus_reason: timeOffForm.is_bonus_time_off ? timeOffForm.bonus_reason : null,
-        leave_days:
-          timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica"
-            ? timeOffForm.leave_days || null
-            : null,
+        leave_days: leaveDaysValue,
       };
 
       if (editingTimeOffId) {
@@ -1269,23 +1279,46 @@ export default function Vacations() {
                       </div>
                     )}
 
-                    {/* Campo de dias de afastamento para Atestado/Licença Médica */}
+                    {/* Campo de dias de afastamento para Atestado/Licença Médica - Apenas exibição */}
                     {timeOffForm.is_bonus_time_off &&
                       (timeOffForm.bonus_reason === "Atestado" || timeOffForm.bonus_reason === "Licença Médica") && (
                         <div>
                           <Label htmlFor="leave_days">Dias de Afastamento</Label>
-                          <Input
-                            id="leave_days"
-                            type="number"
-                            min="0"
-                            value={timeOffForm.leave_days || ""}
-                            onChange={(e) =>
-                              setTimeOffForm({ ...timeOffForm, leave_days: parseInt(e.target.value) || 0 })
-                            }
-                            placeholder="Ex: 5"
-                          />
+                          {(() => {
+                            // Buscar o último leave_days cadastrado para o usuário com esse tipo de bonus_reason
+                            const lastTimeOff = timeOffs.find(
+                              (t) =>
+                                t.user_id === timeOffForm.user_id &&
+                                t.bonus_reason === timeOffForm.bonus_reason &&
+                                t.leave_days &&
+                                t.leave_days > 0
+                            );
+                            const leaveDaysValue = lastTimeOff?.leave_days || 0;
+                            
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  id="leave_days"
+                                  type="number"
+                                  min="0"
+                                  value={leaveDaysValue}
+                                  disabled
+                                  className="bg-muted"
+                                />
+                                {leaveDaysValue > 0 ? (
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                    (cadastrado anteriormente)
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-destructive whitespace-nowrap">
+                                    Nenhum registro encontrado
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                           <p className="text-xs text-muted-foreground mt-1">
-                            Total de dias de afastamento (incluindo finais de semana).
+                            Este valor foi definido na aba "Banco de Horas".
                           </p>
                         </div>
                       )}
