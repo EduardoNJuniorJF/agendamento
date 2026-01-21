@@ -1538,7 +1538,7 @@ export default function Vacations() {
                             </TableCell>
                             <TableCell className="text-xs md:text-sm">
                               {timeOff.is_bonus_time_off ? (
-                                <span className="font-medium">{workingDays} dias</span>
+                                <span className="font-medium">{workingDays} dias úteis</span>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
