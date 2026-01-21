@@ -38,7 +38,7 @@ interface EmployeeWithBank {
   name: string;
   accumulated_hours: number;
   bonuses: number;
-  bonus_breakdown: { bonus_type: string; quantity: number }[];
+  bonus_breakdown: { bonus_type: string; quantity: number; leave_days: number | null }[];
 }
 
 // Helper function to format hours as readable text
@@ -66,7 +66,7 @@ const formatHoursDisplay = (hours: number): string => {
 
 export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTabProps) {
   const [timeBank, setTimeBank] = useState<TimeBank[]>([]);
-  const [bonusBalances, setBonusBalances] = useState<Record<string, { bonus_type: string; quantity: number }[]>>({});
+  const [bonusBalances, setBonusBalances] = useState<Record<string, { bonus_type: string; quantity: number; leave_days: number | null }[]>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -98,6 +98,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     hours: 0,
   });
   const [editBonusChanges, setEditBonusChanges] = useState<Record<string, number>>({});
+  const [editLeaveDays, setEditLeaveDays] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadTimeBank();
@@ -109,14 +110,18 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
       // Load ALL bonus balances (including 0 and negative) to properly track employee state
       const { data, error } = await supabase
         .from("user_bonus_balances")
-        .select("user_id, bonus_type, quantity");
+        .select("user_id, bonus_type, quantity, leave_days");
 
       if (error) throw error;
 
-      const grouped: Record<string, { bonus_type: string; quantity: number }[]> = {};
+      const grouped: Record<string, { bonus_type: string; quantity: number; leave_days: number | null }[]> = {};
       (data || []).forEach((row: any) => {
         if (!grouped[row.user_id]) grouped[row.user_id] = [];
-        grouped[row.user_id].push({ bonus_type: row.bonus_type, quantity: Number(row.quantity) || 0 });
+        grouped[row.user_id].push({ 
+          bonus_type: row.bonus_type, 
+          quantity: Number(row.quantity) || 0,
+          leave_days: row.leave_days || null
+        });
       });
       setBonusBalances(grouped);
     } catch (error) {
@@ -243,10 +248,15 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     });
     // Initialize bonus changes from current breakdown
     const bonusMap: Record<string, number> = {};
+    const leaveDaysMap: Record<string, number> = {};
     employee.bonus_breakdown.forEach((b) => {
       bonusMap[b.bonus_type] = b.quantity;
+      if (b.leave_days !== null) {
+        leaveDaysMap[b.bonus_type] = b.leave_days;
+      }
     });
     setEditBonusChanges(bonusMap);
+    setEditLeaveDays(leaveDaysMap);
     setEditDialogOpen(true);
   };
 
@@ -255,6 +265,7 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
     setEditingEmployee(null);
     setEditForm({ hours: 0 });
     setEditBonusChanges({});
+    setEditLeaveDays({});
   };
 
   const handleEditSubmit = async () => {
@@ -294,6 +305,21 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
             p_created_by: user?.id,
           });
           if (bonusError) throw bonusError;
+        }
+
+        // Update leave_days for Atestado and Licença Médica
+        if (bonusType === "Atestado" || bonusType === "Licença Médica") {
+          const currentLeaveDays = editingEmployee.bonus_breakdown.find((b) => b.bonus_type === bonusType)?.leave_days || 0;
+          const newLeaveDays = editLeaveDays[bonusType] || 0;
+          
+          if (newLeaveDays !== currentLeaveDays) {
+            const { error: leaveDaysError } = await supabase
+              .from("user_bonus_balances")
+              .update({ leave_days: newLeaveDays > 0 ? newLeaveDays : null })
+              .eq("user_id", editingEmployee.id)
+              .eq("bonus_type", bonusType);
+            if (leaveDaysError) throw leaveDaysError;
+          }
         }
       }
 
@@ -620,21 +646,44 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
               <div className="space-y-3 mt-2">
                 {BONUS_TYPES.map((bonusType) => {
                   const currentQty = editingEmployee?.bonus_breakdown.find((b) => b.bonus_type === bonusType)?.quantity || 0;
+                  const currentLeaveDays = editingEmployee?.bonus_breakdown.find((b) => b.bonus_type === bonusType)?.leave_days || 0;
+                  const showLeaveDays = bonusType === "Atestado" || bonusType === "Licença Médica";
+                  
                   return (
-                    <div key={bonusType} className="flex items-center gap-2">
-                      <Label className="text-sm flex-1 text-muted-foreground">{bonusType}</Label>
-                      <Input
-                        type="number"
-                        className="w-20"
-                        value={editBonusChanges[bonusType] ?? currentQty}
-                        onChange={(e) => setEditBonusChanges({
-                          ...editBonusChanges,
-                          [bonusType]: parseFloat(e.target.value) || 0,
-                        })}
-                      />
-                      <span className="text-xs text-muted-foreground w-16">
-                        (atual: {currentQty})
-                      </span>
+                    <div key={bonusType} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm flex-1 text-muted-foreground">{bonusType}</Label>
+                        <Input
+                          type="number"
+                          className="w-20"
+                          value={editBonusChanges[bonusType] ?? currentQty}
+                          onChange={(e) => setEditBonusChanges({
+                            ...editBonusChanges,
+                            [bonusType]: parseFloat(e.target.value) || 0,
+                          })}
+                        />
+                        <span className="text-xs text-muted-foreground w-16">
+                          (atual: {currentQty})
+                        </span>
+                      </div>
+                      {showLeaveDays && (
+                        <div className="flex items-center gap-2 ml-4">
+                          <Label className="text-xs text-muted-foreground">Dias de Afastamento:</Label>
+                          <Input
+                            type="number"
+                            className="w-20"
+                            min="0"
+                            value={editLeaveDays[bonusType] ?? currentLeaveDays}
+                            onChange={(e) => setEditLeaveDays({
+                              ...editLeaveDays,
+                              [bonusType]: parseInt(e.target.value) || 0,
+                            })}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            (atual: {currentLeaveDays || 0})
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
