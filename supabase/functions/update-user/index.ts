@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update email if provided and different from current
+    // Update email if provided and keep profiles.email in sync
     if (email) {
       // Get current user email first
       const { data: currentUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId)
@@ -106,8 +106,10 @@ Deno.serve(async (req) => {
         throw getUserError
       }
 
-      // Only update if email is different
-      if (currentUser?.user?.email !== email) {
+      const currentAuthEmail = currentUser?.user?.email ?? null
+
+      // Only update Auth email if it's different
+      if (currentAuthEmail !== email) {
         // Check if new email already exists for another user
         const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
         const emailExists = existingUsers?.users?.some(
@@ -130,6 +132,17 @@ Deno.serve(async (req) => {
           console.error('Email error:', emailError)
           throw emailError
         }
+      }
+
+      // Always sync profiles.email to whatever was requested (source of truth for username-login flow)
+      const { error: profileEmailError } = await supabaseAdmin
+        .from('profiles')
+        .update({ email })
+        .eq('id', userId)
+
+      if (profileEmailError) {
+        console.error('Profile email sync error:', profileEmailError)
+        throw profileEmailError
       }
     }
 
