@@ -95,16 +95,40 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Update email if provided
+    // Update email if provided and different from current
     if (email) {
-      const { error: emailError } = await supabaseAdmin.auth.admin.updateUserById(
-        userId,
-        { email }
-      )
+      // Get current user email first
+      const { data: currentUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId)
+      
+      if (getUserError) {
+        console.error('Error getting current user:', getUserError)
+        throw getUserError
+      }
 
-      if (emailError) {
-        console.error('Email error:', emailError)
-        throw emailError
+      // Only update if email is different
+      if (currentUser?.user?.email !== email) {
+        // Check if new email already exists for another user
+        const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+        const emailExists = existingUsers?.users?.some(
+          (u) => u.email === email && u.id !== userId
+        )
+
+        if (emailExists) {
+          return new Response(
+            JSON.stringify({ error: 'Este e-mail já está em uso por outro usuário' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        const { error: emailError } = await supabaseAdmin.auth.admin.updateUserById(
+          userId,
+          { email }
+        )
+
+        if (emailError) {
+          console.error('Email error:', emailError)
+          throw emailError
+        }
       }
     }
 
