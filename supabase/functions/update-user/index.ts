@@ -10,6 +10,7 @@ interface UpdateUserRequest {
   username?: string
   fullName?: string
   email?: string
+  password?: string
   role?: 'admin' | 'user' | 'financeiro'
   sector?: 'Comercial' | 'Suporte' | 'Desenvolvimento' | 'Administrativo' | 'Loja'
 }
@@ -56,9 +57,9 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { userId, username, fullName, email, role, sector }: UpdateUserRequest = await req.json()
+    const { userId, username, fullName, email, password, role, sector }: UpdateUserRequest = await req.json()
 
-    console.log('Updating user:', { userId, username, email, role, sector })
+    console.log('Updating user:', { userId, username, email, role, sector, hasPassword: !!password })
 
     // Check if username already exists (if changing username)
     if (username) {
@@ -130,6 +131,20 @@ Deno.serve(async (req) => {
           throw emailError
         }
       }
+    }
+
+    // Update password if provided
+    if (password) {
+      const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
+        userId,
+        { password }
+      )
+
+      if (passwordError) {
+        console.error('Password error:', passwordError)
+        throw passwordError
+      }
+      console.log('Password updated successfully for user:', userId)
     }
 
     // Update role if provided
