@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { ChevronLeft, ChevronRight, Settings, Printer, Plus, Trash2, Edit2, FileText } from "lucide-react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, eachDayOfInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -136,6 +137,12 @@ export default function Bonus() {
       setLoading(false);
     }
   };
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(
+    ['appointments', 'appointment_agents', 'agents', 'bonus_settings', 'city_bonus_levels'],
+    () => { loadData(); }
+  );
 
   const calculateBonuses = async (agentsList: Agent[], settings: BonusSettings | null, cities: CityLevel[]) => {
     const monthStart = format(startOfMonth(currentDate), "yyyy-MM-dd");

@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { isHoliday, getHolidayName, LocalHolidayData } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 
 // Hook para verificar se pode ver/editar elementos do dashboard baseado no setor
 import {
@@ -127,6 +128,12 @@ export default function Dashboard() {
   };
 
   const weekDays = getWeekDays();
+
+  // Realtime: refresh automático quando qualquer usuário fizer alterações
+  useRealtimeRefresh(
+    ['appointments', 'appointment_agents', 'vehicles', 'agents', 'time_off', 'vacations', 'local_holidays'],
+    () => { loadStats(); loadLocalHolidays(); }
+  );
 
   useEffect(() => {
     loadStats();

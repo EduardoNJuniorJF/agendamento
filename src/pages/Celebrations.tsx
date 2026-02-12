@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -140,6 +141,9 @@ function BirthdaysSection({ canManage }: { canManage: boolean }) {
   const [formData, setFormData] = useState({ employee_name: "", birth_date: "", image_url: "" });
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedBirthdayImage, setSelectedBirthdayImage] = useState<{ url: string; name: string } | null>(null);
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(['birthdays'], () => { queryClient.invalidateQueries({ queryKey: ['birthdays'] }); });
 
   const { data: birthdays = [], isLoading } = useQuery({
     queryKey: ["birthdays"],
@@ -482,6 +486,12 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
     month: 1, 
     year: null as number | null, 
     location: "tres_rios" 
+  });
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(['seasonal_dates', 'local_holidays'], () => {
+    queryClient.invalidateQueries({ queryKey: ['seasonal_dates'] });
+    queryClient.invalidateQueries({ queryKey: ['local_holidays'] });
   });
 
   const { data: seasonalDates = [], isLoading } = useQuery({

@@ -30,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { Database } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealtimeRefresh } from '@/hooks/useRealtimeRefresh';
 
 type Vehicle = Database['public']['Tables']['vehicles']['Row'];
 type VehicleInsert = Database['public']['Tables']['vehicles']['Insert'];
@@ -75,6 +76,9 @@ export default function Fleet() {
 
     setVehicles(data || []);
   };
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(['vehicles'], () => { loadVehicles(); });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
