@@ -33,6 +33,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { isHoliday, getHolidayName, LocalHolidayData } from "@/lib/holidays";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import {
   DndContext,
   DragEndEvent,
@@ -101,6 +102,12 @@ export default function CalendarView() {
         distance: 8,
       },
     }),
+  );
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(
+    ['appointments', 'appointment_agents', 'local_holidays'],
+    () => { loadAppointments(); loadLocalHolidays(); }
   );
 
   useEffect(() => {

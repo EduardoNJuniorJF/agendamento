@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 
 type Agent = Database["public"]["Tables"]["agents"]["Row"] & {
   receives_bonus?: boolean;
@@ -78,6 +79,9 @@ export default function Team() {
 
     setAgents(agentsWithSector);
   };
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(['agents', 'profiles'], () => { loadAgents(); });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

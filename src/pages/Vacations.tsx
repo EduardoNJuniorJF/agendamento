@@ -48,6 +48,7 @@ import {
 } from "@/lib/holidays";
 import { addMonths } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -197,6 +198,12 @@ export default function Vacations() {
 
   // Check if user is Dev for time bank access
   const isDev = role === "dev";
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(
+    ['vacations', 'time_off', 'profiles', 'agents', 'user_bonus_balances', 'time_bank', 'time_bank_transactions', 'local_holidays'],
+    () => { loadData(); loadReminders(); loadLocalHolidays(); loadUserBonusBalances(); }
+  );
 
   useEffect(() => {
     loadData();

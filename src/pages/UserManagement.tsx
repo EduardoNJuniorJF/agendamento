@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Loader2, Pencil, Trash2, Users, UserCheck, Search } from "lucide-react";
+import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface User {
@@ -68,13 +69,18 @@ export default function UserManagement() {
     sector: "" as "Comercial" | "Suporte" | "Desenvolvimento" | "Administrativo" | "Loja" | "",
   });
 
+  useEffect(() => {
+    if (role === "admin" || role === "dev") {
+      loadUsers();
+    }
+  }, [role]);
+
+  // Realtime: refresh automático
+  useRealtimeRefresh(['profiles', 'user_roles', 'agents'], () => { loadUsers(); });
+
   if (role !== "admin" && role !== "dev") {
     return <Navigate to="/" replace />;
   }
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   const loadUsers = async () => {
     try {
