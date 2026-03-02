@@ -21,6 +21,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          pix_key: string | null
           receives_bonus: boolean | null
           sector: string | null
           updated_at: string | null
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          pix_key?: string | null
           receives_bonus?: boolean | null
           sector?: string | null
           updated_at?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          pix_key?: string | null
           receives_bonus?: boolean | null
           sector?: string | null
           updated_at?: string | null
