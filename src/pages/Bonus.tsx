@@ -16,6 +16,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
@@ -812,9 +813,11 @@ export default function Bonus() {
                                     <Button variant="ghost" size="icon" onClick={() => setEditingCity(city)}>
                                       <Edit2 className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteCity(city.id)}>
-                                      <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
+                                    <ConfirmDeleteDialog
+                                      onConfirm={() => handleDeleteCity(city.id)}
+                                      description="Tem certeza que deseja excluir esta cidade?"
+                                      iconClassName="h-4 w-4"
+                                    />
                                   </div>
                                 </TableCell>
                               </TableRow>

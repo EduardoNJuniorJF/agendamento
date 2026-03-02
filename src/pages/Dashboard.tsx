@@ -10,12 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
-  Trash2,
   Umbrella,
   PartyPopper,
   GripVertical,
   CalendarDays,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { format, startOfWeek, addDays, addWeeks, isSameDay, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -251,8 +251,6 @@ export default function Dashboard() {
   };
 
   const handleDeleteAppointment = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
-
     const { error } = await supabase.from("appointments").delete().eq("id", id);
 
     if (error) {
@@ -536,14 +534,12 @@ export default function Dashboard() {
                                       >
                                         <Edit className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                       </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                                        onClick={() => handleDeleteAppointment(apt.id)}
-                                      >
-                                        <Trash2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                      </Button>
+                                      <ConfirmDeleteDialog
+                                        onConfirm={() => handleDeleteAppointment(apt.id)}
+                                        description="Tem certeza que deseja excluir este agendamento?"
+                                        triggerClassName="h-5 w-5 md:h-6 md:w-6 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                                        iconClassName="h-2.5 w-2.5 md:h-3 md:w-3"
+                                      />
                                     </>
                                   )}
                                 </div>

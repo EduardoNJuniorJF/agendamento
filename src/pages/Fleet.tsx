@@ -27,7 +27,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import type { Database } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRealtimeRefresh } from '@/hooks/useRealtimeRefresh';
@@ -121,8 +122,6 @@ export default function Fleet() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este veículo?')) return;
-
     const { error } = await supabase.from('vehicles').delete().eq('id', id);
 
     if (error) {
@@ -252,14 +251,10 @@ export default function Fleet() {
                         >
                           <Edit className="h-3 w-3 md:h-4 md:w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleDelete(vehicle.id)}
-                        >
-                          <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                        </Button>
+                        <ConfirmDeleteDialog
+                          onConfirm={() => handleDelete(vehicle.id)}
+                          description="Tem certeza que deseja excluir este veículo?"
+                        />
                       </div>
                     )}
                   </TableCell>
