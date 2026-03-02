@@ -28,6 +28,7 @@ interface Agent {
   id: string;
   name: string;
   color: string;
+  pix_key?: string | null;
 }
 
 interface Appointment {
@@ -118,7 +119,7 @@ export default function Bonus() {
       const [agentsRes, settingsRes, citiesRes] = await Promise.all([
         supabase
           .from("agents")
-          .select("id, name, color, receives_bonus")
+          .select("id, name, color, receives_bonus, pix_key")
           .eq("is_active", true)
           .eq("receives_bonus", true)
           .order("name"),
@@ -515,6 +516,7 @@ export default function Bonus() {
               <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
               <div>Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
               <div class="agent-name">Agente: ${detailedReportAgent.name}</div>
+              ${detailedReportAgent.pix_key ? `<div style="font-size: 10px; margin-top: 2px;">PIX: ${detailedReportAgent.pix_key}</div>` : ''}
             </div>
           </div>
 

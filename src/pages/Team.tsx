@@ -23,12 +23,13 @@ export default function Team() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [open, setOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
-  const [formData, setFormData] = useState<AgentInsert & { receives_bonus: boolean }>({
+  const [formData, setFormData] = useState<AgentInsert & { receives_bonus: boolean; pix_key: string }>({
     name: "",
     sector: "",
     is_active: true,
     color: "#3b82f6",
     receives_bonus: true,
+    pix_key: "",
   });
   const { toast } = useToast();
   const { canEditTeam, sector, role } = useAuth();
@@ -95,6 +96,7 @@ export default function Team() {
           is_active: formData.is_active,
           color: formData.color,
           receives_bonus: formData.receives_bonus,
+          pix_key: formData.pix_key || null,
         })
         .eq("id", editingAgent.id);
 
@@ -111,6 +113,7 @@ export default function Team() {
         is_active: formData.is_active,
         color: formData.color,
         receives_bonus: formData.receives_bonus,
+        pix_key: formData.pix_key || null,
       });
 
       if (error) {
@@ -123,7 +126,7 @@ export default function Team() {
 
     setOpen(false);
     setEditingAgent(null);
-    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true });
+    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true, pix_key: "" });
     loadAgents();
   };
 
@@ -149,13 +152,14 @@ export default function Team() {
       is_active: agent.is_active ?? true,
       color: agent.color || "#3b82f6",
       receives_bonus: agent.receives_bonus ?? true,
+      pix_key: (agent as any).pix_key || "",
     });
     setOpen(true);
   };
 
   const openNewDialog = () => {
     setEditingAgent(null);
-    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true });
+    setFormData({ name: "", sector: "", is_active: true, color: "#3b82f6", receives_bonus: true, pix_key: "" });
     setOpen(true);
   };
 
@@ -233,6 +237,15 @@ export default function Team() {
                     onCheckedChange={(checked) => setFormData({ ...formData, receives_bonus: checked })}
                   />
                   <Label htmlFor="receives_bonus">Recebe Bonificação</Label>
+                </div>
+                <div>
+                  <Label htmlFor="pix_key">Chave PIX</Label>
+                  <Input
+                    id="pix_key"
+                    value={formData.pix_key || ""}
+                    onChange={(e) => setFormData({ ...formData, pix_key: e.target.value })}
+                    placeholder="CPF, e-mail, telefone ou chave aleatória"
+                  />
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>
