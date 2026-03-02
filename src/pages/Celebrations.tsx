@@ -21,7 +21,6 @@ import {
   CalendarDays,
   Plus,
   Pencil,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   X,
@@ -29,6 +28,7 @@ import {
   ExternalLink,
   Flag,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { cn } from "@/lib/utils";
 
 interface LocalHoliday {
@@ -413,14 +413,11 @@ function BirthdaysSection({ canManage }: { canManage: boolean }) {
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(birthday)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => deleteMutation.mutate(birthday.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ConfirmDeleteDialog
+                          onConfirm={() => deleteMutation.mutate(birthday.id)}
+                          description="Tem certeza que deseja excluir este aniversário?"
+                          iconClassName="h-4 w-4"
+                        />
                       </TableCell>
                     )}
                   </TableRow>
@@ -1046,17 +1043,12 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                             >
                               <Pencil className="h-2.5 w-2.5" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteMutation.mutate(datesForDay[0].id);
-                              }}
-                            >
-                              <Trash2 className="h-2.5 w-2.5" />
-                            </Button>
+                            <ConfirmDeleteDialog
+                              onConfirm={() => deleteMutation.mutate(datesForDay[0].id)}
+                              description="Tem certeza que deseja excluir esta data sazonal?"
+                              triggerClassName="h-5 w-5 bg-background/80 hover:bg-destructive hover:text-destructive-foreground"
+                              iconClassName="h-2.5 w-2.5"
+                            />
                           </div>
                         )}
                       </>
@@ -1111,14 +1103,11 @@ function SeasonalDatesSection({ canManage }: { canManage: boolean }) {
                         <Button variant="ghost" size="icon" onClick={() => handleEditHoliday(holiday)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => deleteHolidayMutation.mutate(holiday.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <ConfirmDeleteDialog
+                          onConfirm={() => deleteHolidayMutation.mutate(holiday.id)}
+                          description="Tem certeza que deseja excluir este feriado?"
+                          iconClassName="h-4 w-4"
+                        />
                       </TableCell>
                     )}
                   </TableRow>

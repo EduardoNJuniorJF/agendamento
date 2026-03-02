@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Clock, Gift, Edit, Trash2 } from "lucide-react";
+import { Plus, Clock, Gift, Edit } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -344,8 +345,6 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm("Deseja excluir este registro do banco de horas? Esta ação não pode ser desfeita.")) return;
-
     try {
       // Delete from time_bank
       const { error: timeBankError } = await supabase
@@ -607,14 +606,12 @@ export default function TimeBankTab({ profiles, canEdit, onRefresh }: TimeBankTa
                             >
                               <Edit className="h-3 w-3 md:h-4 md:w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 w-7 p-0"
-                              onClick={() => handleDelete(employee.id)}
-                            >
-                              <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                            </Button>
+                            <ConfirmDeleteDialog
+                              onConfirm={() => handleDelete(employee.id)}
+                              description="Deseja excluir este registro do banco de horas? Esta ação não pode ser desfeita."
+                              triggerClassName="h-7 w-7 p-0"
+                              triggerSize="sm"
+                            />
                           </div>
                         )}
                       </TableCell>

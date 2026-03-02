@@ -13,7 +13,6 @@ import {
   Calendar,
   Edit,
   Plus,
-  Trash2,
   Umbrella,
   Check,
   ChevronsUpDown,
@@ -23,6 +22,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import {
   format,
   differenceInDays,
@@ -517,8 +517,6 @@ export default function Vacations() {
   };
 
   const handleDeleteVacation = async (id: string) => {
-    if (!confirm("Deseja excluir estas férias?")) return;
-
     try {
       const { error } = await supabase.from("vacations").delete().eq("id", id);
       if (error) throw error;
@@ -535,8 +533,6 @@ export default function Vacations() {
   };
 
   const handleDeleteTimeOff = async (id: string) => {
-    if (!confirm("Deseja excluir esta folga?")) return;
-
     try {
       const { error } = await supabase.from("time_off").delete().eq("id", id);
       if (error) throw error;
@@ -1118,14 +1114,12 @@ export default function Vacations() {
                                   >
                                     <Edit className="h-3 w-3 md:h-4 md:w-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 w-7 p-0"
-                                    onClick={() => handleDeleteVacation(vacation.id)}
-                                  >
-                                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                                  </Button>
+                                  <ConfirmDeleteDialog
+                                    onConfirm={() => handleDeleteVacation(vacation.id)}
+                                    description="Deseja excluir estas férias?"
+                                    triggerClassName="h-7 w-7 p-0"
+                                    triggerSize="sm"
+                                  />
                                 </div>
                               )}
                             </TableCell>
@@ -1626,14 +1620,12 @@ export default function Vacations() {
                                   >
                                     <Edit className="h-3 w-3 md:h-4 md:w-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 w-7 p-0"
-                                    onClick={() => handleDeleteTimeOff(timeOff.id)}
-                                  >
-                                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                                  </Button>
+                                  <ConfirmDeleteDialog
+                                    onConfirm={() => handleDeleteTimeOff(timeOff.id)}
+                                    description="Deseja excluir esta folga?"
+                                    triggerClassName="h-7 w-7 p-0"
+                                    triggerSize="sm"
+                                  />
                                 </div>
                               )}
                             </TableCell>

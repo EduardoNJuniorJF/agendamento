@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
@@ -131,8 +132,6 @@ export default function Team() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este agente?")) return;
-
     const { error } = await supabase.from("agents").delete().eq("id", id);
 
     if (error) {
@@ -302,9 +301,10 @@ export default function Team() {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(agent)}>
                           <Edit className="h-3 w-3 md:h-4 md:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(agent.id)}>
-                          <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
-                        </Button>
+                        <ConfirmDeleteDialog
+                          onConfirm={() => handleDelete(agent.id)}
+                          description="Tem certeza que deseja excluir este agente?"
+                        />
                       </div>
                     )}
                   </TableCell>
