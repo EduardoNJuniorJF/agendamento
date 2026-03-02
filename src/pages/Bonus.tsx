@@ -516,7 +516,7 @@ export default function Bonus() {
               <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
               <div>Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
               <div class="agent-name">Agente: ${detailedReportAgent.name}</div>
-              ${detailedReportAgent.pix_key ? `<div style="font-size: 10px; margin-top: 2px;">PIX: ${detailedReportAgent.pix_key}</div>` : ''}
+              ${detailedReportAgent.pix_key ? `<div style="font-size: 10px; margin-top: 2px; font-weight: bold;">PIX: ${detailedReportAgent.pix_key}</div>` : ''}
             </div>
           </div>
 
