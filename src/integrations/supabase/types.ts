@@ -55,19 +55,19 @@ export type Database = {
       }
       appointment_agents: {
         Row: {
-          agent_id: string
+          agent_id: string | null
           appointment_id: string
           created_at: string | null
           id: string
         }
         Insert: {
-          agent_id: string
+          agent_id?: string | null
           appointment_id: string
           created_at?: string | null
           id?: string
         }
         Update: {
-          agent_id?: string
+          agent_id?: string | null
           appointment_id?: string
           created_at?: string | null
           id?: string
