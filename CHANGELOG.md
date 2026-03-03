@@ -6,6 +6,11 @@ Todas as alterações relevantes do sistema são documentadas aqui.
 
 ## [1.2.0] - 2026-03-03
 
+### 💳 Chave PIX nos Agentes
+
+- **Novo campo "Chave PIX"** no cadastro de agentes na página de Equipe (CPF, e-mail, telefone ou chave aleatória).
+- **Integração com Relatório de Bonificação**: a chave PIX é exibida em negrito no cabeçalho do relatório impresso, logo abaixo do nome do agente, para agilizar o pagamento financeiro.
+
 ### 🛡️ Preservação de Histórico de Agentes
 
 - **Soft-delete de agentes**: Agentes agora são **desativados** em vez de excluídos, preservando todo o histórico de agendamentos e bonificações.
