@@ -131,15 +131,15 @@ export default function Team() {
     loadAgents();
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("agents").delete().eq("id", id);
+  const handleDeactivate = async (id: string) => {
+    const { error } = await supabase.from("agents").update({ is_active: false }).eq("id", id);
 
     if (error) {
-      toast({ title: "Erro ao excluir agente", variant: "destructive" });
+      toast({ title: "Erro ao desativar agente", variant: "destructive" });
       return;
     }
 
-    toast({ title: "Agente excluído com sucesso!" });
+    toast({ title: "Agente desativado com sucesso! O histórico foi preservado." });
     loadAgents();
   };
 
@@ -301,10 +301,13 @@ export default function Team() {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(agent)}>
                           <Edit className="h-3 w-3 md:h-4 md:w-4" />
                         </Button>
-                        <ConfirmDeleteDialog
-                          onConfirm={() => handleDelete(agent.id)}
-                          description="Tem certeza que deseja excluir este agente?"
-                        />
+                        {agent.is_active && (
+                          <ConfirmDeleteDialog
+                            onConfirm={() => handleDeactivate(agent.id)}
+                            title="Desativar Agente"
+                            description="O agente será desativado mas todo o histórico de agendamentos e bonificações será preservado. Deseja continuar?"
+                          />
+                        )}
                       </div>
                     )}
                   </TableCell>
