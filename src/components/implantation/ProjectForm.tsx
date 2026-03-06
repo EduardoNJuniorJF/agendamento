@@ -436,6 +436,7 @@ interface ProjectData {
   numLojas: string;
   isGrupo: string;
   grupoNome: string;
+  agentesResponsaveis: string[];
   regimeTributario: string[];
   porte: string[];
   estrutura: string[];
@@ -474,6 +475,7 @@ const DEFAULT_DATA: ProjectData = {
   numLojas: "",
   isGrupo: "",
   grupoNome: "",
+  agentesResponsaveis: [],
   regimeTributario: [],
   porte: [],
   estrutura: [],
@@ -655,6 +657,19 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   });
   const [saving, setSaving] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Fetch agents
+  const [agents, setAgents] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    supabase
+      .from("agents")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data: agentsData }) => {
+        if (agentsData) setAgents(agentsData);
+      });
+  }, []);
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
@@ -948,6 +963,11 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 {selectedClient.group_name && <p className="text-sm">Grupo: {selectedClient.group_name}</p>}
               </>
             )}
+            {(data.agentesResponsaveis || []).length > 0 && (
+              <p className="text-sm">
+                Responsável: <strong>{(data.agentesResponsaveis || []).map((id) => agents.find((a) => a.id === id)?.name).filter(Boolean).join(", ")}</strong>
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -986,6 +1006,27 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                   selectedClientId={clientId}
                   onSelect={setClientId}
                 />
+              </div>
+            </div>
+            <div>
+              <Label>Agente(s) Responsável(is)</Label>
+              <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {agents.map((agent) => (
+                  <label key={agent.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={(data.agentesResponsaveis || []).includes(agent.id)}
+                      onCheckedChange={() => {
+                        const current = data.agentesResponsaveis || [];
+                        if (current.includes(agent.id)) {
+                          updateField("agentesResponsaveis", current.filter((id) => id !== agent.id));
+                        } else {
+                          updateField("agentesResponsaveis", [...current, agent.id]);
+                        }
+                      }}
+                    />
+                    <span>{agent.name}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </CardContent>
