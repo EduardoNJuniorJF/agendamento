@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,27 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { useToast } from "@/hooks/use-toast";
-import { Save, Printer, Plus, Trash2, HelpCircle, Search, X } from "lucide-react";
+import { Save, Printer, Plus, Trash2, HelpCircle, Search, X, GripVertical } from "lucide-react";
 import logo from "@/assets/logo-bonus-report.png";
 
 interface ImplantationClient {
@@ -402,8 +420,14 @@ const DEFAULT_CRONOGRAMA = [
   { item: "Terceiro Atendimento", data: "" },
 ];
 
+interface EtapaDisplayItem {
+  text: string;
+  header?: boolean;
+}
+
 interface EtapaData {
   items: string[];
+  displayItems?: EtapaDisplayItem[];
   data: string;
   dataFim?: string;
 }
@@ -553,6 +577,63 @@ function ClientSearch({
     </div>
   );
 }
+// Sortable item component for drag-and-drop
+function SortableEtapaItem({
+  id,
+  text,
+  checked,
+  onCheckedChange,
+}: {
+  id: string;
+  text: string;
+  checked: boolean;
+  onCheckedChange: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 text-sm rounded-md px-1 py-0.5 hover:bg-muted/50 group"
+    >
+      <button
+        type="button"
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+      <label className="flex items-center gap-2 cursor-pointer flex-1">
+        <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
+        <span>{text}</span>
+      </label>
+    </div>
+  );
+}
+
+// Droppable container for each etapa
+function DroppableEtapa({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useSortable({
+    id,
+    data: { type: "container" },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`border rounded-md p-4 transition-colors ${isOver ? "border-primary bg-primary/5" : "border-border"}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function ProjectForm({ project, clients, onSaved }: ProjectFormProps) {
   const { toast } = useToast();
@@ -655,6 +736,144 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
 
   const currentEtapas = data.conversao === "sim" ? ETAPAS_COM_CONVERSAO : ETAPAS_SEM_CONVERSAO;
   const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
+
+  // Build the display items per etapa: use saved displayItems or fall back to template
+  const getEtapaDisplayItems = useCallback((etapaKey: "etapa1" | "etapa2" | "etapa3", idx: number) => {
+    const etapaData = data.treinamentoEtapas?.[etapaKey];
+    if (etapaData?.displayItems && etapaData.displayItems.length > 0) {
+      return etapaData.displayItems;
+    }
+    return currentEtapas[idx]?.items || [];
+  }, [data.treinamentoEtapas, currentEtapas]);
+
+  // Initialize displayItems when conversao changes
+  useEffect(() => {
+    if (!data.conversao) return;
+    const etapas = { ...data.treinamentoEtapas };
+    let changed = false;
+    etapaKeys.forEach((key, idx) => {
+      if (!etapas[key]?.displayItems || etapas[key].displayItems!.length === 0) {
+        const templateItems = currentEtapas[idx]?.items || [];
+        etapas[key] = { ...etapas[key], displayItems: [...templateItems] };
+        changed = true;
+      }
+    });
+    if (changed) {
+      updateField("treinamentoEtapas", etapas);
+    }
+  }, [data.conversao]);
+
+  // DnD state
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const findEtapaByItemId = (itemId: string): "etapa1" | "etapa2" | "etapa3" | null => {
+    for (const key of etapaKeys) {
+      const displayItems = data.treinamentoEtapas?.[key]?.displayItems || [];
+      if (displayItems.some((di) => `${key}-${di.text}` === itemId)) return key;
+    }
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveItemId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const sourceEtapa = findEtapaByItemId(activeId);
+    // over can be an item or a droppable container (etapa key)
+    let targetEtapa = findEtapaByItemId(overId);
+    if (!targetEtapa && etapaKeys.includes(overId as any)) {
+      targetEtapa = overId as "etapa1" | "etapa2" | "etapa3";
+    }
+
+    if (!sourceEtapa || !targetEtapa || sourceEtapa === targetEtapa) return;
+
+    // Move item from source to target
+    const etapas = { ...data.treinamentoEtapas };
+    const sourceItems = [...(etapas[sourceEtapa].displayItems || [])];
+    const targetItems = [...(etapas[targetEtapa].displayItems || [])];
+
+    const itemText = activeId.replace(`${sourceEtapa}-`, "");
+    const itemIndex = sourceItems.findIndex((di) => di.text === itemText);
+    if (itemIndex === -1) return;
+
+    const [movedItem] = sourceItems.splice(itemIndex, 1);
+
+    // Find position in target
+    const overItemText = overId.replace(`${targetEtapa}-`, "");
+    const overIndex = targetItems.findIndex((di) => di.text === overItemText);
+    if (overIndex >= 0) {
+      targetItems.splice(overIndex, 0, movedItem);
+    } else {
+      targetItems.push(movedItem);
+    }
+
+    etapas[sourceEtapa] = { ...etapas[sourceEtapa], displayItems: sourceItems };
+    etapas[targetEtapa] = { ...etapas[targetEtapa], displayItems: targetItems };
+
+    // Also move checked status
+    if (etapas[sourceEtapa].items.includes(movedItem.text)) {
+      etapas[sourceEtapa] = {
+        ...etapas[sourceEtapa],
+        items: etapas[sourceEtapa].items.filter((i) => i !== movedItem.text),
+      };
+      if (!etapas[targetEtapa].items.includes(movedItem.text)) {
+        etapas[targetEtapa] = {
+          ...etapas[targetEtapa],
+          items: [...etapas[targetEtapa].items, movedItem.text],
+        };
+      }
+    }
+
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItemId(null);
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const sourceEtapa = findEtapaByItemId(activeId);
+    let targetEtapa = findEtapaByItemId(overId);
+    if (!targetEtapa && etapaKeys.includes(overId as any)) {
+      targetEtapa = overId as "etapa1" | "etapa2" | "etapa3";
+    }
+
+    if (!sourceEtapa || !targetEtapa) return;
+
+    // Reorder within same etapa
+    if (sourceEtapa === targetEtapa) {
+      const etapas = { ...data.treinamentoEtapas };
+      const items = [...(etapas[sourceEtapa].displayItems || [])];
+      const activeText = activeId.replace(`${sourceEtapa}-`, "");
+      const overText = overId.replace(`${targetEtapa}-`, "");
+      const oldIndex = items.findIndex((di) => di.text === activeText);
+      const newIndex = items.findIndex((di) => di.text === overText);
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        etapas[sourceEtapa] = {
+          ...etapas[sourceEtapa],
+          displayItems: arrayMove(items, oldIndex, newIndex),
+        };
+        updateField("treinamentoEtapas", etapas);
+      }
+    }
+  };
+
+  const activeItemText = activeItemId
+    ? activeItemId.replace(/^etapa\d-/, "")
+    : null;
 
   const CheckboxGroup = ({
     options,
@@ -1082,7 +1301,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardContent>
         </Card>
 
-        {/* 9-11. Training sections */}
+        {/* 9-11. Training sections with drag and drop */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Plano de Treinamento | Rotinas Básicas</CardTitle>
@@ -1093,68 +1312,100 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 Selecione Sim ou Não no campo Conversão para exibir as etapas do treinamento.
               </p>
             )}
-            {data.conversao && currentEtapas.map((etapa, idx) => {
-              const etapaKey = etapaKeys[idx];
-              const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
-              const showDateRange = data.conversao === "sim" && idx === 0;
+            {data.conversao && (
+              <>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <GripVertical className="h-3 w-3" /> Arraste os itens entre as etapas para reorganizar.
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                >
+                  {currentEtapas.map((etapa, idx) => {
+                    const etapaKey = etapaKeys[idx];
+                    const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "", displayItems: [] };
+                    const displayItems = etapaData.displayItems || etapa.items;
+                    const showDateRange = data.conversao === "sim" && idx === 0;
+                    const sortableIds = displayItems.filter((di) => !di.header).map((di) => `${etapaKey}-${di.text}`);
 
-              return (
-                <div key={etapaKey} className="border border-border rounded-md p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <h4 className="font-semibold text-sm">{etapa.label}</h4>
-                    <div className="flex items-center gap-2">
-                      {showDateRange ? (
-                        <>
-                          <div className="flex items-center gap-1">
-                            <Label className="text-xs whitespace-nowrap">Início:</Label>
-                            <Input
-                              type="date"
-                              value={etapaData.data}
-                              onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
-                              className="w-[150px] h-8 text-xs"
-                            />
+                    return (
+                      <DroppableEtapa key={etapaKey} id={etapaKey}>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                          <h4 className="font-semibold text-sm">{etapa.label}</h4>
+                          <div className="flex items-center gap-2">
+                            {showDateRange ? (
+                              <>
+                                <div className="flex items-center gap-1">
+                                  <Label className="text-xs whitespace-nowrap">Início:</Label>
+                                  <Input
+                                    type="date"
+                                    value={etapaData.data}
+                                    onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                                    className="w-[150px] h-8 text-xs"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Label className="text-xs whitespace-nowrap">Fim:</Label>
+                                  <Input
+                                    type="date"
+                                    value={etapaData.dataFim || ""}
+                                    onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
+                                    className="w-[150px] h-8 text-xs"
+                                  />
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Label className="text-xs whitespace-nowrap">Data:</Label>
+                                <Input
+                                  type="date"
+                                  value={etapaData.data}
+                                  onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                                  className="w-[150px] h-8 text-xs"
+                                />
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Label className="text-xs whitespace-nowrap">Fim:</Label>
-                            <Input
-                              type="date"
-                              value={etapaData.dataFim || ""}
-                              onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
-                              className="w-[150px] h-8 text-xs"
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <Label className="text-xs whitespace-nowrap">Data:</Label>
-                          <Input
-                            type="date"
-                            value={etapaData.data}
-                            onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
-                            className="w-[150px] h-8 text-xs"
-                          />
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    {etapa.items.map((item) =>
-                      item.header ? (
-                        <p key={item.text} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
-                      ) : (
-                        <label key={item.text} className="flex items-center gap-2 cursor-pointer text-sm">
-                          <Checkbox
-                            checked={etapaData.items.includes(item.text)}
-                            onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
-                          />
-                          <span>{item.text}</span>
-                        </label>
-                      )
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                        <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-1">
+                            {displayItems.map((item) =>
+                              item.header ? (
+                                <p key={`header-${item.text}`} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
+                              ) : (
+                                <SortableEtapaItem
+                                  key={`${etapaKey}-${item.text}`}
+                                  id={`${etapaKey}-${item.text}`}
+                                  text={item.text}
+                                  checked={etapaData.items.includes(item.text)}
+                                  onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
+                                />
+                              )
+                            )}
+                            {displayItems.filter((di) => !di.header).length === 0 && (
+                              <p className="text-xs text-muted-foreground italic py-2">
+                                Arraste itens para esta etapa
+                              </p>
+                            )}
+                          </div>
+                        </SortableContext>
+                      </DroppableEtapa>
+                    );
+                  })}
+                  <DragOverlay>
+                    {activeItemText ? (
+                      <div className="flex items-center gap-2 text-sm bg-background border border-primary/50 rounded-md px-3 py-2 shadow-lg">
+                        <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>{activeItemText}</span>
+                      </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </>
+            )}
           </CardContent>
         </Card>
 
