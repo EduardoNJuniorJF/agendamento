@@ -999,6 +999,16 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
               />
             </div>
             <div>
+              <Label>Cliente Associado</Label>
+              <div className="mt-1">
+                <ClientSearch
+                  clients={clients}
+                  selectedClientId={clientId}
+                  onSelect={setClientId}
+                />
+              </div>
+            </div>
+            <div>
               <Label>Agente(s) Responsável(is)</Label>
               <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {agents.map((agent) => (
