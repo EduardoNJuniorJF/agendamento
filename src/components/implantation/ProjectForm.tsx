@@ -493,6 +493,9 @@ const DEFAULT_DATA: ProjectData = {
   rotinasBasicas: [],
   modulosComplementares: [],
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
+  ferramentasAvancadas: {
+    bi: { gerarConta: false, instalacao: false, treinamentoData: "" },
+  },
 };
 
 // Client search component
