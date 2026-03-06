@@ -475,6 +475,7 @@ const DEFAULT_DATA: ProjectData = {
   numLojas: "",
   isGrupo: "",
   grupoNome: "",
+  agentesResponsaveis: [],
   regimeTributario: [],
   porte: [],
   estrutura: [],
