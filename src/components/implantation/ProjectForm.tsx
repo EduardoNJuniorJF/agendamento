@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Printer, Plus, Trash2 } from "lucide-react";
+import { Save, Printer, Plus, Trash2, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-bonus-report.png";
 
 interface ImplantationClient {
