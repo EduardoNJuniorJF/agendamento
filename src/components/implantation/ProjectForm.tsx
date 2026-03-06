@@ -204,6 +204,17 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
       ))}
     </div>
   );
+  // Print helper components
+  const PrintSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-3" style={{ pageBreakInside: "avoid" }}>
+      <h3 className="font-bold text-sm border-b border-gray-400 pb-1 mb-2">{title}</h3>
+      <div className="pl-2">{children}</div>
+    </div>
+  );
+
+  const PrintLine = ({ label, value }: { label: string; value: string }) => (
+    <p><span className="font-semibold">{label}:</span> {value || "—"}</p>
+  );
 
   return (
     <div ref={printRef} className="space-y-4 print-area">
