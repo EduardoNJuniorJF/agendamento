@@ -119,6 +119,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/implantation/:clientId"
+              element={
+                <ProtectedRoute>
+                  <Layout><Implantation /></Layout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
