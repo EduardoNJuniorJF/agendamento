@@ -1473,6 +1473,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </Card>
         )}
         <Card>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
           </CardHeader>
           <CardContent>
