@@ -1087,20 +1087,74 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Plano de Treinamento | Rotinas Básicas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <CheckboxGroup
-              options={TRAINING_OPTIONS}
-              selected={data.planoTreinamento}
-              fieldKey="planoTreinamento"
-              columns={3}
-            />
-            <div className="mt-4 p-3 bg-muted/50 border border-border rounded-md text-sm text-muted-foreground no-print space-y-1">
-              <p className="font-medium text-foreground">Observação:</p>
-              <p>Em caso se conversão, as 2 primeiras etapas são realizadas em 2 dias seguidos de treinamento.</p>
-              <p>Venda e estoque são realizados na etapa 1.</p>
-              <p>Etapa 2: Dúvidas e retorno.</p>
-              <p>Etapa 3: Processos complementares, podendo haver etapa 4.</p>
-            </div>
+          <CardContent className="space-y-6">
+            {!data.conversao && (
+              <p className="text-sm text-muted-foreground italic">
+                Selecione Sim ou Não no campo Conversão para exibir as etapas do treinamento.
+              </p>
+            )}
+            {data.conversao && currentEtapas.map((etapa, idx) => {
+              const etapaKey = etapaKeys[idx];
+              const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
+              const showDateRange = data.conversao === "sim" && idx === 0;
+
+              return (
+                <div key={etapaKey} className="border border-border rounded-md p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <h4 className="font-semibold text-sm">{etapa.label}</h4>
+                    <div className="flex items-center gap-2">
+                      {showDateRange ? (
+                        <>
+                          <div className="flex items-center gap-1">
+                            <Label className="text-xs whitespace-nowrap">Início:</Label>
+                            <Input
+                              type="date"
+                              value={etapaData.data}
+                              onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                              className="w-[150px] h-8 text-xs"
+                            />
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Label className="text-xs whitespace-nowrap">Fim:</Label>
+                            <Input
+                              type="date"
+                              value={etapaData.dataFim || ""}
+                              onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
+                              className="w-[150px] h-8 text-xs"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Label className="text-xs whitespace-nowrap">Data:</Label>
+                          <Input
+                            type="date"
+                            value={etapaData.data}
+                            onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                            className="w-[150px] h-8 text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {etapa.items.map((item) =>
+                      item.header ? (
+                        <p key={item.text} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
+                      ) : (
+                        <label key={item.text} className="flex items-center gap-2 cursor-pointer text-sm">
+                          <Checkbox
+                            checked={etapaData.items.includes(item.text)}
+                            onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
+                          />
+                          <span>{item.text}</span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
