@@ -324,13 +324,18 @@ export default function Implantation() {
               {filteredProjects.map((project) => (
                 <Card
                   key={project.id}
-                  className="hover:border-primary/50 transition-colors cursor-pointer"
+                  className={`hover:border-primary/50 transition-colors cursor-pointer ${project.project_data?.concluido ? 'border-primary/30 bg-primary/5' : ''}`}
                   onClick={() => handleSelectProject(project)}
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      {project.name}
+                    <CardTitle className="text-base flex items-center gap-2 justify-between">
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        {project.name}
+                      </span>
+                      <span onClick={(e) => handleToggleConcluido(project, e)} title="Marcar como concluído">
+                        <Checkbox checked={project.project_data?.concluido === true} />
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1">
