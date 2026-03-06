@@ -169,7 +169,7 @@ export default function Implantation() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 no-print">
-          <Button variant="outline" size="sm" onClick={() => setSelectedClient(null)}>
+          <Button variant="outline" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
           </Button>
           <div>
