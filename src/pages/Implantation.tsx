@@ -333,9 +333,10 @@ export default function Implantation() {
                         <FileText className="h-4 w-4 text-primary" />
                         {project.name}
                       </span>
-                      <span onClick={(e) => handleToggleConcluido(project, e)} title="Marcar como concluído">
+                      <label onClick={(e) => handleToggleConcluido(project, e)} className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground font-normal">
                         <Checkbox checked={project.project_data?.concluido === true} />
-                      </span>
+                        Concluído
+                      </label>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1">
