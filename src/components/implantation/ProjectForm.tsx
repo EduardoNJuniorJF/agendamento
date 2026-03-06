@@ -402,8 +402,14 @@ const DEFAULT_CRONOGRAMA = [
   { item: "Terceiro Atendimento", data: "" },
 ];
 
+interface EtapaDisplayItem {
+  text: string;
+  header?: boolean;
+}
+
 interface EtapaData {
   items: string[];
+  displayItems?: EtapaDisplayItem[];
   data: string;
   dataFim?: string;
 }
