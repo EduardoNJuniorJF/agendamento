@@ -680,6 +680,144 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const currentEtapas = data.conversao === "sim" ? ETAPAS_COM_CONVERSAO : ETAPAS_SEM_CONVERSAO;
   const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
 
+  // Build the display items per etapa: use saved displayItems or fall back to template
+  const getEtapaDisplayItems = useCallback((etapaKey: "etapa1" | "etapa2" | "etapa3", idx: number) => {
+    const etapaData = data.treinamentoEtapas?.[etapaKey];
+    if (etapaData?.displayItems && etapaData.displayItems.length > 0) {
+      return etapaData.displayItems;
+    }
+    return currentEtapas[idx]?.items || [];
+  }, [data.treinamentoEtapas, currentEtapas]);
+
+  // Initialize displayItems when conversao changes
+  useEffect(() => {
+    if (!data.conversao) return;
+    const etapas = { ...data.treinamentoEtapas };
+    let changed = false;
+    etapaKeys.forEach((key, idx) => {
+      if (!etapas[key]?.displayItems || etapas[key].displayItems!.length === 0) {
+        const templateItems = currentEtapas[idx]?.items || [];
+        etapas[key] = { ...etapas[key], displayItems: [...templateItems] };
+        changed = true;
+      }
+    });
+    if (changed) {
+      updateField("treinamentoEtapas", etapas);
+    }
+  }, [data.conversao]);
+
+  // DnD state
+  const [activeItemId, setActiveItemId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const findEtapaByItemId = (itemId: string): "etapa1" | "etapa2" | "etapa3" | null => {
+    for (const key of etapaKeys) {
+      const displayItems = data.treinamentoEtapas?.[key]?.displayItems || [];
+      if (displayItems.some((di) => `${key}-${di.text}` === itemId)) return key;
+    }
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveItemId(event.active.id as string);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const sourceEtapa = findEtapaByItemId(activeId);
+    // over can be an item or a droppable container (etapa key)
+    let targetEtapa = findEtapaByItemId(overId);
+    if (!targetEtapa && etapaKeys.includes(overId as any)) {
+      targetEtapa = overId as "etapa1" | "etapa2" | "etapa3";
+    }
+
+    if (!sourceEtapa || !targetEtapa || sourceEtapa === targetEtapa) return;
+
+    // Move item from source to target
+    const etapas = { ...data.treinamentoEtapas };
+    const sourceItems = [...(etapas[sourceEtapa].displayItems || [])];
+    const targetItems = [...(etapas[targetEtapa].displayItems || [])];
+
+    const itemText = activeId.replace(`${sourceEtapa}-`, "");
+    const itemIndex = sourceItems.findIndex((di) => di.text === itemText);
+    if (itemIndex === -1) return;
+
+    const [movedItem] = sourceItems.splice(itemIndex, 1);
+
+    // Find position in target
+    const overItemText = overId.replace(`${targetEtapa}-`, "");
+    const overIndex = targetItems.findIndex((di) => di.text === overItemText);
+    if (overIndex >= 0) {
+      targetItems.splice(overIndex, 0, movedItem);
+    } else {
+      targetItems.push(movedItem);
+    }
+
+    etapas[sourceEtapa] = { ...etapas[sourceEtapa], displayItems: sourceItems };
+    etapas[targetEtapa] = { ...etapas[targetEtapa], displayItems: targetItems };
+
+    // Also move checked status
+    if (etapas[sourceEtapa].items.includes(movedItem.text)) {
+      etapas[sourceEtapa] = {
+        ...etapas[sourceEtapa],
+        items: etapas[sourceEtapa].items.filter((i) => i !== movedItem.text),
+      };
+      if (!etapas[targetEtapa].items.includes(movedItem.text)) {
+        etapas[targetEtapa] = {
+          ...etapas[targetEtapa],
+          items: [...etapas[targetEtapa].items, movedItem.text],
+        };
+      }
+    }
+
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItemId(null);
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const sourceEtapa = findEtapaByItemId(activeId);
+    let targetEtapa = findEtapaByItemId(overId);
+    if (!targetEtapa && etapaKeys.includes(overId as any)) {
+      targetEtapa = overId as "etapa1" | "etapa2" | "etapa3";
+    }
+
+    if (!sourceEtapa || !targetEtapa) return;
+
+    // Reorder within same etapa
+    if (sourceEtapa === targetEtapa) {
+      const etapas = { ...data.treinamentoEtapas };
+      const items = [...(etapas[sourceEtapa].displayItems || [])];
+      const activeText = activeId.replace(`${sourceEtapa}-`, "");
+      const overText = overId.replace(`${targetEtapa}-`, "");
+      const oldIndex = items.findIndex((di) => di.text === activeText);
+      const newIndex = items.findIndex((di) => di.text === overText);
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        etapas[sourceEtapa] = {
+          ...etapas[sourceEtapa],
+          displayItems: arrayMove(items, oldIndex, newIndex),
+        };
+        updateField("treinamentoEtapas", etapas);
+      }
+    }
+  };
+
+  const activeItemText = activeItemId
+    ? activeItemId.replace(/^etapa\d-/, "")
+    : null;
+
   const CheckboxGroup = ({
     options,
     selected,
