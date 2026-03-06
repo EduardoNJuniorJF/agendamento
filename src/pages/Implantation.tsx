@@ -279,13 +279,6 @@ export default function Implantation() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDeleteDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDeleteClient}
-        title="Excluir Cliente"
-        description="Tem certeza que deseja excluir este cliente? Todos os dados do projeto serão perdidos."
-      />
     </div>
   );
 }

@@ -140,7 +140,7 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
       .from("implantation_clients")
       .update({
         profile: profile || null,
-        project_data: data as unknown as Record<string, unknown>,
+        project_data: JSON.parse(JSON.stringify(data)),
         updated_at: new Date().toISOString(),
       })
       .eq("id", client.id);
