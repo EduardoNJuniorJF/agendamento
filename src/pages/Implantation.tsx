@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, ArrowLeft, FolderOpen, Link, Check, FileText } from "lucide-react";
+import { Plus, Search, Edit, ArrowLeft, FolderOpen, Link, Check, FileText, Filter } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import ProjectForm from "@/components/implantation/ProjectForm";
 
