@@ -120,7 +120,7 @@ const App = () => (
               }
             />
             <Route
-              path="/implantation/:clientId"
+              path="/implantation/:projectId"
               element={
                 <ProtectedRoute>
                   <Layout><Implantation /></Layout>

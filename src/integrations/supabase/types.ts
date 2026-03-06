@@ -287,6 +287,44 @@ export type Database = {
         }
         Relationships: []
       }
+      implantation_projects: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          profile: string | null
+          project_data: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          profile?: string | null
+          project_data?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          profile?: string | null
+          project_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implantation_projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "implantation_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       local_holidays: {
         Row: {
           created_at: string | null

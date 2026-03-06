@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import { useToast } from "@/hooks/use-toast";
-import { Save, Printer, Plus, Trash2, HelpCircle } from "lucide-react";
+import { Save, Printer, Plus, Trash2, HelpCircle, Search, X } from "lucide-react";
 import logo from "@/assets/logo-bonus-report.png";
 
 interface ImplantationClient {
@@ -17,12 +17,22 @@ interface ImplantationClient {
   code: string | null;
   name: string;
   group_name: string | null;
+}
+
+interface ImplantationProject {
+  id: string;
+  client_id: string | null;
+  name: string;
   profile: string | null;
   project_data: any;
+  client_name?: string;
+  client_code?: string | null;
+  client_group?: string | null;
 }
 
 interface ProjectFormProps {
-  client: ImplantationClient;
+  project: ImplantationProject;
+  clients: ImplantationClient[];
   onSaved: () => void;
 }
 
@@ -354,11 +364,99 @@ const DEFAULT_DATA: ProjectData = {
   modulosComplementares: [],
 };
 
-export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
+// Client search component
+function ClientSearch({
+  clients,
+  selectedClientId,
+  onSelect,
+}: {
+  clients: ImplantationClient[];
+  selectedClientId: string | null;
+  onSelect: (clientId: string | null) => void;
+}) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selectedClient = clients.find((c) => c.id === selectedClientId);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return clients;
+    const q = search.toLowerCase();
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.code?.toLowerCase().includes(q) ||
+        c.group_name?.toLowerCase().includes(q)
+    );
+  }, [clients, search]);
+
+  if (selectedClient) {
+    return (
+      <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+        <div className="flex-1">
+          <p className="text-sm font-medium">{selectedClient.name}</p>
+          {selectedClient.code && (
+            <p className="text-xs text-muted-foreground">Código: {selectedClient.code}</p>
+          )}
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          ref={inputRef}
+          placeholder="Buscar cliente por nome, código ou grupo..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          className="pl-10"
+        />
+      </div>
+      {open && (
+        <div className="absolute z-50 w-full mt-1 border rounded-md bg-popover shadow-md max-h-48 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <p className="p-3 text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
+          ) : (
+            filtered.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                onClick={() => {
+                  onSelect(c.id);
+                  setSearch("");
+                  setOpen(false);
+                }}
+              >
+                <span className="font-medium">{c.name}</span>
+                {c.code && <span className="text-muted-foreground ml-2">({c.code})</span>}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ProjectForm({ project, clients, onSaved }: ProjectFormProps) {
   const { toast } = useToast();
-  const [profile, setProfile] = useState<string>(client.profile || "");
+  const [projectName, setProjectName] = useState(project.name);
+  const [clientId, setClientId] = useState<string | null>(project.client_id);
+  const [profile, setProfile] = useState<string>(project.profile || "");
   const [data, setData] = useState<ProjectData>(() => {
-    const saved = client.project_data;
+    const saved = project.project_data;
     if (saved && Object.keys(saved).length > 0) {
       return { ...DEFAULT_DATA, ...saved };
     }
@@ -366,6 +464,8 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
   });
   const [saving, setSaving] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const selectedClient = clients.find((c) => c.id === clientId);
 
   const updateField = <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -383,13 +483,15 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase
-      .from("implantation_clients")
+      .from("implantation_projects" as any)
       .update({
+        name: projectName.trim() || "Sem nome",
+        client_id: clientId,
         profile: profile || null,
         project_data: JSON.parse(JSON.stringify(data)),
         updated_at: new Date().toISOString(),
-      })
-      .eq("id", client.id);
+      } as any)
+      .eq("id", project.id);
 
     if (error) {
       toast({ title: "Erro ao salvar projeto", variant: "destructive" });
@@ -475,10 +577,17 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
           <div className="text-right">
             <h1 className="text-xl font-bold">Projeto de Implantação</h1>
             <p className="text-sm">
-              Cliente: <strong>{client.name}</strong>
+              Projeto: <strong>{projectName}</strong>
             </p>
-            {client.code && <p className="text-sm">Código: {client.code}</p>}
-            {client.group_name && <p className="text-sm">Grupo: {client.group_name}</p>}
+            {selectedClient && (
+              <>
+                <p className="text-sm">
+                  Cliente: <strong>{selectedClient.name}</strong>
+                </p>
+                {selectedClient.code && <p className="text-sm">Código: {selectedClient.code}</p>}
+                {selectedClient.group_name && <p className="text-sm">Grupo: {selectedClient.group_name}</p>}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -495,6 +604,33 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
 
       {/* ===== INTERACTIVE FORM (screen only) ===== */}
       <div className="no-print print:hidden space-y-4">
+        {/* Project name and client association */}
+        <Card className="border-primary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Dados do Projeto</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Nome do Projeto *</Label>
+              <Input
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Nome do projeto"
+              />
+            </div>
+            <div>
+              <Label>Cliente Associado</Label>
+              <div className="mt-1">
+                <ClientSearch
+                  clients={clients}
+                  selectedClientId={clientId}
+                  onSelect={setClientId}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 1. Perfil do Cliente - NEVER print */}
         <Card className="border-primary/30">
           <CardHeader className="pb-3">
