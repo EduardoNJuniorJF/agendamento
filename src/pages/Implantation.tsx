@@ -37,10 +37,7 @@ export default function Implantation() {
 
   const loadClients = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("implantation_clients")
-      .select("*")
-      .order("name");
+    const { data, error } = await supabase.from("implantation_clients").select("*").order("name");
 
     if (!error && data) {
       setClients(data as unknown as ImplantationClient[]);
@@ -59,7 +56,7 @@ export default function Implantation() {
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.code?.toLowerCase().includes(q) ||
-        c.group_name?.toLowerCase().includes(q)
+        c.group_name?.toLowerCase().includes(q),
     );
   }, [clients, search]);
 
@@ -107,9 +104,7 @@ export default function Implantation() {
         setSelectedClient({ ...selectedClient, ...payload });
       }
     } else {
-      const { error } = await supabase
-        .from("implantation_clients")
-        .insert(payload);
+      const { error } = await supabase.from("implantation_clients").insert(payload);
 
       if (error) {
         toast({ title: "Erro ao cadastrar cliente", variant: "destructive" });
@@ -123,10 +118,7 @@ export default function Implantation() {
   };
 
   const handleDeleteClient = async (id: string) => {
-    const { error } = await supabase
-      .from("implantation_clients")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("implantation_clients").delete().eq("id", id);
 
     if (error) {
       toast({ title: "Erro ao excluir cliente", variant: "destructive" });
@@ -156,9 +148,7 @@ export default function Implantation() {
             <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
           </Button>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              Projeto: {selectedClient.name}
-            </h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">Projeto: {selectedClient.name}</h1>
             <p className="text-sm text-muted-foreground">
               {selectedClient.code && `Código: ${selectedClient.code} • `}
               {selectedClient.group_name && `Grupo: ${selectedClient.group_name}`}
@@ -166,10 +156,7 @@ export default function Implantation() {
           </div>
         </div>
 
-        <ProjectForm
-          client={selectedClient}
-          onSaved={handleProjectSaved}
-        />
+        <ProjectForm client={selectedClient} onSaved={handleProjectSaved} />
       </div>
     );
   }
@@ -178,7 +165,7 @@ export default function Implantation() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-xl md:text-2xl font-bold text-foreground">Implantação</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Porjetos</h1>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-1" /> Cadastrar Novo Cliente
         </Button>
@@ -217,12 +204,8 @@ export default function Implantation() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                {client.code && (
-                  <p className="text-sm text-muted-foreground">Código: {client.code}</p>
-                )}
-                {client.group_name && (
-                  <p className="text-sm text-muted-foreground">Grupo: {client.group_name}</p>
-                )}
+                {client.code && <p className="text-sm text-muted-foreground">Código: {client.code}</p>}
+                {client.group_name && <p className="text-sm text-muted-foreground">Grupo: {client.group_name}</p>}
                 <div className="flex gap-1 pt-2" onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="sm" onClick={() => openEditDialog(client)}>
                     <Edit className="h-3.5 w-3.5" />
@@ -278,7 +261,6 @@ export default function Implantation() {
           </div>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
