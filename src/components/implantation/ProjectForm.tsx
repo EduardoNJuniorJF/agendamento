@@ -1265,8 +1265,38 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           />
         </PrintSection>
 
-        <PrintSection title="Plano de Treinamento">
-          <p>{data.planoTreinamento.length > 0 ? data.planoTreinamento.join(", ") : "—"}</p>
+        <PrintSection title="Plano de Treinamento | Rotinas Básicas">
+          {data.conversao ? (
+            <>
+              {currentEtapas.map((etapa, idx) => {
+                const etapaKey = etapaKeys[idx];
+                const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
+                const showDateRange = data.conversao === "sim" && idx === 0;
+                const formatDate = (d: string) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+                return (
+                  <div key={etapaKey} className="mb-2">
+                    <p className="font-semibold">
+                      {etapa.label}
+                      {showDateRange
+                        ? ` — ${formatDate(etapaData.data)} a ${formatDate(etapaData.dataFim || "")}`
+                        : ` — ${formatDate(etapaData.data)}`}
+                    </p>
+                    {etapaData.items.length > 0 ? (
+                      <ul className="list-disc ml-6">
+                        {etapaData.items.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="ml-4 text-muted-foreground">Nenhum item marcado</p>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            <p>—</p>
+          )}
         </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
