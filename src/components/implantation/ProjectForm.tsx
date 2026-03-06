@@ -994,13 +994,24 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
               />
             </div>
             <div>
-              <Label>Cliente Associado</Label>
-              <div className="mt-1">
-                <ClientSearch
-                  clients={clients}
-                  selectedClientId={clientId}
-                  onSelect={setClientId}
-                />
+              <Label>Agente(s) Responsável(is)</Label>
+              <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {agents.map((agent) => (
+                  <label key={agent.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={(data.agentesResponsaveis || []).includes(agent.id)}
+                      onCheckedChange={() => {
+                        const current = data.agentesResponsaveis || [];
+                        if (current.includes(agent.id)) {
+                          updateField("agentesResponsaveis", current.filter((id) => id !== agent.id));
+                        } else {
+                          updateField("agentesResponsaveis", [...current, agent.id]);
+                        }
+                      }}
+                    />
+                    <span>{agent.name}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </CardContent>
