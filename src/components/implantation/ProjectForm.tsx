@@ -34,6 +34,94 @@ const PROFILES = [
   "PERFIL EXPLOSIVO",
 ];
 
+const PROFILE_INFO: Record<string, { caracteristicas: string[]; positivos: string[]; negativos: string[]; atendimento: string[]; negociacao: string[]; recuperar: string; dicaChave: string }> = {
+  "PERFIL ANALÍTICO": {
+    caracteristicas: ["Extremamente racional, detalhista e cuidadoso nas decisões.", "Valoriza dados, comparativos, segurança e estabilidade.", "Gosta de entender o \"como\" e o \"porquê\" das coisas.", "Evita riscos e não decide por impulso."],
+    positivos: ["Leal e consistente quando confia.", "Dá pouco trabalho após o fechamento, pois segue processos.", "Valoriza empresas organizadas e que demonstram domínio técnico."],
+    negativos: ["Demora na tomada de decisão.", "Questiona detalhes técnicos em excesso.", "Pode parecer frio ou desconfiado."],
+    atendimento: ["Seja objetivo, técnico e claro nas respostas.", "Tenha dados concretos: números, prints, resultados e prazos.", "Mostre segurança e domínio do sistema, sem improvisos.", "Evite promessas vagas ou generalizações."],
+    negociacao: ["Apresente comparativos: custo-benefício, estabilidade e suporte.", "Mostre métricas (\"reduz X horas\", \"melhora controle fiscal em Y%\").", "Evite pressão: o analítico recua diante de urgência comercial."],
+    recuperar: "\"Notei que havíamos interrompido nossa conversa. Fiz uma revisão nas soluções que você analisou e posso te mostrar o que realmente faz diferença em controle e segurança de dados.\"",
+    dicaChave: "Pergunta muito \"como funciona?\" ou \"o que acontece se...?\" (Sempre quer entender o processo antes de confiar.)",
+  },
+  "PERFIL COMUNICADOR": {
+    caracteristicas: ["Extrovertido, entusiasmado e voltado para o relacionamento.", "Gosta de se sentir valorizado e reconhecido.", "Decide com base em emoção, empatia e identificação.", "Conversa muito e muda de assunto com facilidade."],
+    positivos: ["Traz boas indicações e influencia outros lojistas.", "Cria vínculo e tende a ser fiel quando se sente ouvido.", "Adere bem a novidades e campanhas."],
+    negativos: ["Dispersa-se rápido e pode esquecer compromissos.", "Pode prometer retorno e não responder.", "Reage mal a comunicações frias ou muito técnicas."],
+    atendimento: ["Seja simpático e use o nome dele sempre.", "Mostre interesse genuíno no negócio e conquistas.", "Evite jargões técnicos; use uma linguagem leve e visual.", "Elogie resultados ou melhorias que ele adotou."],
+    negociacao: ["Destaque benefícios práticos e rápidos (\"vai facilitar sua rotina\").", "Use exemplos de outras lojas satisfeitas.", "Faça ele se sentir parte de algo maior (\"outros clientes como você estão usando e amando\")."],
+    recuperar: "\"Não esqueci de você! Vi que paramos a conversa e pensei em te atualizar com as melhorias que saíram no sistema. Tem coisa boa que acho que vai te animar!\"",
+    dicaChave: "Fala muito, conta histórias e demonstra empolgação. (Ganha confiança por afinidade e simpatia.)",
+  },
+  "PERFIL PRAGMÁTICO": {
+    caracteristicas: ["Objetivo, prático e direto.", "Valoriza resultado e tempo.", "Foca no essencial e detesta enrolação.", "Decide rápido se perceber utilidade clara."],
+    positivos: ["Fecha rápido quando vê vantagem concreta.", "É fiel se o produto entrega o prometido.", "Excelente para cases de sucesso."],
+    negativos: ["Impaciente com explicações longas.", "Pouco sensível a apelos emocionais.", "Cobra prazos e resultados de forma dura."],
+    atendimento: ["Vá direto ao ponto, sem rodeios.", "Mostre soluções rápidas e funcionais.", "Entregue o que foi combinado com eficiência."],
+    negociacao: ["Mostre economia de tempo e custo.", "Foque no retorno imediato do investimento.", "Evite apresentações longas ou técnicas demais."],
+    recuperar: "\"Revendo aqui seu histórico, percebi que você buscava agilidade e praticidade. Posso te mostrar uma forma mais direta de chegar nisso, sem complicação.\"",
+    dicaChave: "Pergunta \"quanto custa?\", \"funciona bem?\", \"é rápido?\". (Quer resultado, não detalhes.)",
+  },
+  "PERFIL EXPRESSIVO": {
+    caracteristicas: ["Criativo, visionário e empolgado.", "Gosta de novidades, tendências e diferenciais.", "Quer que o sistema ajude o negócio a se destacar.", "Decide por percepção de valor e inovação."],
+    positivos: ["Aberto a upgrades e produtos premium.", "Gera conteúdo e indica espontaneamente.", "Valoriza marca e imagem da empresa."],
+    negativos: ["Impulsivo, pode se arrepender depois.", "Fica entediado com informações repetitivas.", "Desvaloriza detalhes técnicos e rotinas."],
+    atendimento: ["Mostre novidades e melhorias constantemente.", "Use uma linguagem inspiradora (\"imagine poder...\", \"agora você vai conseguir...\").", "Envolva o cliente em ideias e possibilidades."],
+    negociacao: ["Apresente diferenciais do sistema (design, automação, integração).", "Mostre que ele será \"pioneiro\" ao adotar antes dos outros.", "Evite falar muito de preço; fale de valor percebido."],
+    recuperar: "\"Lembrei de uma melhoria que encaixa muito bem com o que você buscava lá atrás, algo que pode deixar sua operação ainda mais moderna.\"",
+    dicaChave: "Usa palavras como \"ideia\", \"inovação\", \"legal\", \"diferente\". (Gosta de se sentir único e inovador.)",
+  },
+  "PERFIL EXPLOSIVO": {
+    caracteristicas: ["Temperamento forte, direto e por vezes agressivo.", "Exige agilidade e respostas imediatas.", "Costuma estar sob pressão e não gosta de justificativas.", "Valoriza postura firme e profissionalismo."],
+    positivos: ["Resolve rápido quando confia.", "Respeita quem demonstra autoridade técnica.", "É fiel a quem entrega sem enrolação."],
+    negativos: ["Reage mal a atrasos e erros.", "Pode elevar o tom em momentos de estresse.", "Impaciente com processos demorados."],
+    atendimento: ["Mantenha a calma e responda com firmeza e respeito.", "Vá direto ao ponto e evite se justificar demais.", "Mostre controle da situação e ofereça soluções concretas.", "Nunca confronte ou tente \"provar\" que ele está errado."],
+    negociacao: ["Fale com clareza e segurança, sem hesitar.", "Deixe claro que você tem o controle do processo.", "Mostre vantagens em tempo, segurança e autoridade técnica."],
+    recuperar: "\"Percebi que na época tivemos alguns impasses. Gostaria de te mostrar o que evoluiu no sistema desde então, de forma direta e sem enrolação.\"",
+    dicaChave: "Tom de voz firme, fala curta e impaciente. (Quer resultado imediato e respeito à sua autoridade.)",
+  },
+};
+
+const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
+  const info = PROFILE_INFO[profileName];
+  if (!info) return null;
+  const Section = ({ title, items }: { title: string; items: string[] }) => (
+    <div className="mb-2">
+      <p className="font-semibold text-xs text-primary">{title}</p>
+      <ul className="list-disc ml-4 text-xs space-y-0.5">
+        {items.map((item, i) => <li key={i}>{item}</li>)}
+      </ul>
+    </div>
+  );
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 border border-muted-foreground/40 text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+          <HelpCircle className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-96 p-0" side="right" align="start">
+        <ScrollArea className="max-h-[70vh] p-4">
+          <h4 className="font-bold text-sm mb-3">{profileName}</h4>
+          <Section title="Características" items={info.caracteristicas} />
+          <Section title="Pontos Positivos" items={info.positivos} />
+          <Section title="Pontos Negativos" items={info.negativos} />
+          <Section title="Atendimento" items={info.atendimento} />
+          <Section title="Negociação" items={info.negociacao} />
+          <div className="mb-2">
+            <p className="font-semibold text-xs text-primary">Recuperar Oportunidade</p>
+            <p className="text-xs italic ml-1">{info.recuperar}</p>
+          </div>
+          <div className="mb-1">
+            <p className="font-semibold text-xs text-primary">Dica-Chave de Identificação</p>
+            <p className="text-xs ml-1">{info.dicaChave}</p>
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const REGIME_OPTIONS = ["MEI", "Simples Nacional", "Lucro Presumido", "Lucro Real"];
 const PORTE_OPTIONS = ["Pequeno", "Médio", "Grande"];
 const ESTRUTURA_OPTIONS = ["Máquinas", "Impressora de Cupom", "Impressora de Etiquetas", "Balanças", "Consulta Preços"];
