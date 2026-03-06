@@ -459,6 +459,9 @@ interface ProjectData {
     etapa2: EtapaData;
     etapa3: EtapaData;
   };
+  ferramentasAvancadas: {
+    bi: { gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+  };
 }
 
 const DEFAULT_ETAPAS = {
@@ -490,6 +493,9 @@ const DEFAULT_DATA: ProjectData = {
   rotinasBasicas: [],
   modulosComplementares: [],
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
+  ferramentasAvancadas: {
+    bi: { gerarConta: false, instalacao: false, treinamentoData: "" },
+  },
 };
 
 // Client search component
@@ -1409,6 +1415,63 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardContent>
         </Card>
 
+        {/* Novas Ferramentas | Rotinas Avançadas - always visible when conversao is set */}
+        {data.conversao && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Novas Ferramentas | Rotinas Avançadas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Chegando nesse ponto significa que as rotinas básicas da implantação foram concluídas com sucesso. 
+                A partir de agora, os atendimentos serão isolados, com o mesmo compromisso, mas focados em rotinas avançadas, 
+                que cancelam cronogramas separados conforme a ferramenta. Para implementar essas rotinas, será necessário 
+                abrir novos protocolos usando as ferramentas abaixo. Analisar a possibilidade de agendar mais de um processo para o mesmo dia.
+              </p>
+              <Separator />
+              <div className="border border-border rounded-md p-4 space-y-3">
+                <h4 className="font-semibold text-sm">BI</h4>
+                <div className="space-y-2 ml-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={data.ferramentasAvancadas?.bi?.gerarConta || false}
+                      onCheckedChange={(checked) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, gerarConta: !!checked };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                    />
+                    <span>Gerar Conta (Mauro)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={data.ferramentasAvancadas?.bi?.instalacao || false}
+                      onCheckedChange={(checked) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, instalacao: !!checked };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                    />
+                    <span>Instalação e configurações</span>
+                  </label>
+                  <div className="flex items-center gap-2 ml-0">
+                    <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
+                    <Input
+                      type="date"
+                      value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
+                      onChange={(e) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, treinamentoData: e.target.value };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                      className="w-[180px] h-8 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
@@ -1548,6 +1611,17 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           ) : (
             <p>—</p>
           )}
+        </PrintSection>
+
+        <PrintSection title="Novas Ferramentas | Rotinas Avançadas">
+          <div className="mb-1">
+            <span className="font-semibold">BI:</span>
+            <ul className="list-disc ml-6">
+              <li>Gerar Conta (Mauro): {data.ferramentasAvancadas?.bi?.gerarConta ? "✓" : "—"}</li>
+              <li>Instalação e configurações: {data.ferramentasAvancadas?.bi?.instalacao ? "✓" : "—"}</li>
+              <li>Treinamento agendado para: {data.ferramentasAvancadas?.bi?.treinamentoData ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
+            </ul>
+          </div>
         </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
