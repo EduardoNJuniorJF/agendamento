@@ -190,7 +190,7 @@ export default function Implantation() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Porjetos</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Projetos</h1>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-1" /> Cadastrar Novo Cliente
         </Button>
