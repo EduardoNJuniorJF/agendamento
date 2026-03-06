@@ -577,6 +577,63 @@ function ClientSearch({
     </div>
   );
 }
+// Sortable item component for drag-and-drop
+function SortableEtapaItem({
+  id,
+  text,
+  checked,
+  onCheckedChange,
+}: {
+  id: string;
+  text: string;
+  checked: boolean;
+  onCheckedChange: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 text-sm rounded-md px-1 py-0.5 hover:bg-muted/50 group"
+    >
+      <button
+        type="button"
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </button>
+      <label className="flex items-center gap-2 cursor-pointer flex-1">
+        <Checkbox checked={checked} onCheckedChange={onCheckedChange} />
+        <span>{text}</span>
+      </label>
+    </div>
+  );
+}
+
+// Droppable container for each etapa
+function DroppableEtapa({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useSortable({
+    id,
+    data: { type: "container" },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`border rounded-md p-4 transition-colors ${isOver ? "border-primary bg-primary/5" : "border-border"}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function ProjectForm({ project, clients, onSaved }: ProjectFormProps) {
   const { toast } = useToast();
