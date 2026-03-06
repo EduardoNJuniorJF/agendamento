@@ -1613,6 +1613,17 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           )}
         </PrintSection>
 
+        <PrintSection title="Novas Ferramentas | Rotinas Avançadas">
+          <div className="mb-1">
+            <span className="font-semibold">BI:</span>
+            <ul className="list-disc ml-6">
+              <li>Gerar Conta (Mauro): {data.ferramentasAvancadas?.bi?.gerarConta ? "✓" : "—"}</li>
+              <li>Instalação e configurações: {data.ferramentasAvancadas?.bi?.instalacao ? "✓" : "—"}</li>
+              <li>Treinamento agendado para: {data.ferramentasAvancadas?.bi?.treinamentoData ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
+            </ul>
+          </div>
+        </PrintSection>
+
         <PrintSection title="Módulos Complementares | Gerar Valor">
           <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
         </PrintSection>
