@@ -53,6 +53,11 @@ const TRAINING_OPTIONS = [
   "BI", "Plugtoo ou Tray Commerce", "Plataforma do contador", "CRM",
   "Meta", "Cash Back", "Coletor Zaal",
 ];
+const MODULOS_OPTIONS = [
+  "App de Resultados", "Caixa central e Contas Bancárias", "BI",
+  "Plugtoo ou Tray Commerce", "Plataforma do contador", "CRM",
+  "Meta", "Cash Back", "Coletor Zaal",
+];
 
 const DEFAULT_CRONOGRAMA = [
   { item: "Primeiro Atendimento", data: "" },
@@ -405,7 +410,7 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
         {/* 9-11. Training sections */}
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Plano de Treinamento</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.planoTreinamento} fieldKey="planoTreinamento" columns={3} /></CardContent></Card>
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Rotinas Básicas</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.rotinasBasicas} fieldKey="rotinasBasicas" columns={3} /></CardContent></Card>
-        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.modulosComplementares} fieldKey="modulosComplementares" columns={3} /></CardContent></Card>
+        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle></CardHeader><CardContent><CheckboxGroup options={MODULOS_OPTIONS} selected={data.modulosComplementares} fieldKey="modulosComplementares" columns={3} /></CardContent></Card>
 
         {/* Bottom save/print buttons */}
         <div className="flex gap-2 justify-end pb-6">
