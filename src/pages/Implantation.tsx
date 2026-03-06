@@ -17,6 +17,7 @@ interface ImplantationClient {
   code: string | null;
   name: string;
   group_name: string | null;
+  group_code: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -46,7 +47,7 @@ export default function Implantation() {
   const [clientSearch, setClientSearch] = useState("");
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ImplantationClient | null>(null);
-  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "" });
+  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "", group_code: "" });
 
   // Projects state
   const [projects, setProjects] = useState<ImplantationProject[]>([]);
@@ -126,13 +127,13 @@ export default function Implantation() {
   // Client CRUD
   const openCreateClientDialog = () => {
     setEditingClient(null);
-    setClientForm({ code: "", name: "", group_name: "" });
+    setClientForm({ code: "", name: "", group_name: "", group_code: "" });
     setClientDialogOpen(true);
   };
 
   const openEditClientDialog = (client: ImplantationClient) => {
     setEditingClient(client);
-    setClientForm({ code: client.code || "", name: client.name, group_name: client.group_name || "" });
+    setClientForm({ code: client.code || "", name: client.name, group_name: client.group_name || "", group_code: (client as any).group_code || "" });
     setClientDialogOpen(true);
   };
 
@@ -145,6 +146,7 @@ export default function Implantation() {
       code: clientForm.code.trim() || null,
       name: clientForm.name.trim(),
       group_name: clientForm.group_name.trim() || null,
+      group_code: clientForm.group_code.trim() || null,
     };
     if (editingClient) {
       const { error } = await supabase
@@ -414,6 +416,14 @@ export default function Implantation() {
                 value={clientForm.group_name}
                 onChange={(e) => setClientForm({ ...clientForm, group_name: e.target.value })}
                 placeholder="Nome do grupo"
+              />
+            </div>
+            <div>
+              <Label>Código do Grupo (opcional)</Label>
+              <Input
+                value={clientForm.group_code}
+                onChange={(e) => setClientForm({ ...clientForm, group_code: e.target.value })}
+                placeholder="Ex: GRP001"
               />
             </div>
             <Button onClick={handleSaveClient} className="w-full">
