@@ -1,0 +1,1 @@
+ALTER TABLE public.implantation_clients ADD COLUMN group_code text;
