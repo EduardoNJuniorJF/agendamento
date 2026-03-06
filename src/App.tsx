@@ -17,6 +17,7 @@ import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
 import Bonus from "./pages/Bonus";
 import Celebrations from "./pages/Celebrations";
+import Implantation from "./pages/Implantation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout><Celebrations /></Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/implantation"
+              element={
+                <ProtectedRoute>
+                  <Layout><Implantation /></Layout>
                 </ProtectedRoute>
               }
             />

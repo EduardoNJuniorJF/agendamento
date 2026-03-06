@@ -178,3 +178,27 @@ All colors MUST be HSL.
 .rbc-toolbar button.rbc-active {
   @apply bg-primary text-primary-foreground;
 }
+
+/* Print styles for Implantation */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .no-print, .print\\:hidden {
+    display: none !important;
+  }
+  .print-area .hidden.print\\:block {
+    display: block !important;
+    visibility: visible !important;
+  }
+}
