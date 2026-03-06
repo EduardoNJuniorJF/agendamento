@@ -500,7 +500,7 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
 
         {/* 9-11. Training sections */}
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Plano de Treinamento</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.planoTreinamento} fieldKey="planoTreinamento" columns={3} /></CardContent></Card>
-        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Rotinas Básicas</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.rotinasBasicas} fieldKey="rotinasBasicas" columns={3} /></CardContent></Card>
+        
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle></CardHeader><CardContent><CheckboxGroup options={MODULOS_OPTIONS} selected={data.modulosComplementares} fieldKey="modulosComplementares" columns={3} /></CardContent></Card>
 
         {/* Bottom save/print buttons */}
@@ -580,9 +580,6 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
           <p>{data.planoTreinamento.length > 0 ? data.planoTreinamento.join(", ") : "—"}</p>
         </PrintSection>
 
-        <PrintSection title="Rotinas Básicas">
-          <p>{data.rotinasBasicas.length > 0 ? data.rotinasBasicas.join(", ") : "—"}</p>
-        </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
           <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
