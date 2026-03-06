@@ -33,8 +33,6 @@ export default function Implantation() {
   const [editingClient, setEditingClient] = useState<ImplantationClient | null>(null);
   const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "" });
 
-  // Delete dialog
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
 
   const loadClients = async () => {
@@ -124,24 +122,21 @@ export default function Implantation() {
     loadClients();
   };
 
-  const handleDeleteClient = async () => {
-    if (!deletingClientId) return;
+  const handleDeleteClient = async (id: string) => {
     const { error } = await supabase
       .from("implantation_clients")
       .delete()
-      .eq("id", deletingClientId);
+      .eq("id", id);
 
     if (error) {
       toast({ title: "Erro ao excluir cliente", variant: "destructive" });
     } else {
       toast({ title: "Cliente excluído com sucesso!" });
-      if (selectedClient?.id === deletingClientId) {
+      if (selectedClient?.id === id) {
         setSelectedClient(null);
       }
       loadClients();
     }
-    setDeleteDialogOpen(false);
-    setDeletingClientId(null);
   };
 
   const handleSelectClient = (client: ImplantationClient) => {
@@ -232,17 +227,13 @@ export default function Implantation() {
                   <Button variant="ghost" size="sm" onClick={() => openEditDialog(client)}>
                     <Edit className="h-3.5 w-3.5" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => {
-                      setDeletingClientId(client.id);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <ConfirmDeleteDialog
+                    onConfirm={() => handleDeleteClient(client.id)}
+                    title="Excluir Cliente"
+                    description="Tem certeza que deseja excluir este cliente? Todos os dados do projeto serão perdidos."
+                    triggerSize="sm"
+                    triggerClassName=""
+                  />
                 </div>
               </CardContent>
             </Card>
