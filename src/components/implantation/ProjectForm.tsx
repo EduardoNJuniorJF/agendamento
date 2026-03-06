@@ -658,6 +658,17 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
+  // Auto-fill group info when client changes
+  useEffect(() => {
+    if (selectedClient?.group_name) {
+      setData((prev) => ({
+        ...prev,
+        isGrupo: "sim",
+        grupoNome: prev.grupoNome || selectedClient.group_name || "",
+      }));
+    }
+  }, [clientId]);
+
   const updateField = <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
   };
