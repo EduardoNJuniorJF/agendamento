@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, ArrowLeft, FolderOpen, Link, Check, FileText } from "lucide-react";
+import { Plus, Search, Edit, ArrowLeft, FolderOpen, Link, Check, FileText, Filter } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import ProjectForm from "@/components/implantation/ProjectForm";
 
@@ -55,6 +56,7 @@ export default function Implantation() {
   const [selectedProject, setSelectedProject] = useState<ImplantationProject | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnlyCompleted, setShowOnlyCompleted] = useState(false);
 
   const loadClients = async () => {
     const { data } = await supabase.from("implantation_clients").select("*").order("name");
@@ -117,12 +119,27 @@ export default function Implantation() {
   }, [clients, clientSearch]);
 
   const filteredProjects = useMemo(() => {
-    if (!projectSearch.trim()) return projects;
+    let list = projects;
+    if (showOnlyCompleted) {
+      list = list.filter(p => p.project_data?.concluido === true);
+    }
+    if (!projectSearch.trim()) return list;
     const q = projectSearch.toLowerCase();
-    return projects.filter(
+    return list.filter(
       p => p.name.toLowerCase().includes(q) || p.client_name?.toLowerCase().includes(q) || p.client_code?.toLowerCase().includes(q)
     );
-  }, [projects, projectSearch]);
+  }, [projects, projectSearch, showOnlyCompleted]);
+
+  const handleToggleConcluido = async (project: ImplantationProject, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newVal = !(project.project_data?.concluido === true);
+    const newData = { ...(project.project_data || {}), concluido: newVal };
+    await supabase
+      .from("implantation_projects" as any)
+      .update({ project_data: newData, updated_at: new Date().toISOString() } as any)
+      .eq("id", project.id);
+    loadProjects();
+  };
 
   // Client CRUD
   const openCreateClientDialog = () => {
@@ -273,14 +290,25 @@ export default function Implantation() {
 
         {/* Projects Tab */}
         <TabsContent value="projects" className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome do projeto ou cliente..."
-              value={projectSearch}
-              onChange={(e) => setProjectSearch(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex gap-2 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome do projeto ou cliente..."
+                value={projectSearch}
+                onChange={(e) => setProjectSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button
+              variant={showOnlyCompleted ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowOnlyCompleted(!showOnlyCompleted)}
+              className="shrink-0"
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Concluídos
+            </Button>
           </div>
 
           {loading ? (
@@ -296,13 +324,18 @@ export default function Implantation() {
               {filteredProjects.map((project) => (
                 <Card
                   key={project.id}
-                  className="hover:border-primary/50 transition-colors cursor-pointer"
+                  className={`hover:border-primary/50 transition-colors cursor-pointer ${project.project_data?.concluido ? 'border-primary/30 bg-primary/5' : ''}`}
                   onClick={() => handleSelectProject(project)}
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      {project.name}
+                    <CardTitle className="text-base flex items-center gap-2 justify-between">
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        {project.name}
+                      </span>
+                      <span onClick={(e) => handleToggleConcluido(project, e)} title="Marcar como concluído">
+                        <Checkbox checked={project.project_data?.concluido === true} />
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1">
