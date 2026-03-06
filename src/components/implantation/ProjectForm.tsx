@@ -963,6 +963,11 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 {selectedClient.group_name && <p className="text-sm">Grupo: {selectedClient.group_name}</p>}
               </>
             )}
+            {(data.agentesResponsaveis || []).length > 0 && (
+              <p className="text-sm">
+                Responsável: <strong>{(data.agentesResponsaveis || []).map((id) => agents.find((a) => a.id === id)?.name).filter(Boolean).join(", ")}</strong>
+              </p>
+            )}
           </div>
         </div>
       </div>
