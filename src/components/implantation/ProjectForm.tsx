@@ -635,7 +635,27 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
     updateField("cronograma", updated);
   };
 
-  // Checkbox group helper
+  const toggleEtapaItem = (etapaKey: "etapa1" | "etapa2" | "etapa3", item: string) => {
+    const etapas = { ...data.treinamentoEtapas };
+    const etapa = { ...etapas[etapaKey] };
+    if (etapa.items.includes(item)) {
+      etapa.items = etapa.items.filter((v) => v !== item);
+    } else {
+      etapa.items = [...etapa.items, item];
+    }
+    etapas[etapaKey] = etapa;
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const updateEtapaDate = (etapaKey: "etapa1" | "etapa2" | "etapa3", field: "data" | "dataFim", value: string) => {
+    const etapas = { ...data.treinamentoEtapas };
+    etapas[etapaKey] = { ...etapas[etapaKey], [field]: value };
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const currentEtapas = data.conversao === "sim" ? ETAPAS_COM_CONVERSAO : ETAPAS_SEM_CONVERSAO;
+  const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
+
   const CheckboxGroup = ({
     options,
     selected,
