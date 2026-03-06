@@ -1415,7 +1415,63 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Novas Ferramentas | Rotinas Avançadas - always visible when conversao is set */}
+        {data.conversao && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Novas Ferramentas | Rotinas Avançadas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Chegando nesse ponto significa que as rotinas básicas da implantação foram concluídas com sucesso. 
+                A partir de agora, os atendimentos serão isolados, com o mesmo compromisso, mas focados em rotinas avançadas, 
+                que cancelam cronogramas separados conforme a ferramenta. Para implementar essas rotinas, será necessário 
+                abrir novos protocolos usando as ferramentas abaixo. Analisar a possibilidade de agendar mais de um processo para o mesmo dia.
+              </p>
+              <Separator />
+              <div className="border border-border rounded-md p-4 space-y-3">
+                <h4 className="font-semibold text-sm">BI</h4>
+                <div className="space-y-2 ml-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={data.ferramentasAvancadas?.bi?.gerarConta || false}
+                      onCheckedChange={(checked) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, gerarConta: !!checked };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                    />
+                    <span>Gerar Conta (Mauro)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={data.ferramentasAvancadas?.bi?.instalacao || false}
+                      onCheckedChange={(checked) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, instalacao: !!checked };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                    />
+                    <span>Instalação e configurações</span>
+                  </label>
+                  <div className="flex items-center gap-2 ml-0">
+                    <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
+                    <Input
+                      type="date"
+                      value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
+                      onChange={(e) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, treinamentoData: e.target.value };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                      className="w-[180px] h-8 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
           </CardHeader>
