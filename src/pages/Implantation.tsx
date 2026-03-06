@@ -143,6 +143,21 @@ export default function Implantation() {
 
   const handleSelectClient = (client: ImplantationClient) => {
     setSelectedClient(client);
+    navigate(`/implantation/${client.id}`, { replace: true });
+  };
+
+  const handleBack = () => {
+    setSelectedClient(null);
+    navigate("/implantation", { replace: true });
+  };
+
+  const handleCopyLink = (clientId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const link = `${window.location.origin}/implantation/${clientId}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(clientId);
+    toast({ title: "Link copiado!" });
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleProjectSaved = () => {
