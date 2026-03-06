@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useToast } from "@/hooks/use-toast";
 import { Save, Printer, Plus, Trash2, HelpCircle, Search, X } from "lucide-react";
@@ -694,15 +695,31 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             </div>
             <div>
               <Label>Regime Tributário</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={REGIME_OPTIONS} selected={data.regimeTributario} fieldKey="regimeTributario" />
-              </div>
+              <Select
+                value={data.regimeTributario[0] || ""}
+                onValueChange={(v) => updateField("regimeTributario", [v])}
+              >
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {REGIME_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Porte</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={PORTE_OPTIONS} selected={data.porte} fieldKey="porte" columns={3} />
-              </div>
+              <Select
+                value={data.porte[0] || ""}
+                onValueChange={(v) => updateField("porte", [v])}
+              >
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {PORTE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Estrutura</Label>
@@ -721,20 +738,31 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardContent className="space-y-4">
             <div>
               <Label>Servidor</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={SERVIDOR_OPTIONS} selected={data.servidor} fieldKey="servidor" />
-              </div>
+              <Select
+                value={data.servidor[0] || ""}
+                onValueChange={(v) => updateField("servidor", [v])}
+              >
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {SERVIDOR_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Base de Dados</Label>
-              <div className="mt-1">
-                <CheckboxGroup
-                  options={BASE_DADOS_OPTIONS}
-                  selected={data.baseDados}
-                  fieldKey="baseDados"
-                  columns={3}
-                />
-              </div>
+              <Select
+                value={data.baseDados[0] || ""}
+                onValueChange={(v) => updateField("baseDados", [v])}
+              >
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {BASE_DADOS_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -879,9 +907,17 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardContent className="space-y-4">
             <div>
               <Label>Sistema</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={SISTEMA_OPTIONS} selected={data.sistema} fieldKey="sistema" />
-              </div>
+              <Select
+                value={data.sistema[0] || ""}
+                onValueChange={(v) => updateField("sistema", [v])}
+              >
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {SISTEMA_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Módulo Fiscal</Label>
