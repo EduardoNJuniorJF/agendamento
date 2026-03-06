@@ -346,13 +346,16 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {PROFILES.map((p) => (
-                <label key={p} className="flex items-center gap-2 cursor-pointer text-sm">
-                  <Checkbox
-                    checked={profile === p}
-                    onCheckedChange={() => setProfile(profile === p ? "" : p)}
-                  />
-                  <span>{p}</span>
-                </label>
+                <div key={p} className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={profile === p}
+                      onCheckedChange={() => setProfile(profile === p ? "" : p)}
+                    />
+                    <span>{p}</span>
+                  </label>
+                  <ProfileInfoPopover profileName={p} />
+                </div>
               ))}
             </div>
           </CardContent>
