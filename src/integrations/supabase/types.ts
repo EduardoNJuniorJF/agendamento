@@ -254,6 +254,39 @@ export type Database = {
         }
         Relationships: []
       }
+      implantation_clients: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          group_name: string | null
+          id: string
+          name: string
+          profile: string | null
+          project_data: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string | null
+          group_name?: string | null
+          id?: string
+          name: string
+          profile?: string | null
+          project_data?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string | null
+          group_name?: string | null
+          id?: string
+          name?: string
+          profile?: string | null
+          project_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       local_holidays: {
         Row: {
           created_at: string | null
