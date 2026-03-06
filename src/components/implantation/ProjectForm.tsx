@@ -459,6 +459,9 @@ interface ProjectData {
     etapa2: EtapaData;
     etapa3: EtapaData;
   };
+  ferramentasAvancadas: {
+    bi: { gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+  };
 }
 
 const DEFAULT_ETAPAS = {
