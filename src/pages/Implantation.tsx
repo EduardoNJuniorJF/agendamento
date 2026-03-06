@@ -241,7 +241,7 @@ export default function Implantation() {
                     onClick={(e) => handleCopyLink(client.id, e)}
                     title="Copiar link de acesso"
                   >
-                    {copiedId === client.id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Link className="h-3.5 w-3.5" />}
+                    {copiedId === client.id ? <Check className="h-3.5 w-3.5 text-primary" /> : <Link className="h-3.5 w-3.5" />}
                   </Button>
                   <ConfirmDeleteDialog
                     onConfirm={() => handleDeleteClient(client.id)}
