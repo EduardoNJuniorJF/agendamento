@@ -24,10 +24,13 @@ interface ImplantationClient {
 
 export default function Implantation() {
   const { toast } = useToast();
+  const { clientId } = useParams();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<ImplantationClient[]>([]);
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<ImplantationClient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Client dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,7 +44,13 @@ export default function Implantation() {
     const { data, error } = await supabase.from("implantation_clients").select("*").order("name");
 
     if (!error && data) {
-      setClients(data as unknown as ImplantationClient[]);
+      const clientsData = data as unknown as ImplantationClient[];
+      setClients(clientsData);
+      // Auto-select client from URL param
+      if (clientId && !selectedClient) {
+        const found = clientsData.find((c) => c.id === clientId);
+        if (found) setSelectedClient(found);
+      }
     }
     setLoading(false);
   };
