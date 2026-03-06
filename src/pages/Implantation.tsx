@@ -235,6 +235,14 @@ export default function Implantation() {
                   <Button variant="ghost" size="sm" onClick={() => openEditDialog(client)}>
                     <Edit className="h-3.5 w-3.5" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => handleCopyLink(client.id, e)}
+                    title="Copiar link de acesso"
+                  >
+                    {copiedId === client.id ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Link className="h-3.5 w-3.5" />}
+                  </Button>
                   <ConfirmDeleteDialog
                     onConfirm={() => handleDeleteClient(client.id)}
                     title="Excluir Cliente"
