@@ -230,324 +230,256 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
         </Button>
       </div>
 
-      {/* 1. Perfil do Cliente - NEVER print */}
-      <Card className="no-print print:hidden border-primary/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Perfil do Cliente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {PROFILES.map((p) => (
-              <label key={p} className="flex items-center gap-2 cursor-pointer text-sm">
-                <Checkbox
-                  checked={profile === p}
-                  onCheckedChange={() => setProfile(profile === p ? "" : p)}
-                />
-                <span>{p}</span>
-              </label>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 2. Empresa */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Empresa</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Número de lojas</Label>
-            <Input
-              value={data.numLojas}
-              onChange={(e) => updateField("numLojas", e.target.value)}
-              placeholder="Ex: 3"
-            />
-          </div>
-
-          <div>
-            <Label>Grupo</Label>
-            <div className="flex gap-4 mt-1">
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <Checkbox
-                  checked={data.isGrupo === "sim"}
-                  onCheckedChange={() => updateField("isGrupo", data.isGrupo === "sim" ? "" : "sim")}
-                />
-                <span>SIM</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <Checkbox
-                  checked={data.isGrupo === "nao"}
-                  onCheckedChange={() => updateField("isGrupo", data.isGrupo === "nao" ? "" : "nao")}
-                />
-                <span>NÃO</span>
-              </label>
-            </div>
-            {data.isGrupo === "sim" && (
-              <Input
-                className="mt-2"
-                value={data.grupoNome}
-                onChange={(e) => updateField("grupoNome", e.target.value)}
-                placeholder="Nome do grupo"
-              />
-            )}
-          </div>
-
-          <div>
-            <Label>Regime Tributário</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={REGIME_OPTIONS} selected={data.regimeTributario} fieldKey="regimeTributario" />
-            </div>
-          </div>
-
-          <div>
-            <Label>Porte</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={PORTE_OPTIONS} selected={data.porte} fieldKey="porte" columns={3} />
-            </div>
-          </div>
-
-          <div>
-            <Label>Estrutura</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={ESTRUTURA_OPTIONS} selected={data.estrutura} fieldKey="estrutura" columns={3} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 3. Conexão */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Conexão</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Servidor</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={SERVIDOR_OPTIONS} selected={data.servidor} fieldKey="servidor" />
-            </div>
-          </div>
-          <div>
-            <Label>Base de Dados</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={BASE_DADOS_OPTIONS} selected={data.baseDados} fieldKey="baseDados" columns={3} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 4. Escopo */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Escopo</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Ramo</Label>
-            <Input
-              value={data.ramo}
-              onChange={(e) => updateField("ramo", e.target.value)}
-              placeholder="Ex: Supermercado"
-            />
-          </div>
-          <div>
-            <Label>Método de Atendimento</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={ATENDIMENTO_OPTIONS} selected={data.metodoAtendimento} fieldKey="metodoAtendimento" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 5. Envolvidos */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Envolvidos</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Proprietário</Label>
-            <Input
-              value={data.proprietario}
-              onChange={(e) => updateField("proprietario", e.target.value)}
-              placeholder="Nome do proprietário"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label>Funcionários e Funções</Label>
-              <Button variant="outline" size="sm" onClick={addFuncionario} className="no-print print:hidden">
-                <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar
-              </Button>
-            </div>
-            {data.funcionarios.map((f, i) => (
-              <div key={i} className="flex gap-2 items-center mb-2">
-                <Input
-                  className="flex-1"
-                  value={f.funcao}
-                  onChange={(e) => updateFuncionario(i, "funcao", e.target.value)}
-                  placeholder="Função (ex: Vendedor)"
-                />
-                <Input
-                  className="w-20"
-                  type="number"
-                  min={0}
-                  value={f.quantidade}
-                  onChange={(e) => updateFuncionario(i, "quantidade", parseInt(e.target.value) || 0)}
-                />
-                <Button variant="ghost" size="icon" onClick={() => removeFuncionario(i)} className="no-print print:hidden text-destructive hover:text-destructive">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
-            {data.funcionarios.length > 0 && (
-              <p className="text-sm font-medium text-muted-foreground">
-                Total de pessoas: <strong className="text-foreground">{totalFuncionarios}</strong>
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 6. Gerenciamento do Projeto */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Gerenciamento do Projeto</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Cronograma</Label>
-            <div className="space-y-2 mt-1">
-              {data.cronograma.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-sm min-w-[180px]">{c.item}</span>
-                  <Input
-                    type="date"
-                    value={c.data}
-                    onChange={(e) => updateCronograma(i, e.target.value)}
-                    className="max-w-[180px]"
+      {/* ===== INTERACTIVE FORM (screen only) ===== */}
+      <div className="no-print print:hidden space-y-4">
+        {/* 1. Perfil do Cliente - NEVER print */}
+        <Card className="border-primary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Perfil do Cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {PROFILES.map((p) => (
+                <label key={p} className="flex items-center gap-2 cursor-pointer text-sm">
+                  <Checkbox
+                    checked={profile === p}
+                    onCheckedChange={() => setProfile(profile === p ? "" : p)}
                   />
-                </div>
+                  <span>{p}</span>
+                </label>
               ))}
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <Separator />
+        {/* 2. Empresa */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Empresa</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Número de lojas</Label>
+              <Input value={data.numLojas} onChange={(e) => updateField("numLojas", e.target.value)} placeholder="Ex: 3" />
+            </div>
+            <div>
+              <Label>Grupo</Label>
+              <div className="flex gap-4 mt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <Checkbox checked={data.isGrupo === "sim"} onCheckedChange={() => updateField("isGrupo", data.isGrupo === "sim" ? "" : "sim")} />
+                  <span>SIM</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <Checkbox checked={data.isGrupo === "nao"} onCheckedChange={() => updateField("isGrupo", data.isGrupo === "nao" ? "" : "nao")} />
+                  <span>NÃO</span>
+                </label>
+              </div>
+              {data.isGrupo === "sim" && (
+                <Input className="mt-2" value={data.grupoNome} onChange={(e) => updateField("grupoNome", e.target.value)} placeholder="Nome do grupo" />
+              )}
+            </div>
+            <div>
+              <Label>Regime Tributário</Label>
+              <div className="mt-1"><CheckboxGroup options={REGIME_OPTIONS} selected={data.regimeTributario} fieldKey="regimeTributario" /></div>
+            </div>
+            <div>
+              <Label>Porte</Label>
+              <div className="mt-1"><CheckboxGroup options={PORTE_OPTIONS} selected={data.porte} fieldKey="porte" columns={3} /></div>
+            </div>
+            <div>
+              <Label>Estrutura</Label>
+              <div className="mt-1"><CheckboxGroup options={ESTRUTURA_OPTIONS} selected={data.estrutura} fieldKey="estrutura" columns={3} /></div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div>
-            <Label>Risco</Label>
-            <div className="mt-1 space-y-2">
-              {RISCO_OPTIONS.map((opt) => (
-                <div key={opt}>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <Checkbox
-                      checked={data.riscos.includes(opt)}
-                      onCheckedChange={() => toggleArrayItem("riscos", opt)}
-                    />
-                    <span>{opt}</span>
-                  </label>
-                  {opt === "Pendência cliente" && data.riscos.includes(opt) && (
-                    <Input
-                      className="mt-1 ml-6"
-                      value={data.riscoPendenciaDetalhe}
-                      onChange={(e) => updateField("riscoPendenciaDetalhe", e.target.value)}
-                      placeholder="Descreva a pendência..."
-                    />
-                  )}
+        {/* 3. Conexão */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Conexão</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Servidor</Label><div className="mt-1"><CheckboxGroup options={SERVIDOR_OPTIONS} selected={data.servidor} fieldKey="servidor" /></div></div>
+            <div><Label>Base de Dados</Label><div className="mt-1"><CheckboxGroup options={BASE_DADOS_OPTIONS} selected={data.baseDados} fieldKey="baseDados" columns={3} /></div></div>
+          </CardContent>
+        </Card>
+
+        {/* 4. Escopo */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Escopo</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Ramo</Label><Input value={data.ramo} onChange={(e) => updateField("ramo", e.target.value)} placeholder="Ex: Supermercado" /></div>
+            <div><Label>Método de Atendimento</Label><div className="mt-1"><CheckboxGroup options={ATENDIMENTO_OPTIONS} selected={data.metodoAtendimento} fieldKey="metodoAtendimento" /></div></div>
+          </CardContent>
+        </Card>
+
+        {/* 5. Envolvidos */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Envolvidos</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Proprietário</Label><Input value={data.proprietario} onChange={(e) => updateField("proprietario", e.target.value)} placeholder="Nome do proprietário" /></div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Funcionários e Funções</Label>
+                <Button variant="outline" size="sm" onClick={addFuncionario}><Plus className="h-3.5 w-3.5 mr-1" /> Adicionar</Button>
+              </div>
+              {data.funcionarios.map((f, i) => (
+                <div key={i} className="flex gap-2 items-center mb-2">
+                  <Input className="flex-1" value={f.funcao} onChange={(e) => updateFuncionario(i, "funcao", e.target.value)} placeholder="Função (ex: Vendedor)" />
+                  <Input className="w-20" type="number" min={0} value={f.quantidade} onChange={(e) => updateFuncionario(i, "quantidade", parseInt(e.target.value) || 0)} />
+                  <Button variant="ghost" size="icon" onClick={() => removeFuncionario(i)} className="text-destructive hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               ))}
+              {data.funcionarios.length > 0 && (
+                <p className="text-sm font-medium text-muted-foreground">Total de pessoas: <strong className="text-foreground">{totalFuncionarios}</strong></p>
+              )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* 7. Software */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Software</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Sistema</Label>
+        {/* 6. Gerenciamento do Projeto */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Gerenciamento do Projeto</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Cronograma</Label>
+              <div className="space-y-2 mt-1">
+                {data.cronograma.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-sm min-w-[180px]">{c.item}</span>
+                    <Input type="date" value={c.data} onChange={(e) => updateCronograma(i, e.target.value)} className="max-w-[180px]" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Separator />
+            <div>
+              <Label>Risco</Label>
+              <div className="mt-1 space-y-2">
+                {RISCO_OPTIONS.map((opt) => (
+                  <div key={opt}>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox checked={data.riscos.includes(opt)} onCheckedChange={() => toggleArrayItem("riscos", opt)} />
+                      <span>{opt}</span>
+                    </label>
+                    {opt === "Pendência cliente" && data.riscos.includes(opt) && (
+                      <Input className="mt-1 ml-6" value={data.riscoPendenciaDetalhe} onChange={(e) => updateField("riscoPendenciaDetalhe", e.target.value)} placeholder="Descreva a pendência..." />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 7. Software */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Software</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div><Label>Sistema</Label><div className="mt-1"><CheckboxGroup options={SISTEMA_OPTIONS} selected={data.sistema} fieldKey="sistema" /></div></div>
+            <div><Label>Módulo Fiscal</Label><div className="mt-1"><CheckboxGroup options={MODULO_FISCAL_OPTIONS} selected={data.moduloFiscal} fieldKey="moduloFiscal" columns={3} /></div></div>
+          </CardContent>
+        </Card>
+
+        {/* 8. Conversão de Dados */}
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">Conversão de Dados</CardTitle></CardHeader>
+          <CardContent>
+            <Label>Conversão</Label>
+            <div className="flex gap-4 mt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={data.conversao === "sim"} onCheckedChange={() => updateField("conversao", data.conversao === "sim" ? "" : "sim")} /><span>Sim</span></label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={data.conversao === "nao"} onCheckedChange={() => updateField("conversao", data.conversao === "nao" ? "" : "nao")} /><span>Não</span></label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 9-11. Training sections */}
+        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Plano de Treinamento</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.planoTreinamento} fieldKey="planoTreinamento" columns={3} /></CardContent></Card>
+        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Rotinas Básicas</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.rotinasBasicas} fieldKey="rotinasBasicas" columns={3} /></CardContent></Card>
+        <Card><CardHeader className="pb-3"><CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle></CardHeader><CardContent><CheckboxGroup options={TRAINING_OPTIONS} selected={data.modulosComplementares} fieldKey="modulosComplementares" columns={3} /></CardContent></Card>
+
+        {/* Bottom save/print buttons */}
+        <div className="flex gap-2 justify-end pb-6">
+          <Button onClick={handleSave} disabled={saving}><Save className="h-4 w-4 mr-1" /> {saving ? "Salvando..." : "Salvar Projeto"}</Button>
+          <Button variant="outline" onClick={handlePrint}><Printer className="h-4 w-4 mr-1" /> Imprimir Projeto</Button>
+        </div>
+      </div>
+
+      {/* ===== PRINT-ONLY TEXT VERSION ===== */}
+      <div className="hidden print:block print-text-version text-sm" style={{ fontSize: "11px", lineHeight: "1.6" }}>
+        <PrintSection title="Empresa">
+          <PrintLine label="Número de lojas" value={data.numLojas} />
+          <PrintLine label="Grupo" value={data.isGrupo === "sim" ? `Sim — ${data.grupoNome || "(não informado)"}` : data.isGrupo === "nao" ? "Não" : ""} />
+          <PrintLine label="Regime Tributário" value={data.regimeTributario.join(", ")} />
+          <PrintLine label="Porte" value={data.porte.join(", ")} />
+          <PrintLine label="Estrutura" value={data.estrutura.join(", ")} />
+        </PrintSection>
+
+        <PrintSection title="Conexão">
+          <PrintLine label="Servidor" value={data.servidor.join(", ")} />
+          <PrintLine label="Base de Dados" value={data.baseDados.join(", ")} />
+        </PrintSection>
+
+        <PrintSection title="Escopo">
+          <PrintLine label="Ramo" value={data.ramo} />
+          <PrintLine label="Método de Atendimento" value={data.metodoAtendimento.join(", ")} />
+        </PrintSection>
+
+        <PrintSection title="Envolvidos">
+          <PrintLine label="Proprietário" value={data.proprietario} />
+          {data.funcionarios.length > 0 && (
             <div className="mt-1">
-              <CheckboxGroup options={SISTEMA_OPTIONS} selected={data.sistema} fieldKey="sistema" />
+              <span className="font-semibold">Funcionários e Funções:</span>
+              <ul className="list-disc ml-6 mt-1">
+                {data.funcionarios.map((f, i) => (
+                  <li key={i}>{f.funcao || "(sem função)"}: {f.quantidade}</li>
+                ))}
+              </ul>
+              <p className="mt-1 font-semibold">Total de pessoas: {totalFuncionarios}</p>
             </div>
-          </div>
-          <div>
-            <Label>Módulo Fiscal</Label>
-            <div className="mt-1">
-              <CheckboxGroup options={MODULO_FISCAL_OPTIONS} selected={data.moduloFiscal} fieldKey="moduloFiscal" columns={3} />
+          )}
+        </PrintSection>
+
+        <PrintSection title="Gerenciamento do Projeto">
+          <span className="font-semibold">Cronograma:</span>
+          <ul className="list-disc ml-6 mt-1">
+            {data.cronograma.map((c, i) => (
+              <li key={i}>{c.item}: {c.data ? new Date(c.data + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
+            ))}
+          </ul>
+          {data.riscos.length > 0 && (
+            <div className="mt-2">
+              <span className="font-semibold">Riscos:</span>
+              <ul className="list-disc ml-6 mt-1">
+                {data.riscos.map((r, i) => (
+                  <li key={i}>
+                    {r}
+                    {r === "Pendência cliente" && data.riscoPendenciaDetalhe && ` — ${data.riscoPendenciaDetalhe}`}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </PrintSection>
 
-      {/* 8. Conversão de Dados */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Conversão de Dados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Label>Conversão</Label>
-          <div className="flex gap-4 mt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-sm">
-              <Checkbox
-                checked={data.conversao === "sim"}
-                onCheckedChange={() => updateField("conversao", data.conversao === "sim" ? "" : "sim")}
-              />
-              <span>Sim</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer text-sm">
-              <Checkbox
-                checked={data.conversao === "nao"}
-                onCheckedChange={() => updateField("conversao", data.conversao === "nao" ? "" : "nao")}
-              />
-              <span>Não</span>
-            </label>
-          </div>
-        </CardContent>
-      </Card>
+        <PrintSection title="Software">
+          <PrintLine label="Sistema" value={data.sistema.join(", ")} />
+          <PrintLine label="Módulo Fiscal" value={data.moduloFiscal.join(", ")} />
+        </PrintSection>
 
-      {/* 9. Plano de Treinamento */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Plano de Treinamento</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CheckboxGroup options={TRAINING_OPTIONS} selected={data.planoTreinamento} fieldKey="planoTreinamento" columns={3} />
-        </CardContent>
-      </Card>
+        <PrintSection title="Conversão de Dados">
+          <PrintLine label="Conversão" value={data.conversao === "sim" ? "Sim" : data.conversao === "nao" ? "Não" : ""} />
+        </PrintSection>
 
-      {/* 10. Rotinas Básicas */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Rotinas Básicas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CheckboxGroup options={TRAINING_OPTIONS} selected={data.rotinasBasicas} fieldKey="rotinasBasicas" columns={3} />
-        </CardContent>
-      </Card>
+        <PrintSection title="Plano de Treinamento">
+          <p>{data.planoTreinamento.length > 0 ? data.planoTreinamento.join(", ") : "—"}</p>
+        </PrintSection>
 
-      {/* 11. Módulos Complementares */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CheckboxGroup options={TRAINING_OPTIONS} selected={data.modulosComplementares} fieldKey="modulosComplementares" columns={3} />
-        </CardContent>
-      </Card>
+        <PrintSection title="Rotinas Básicas">
+          <p>{data.rotinasBasicas.length > 0 ? data.rotinasBasicas.join(", ") : "—"}</p>
+        </PrintSection>
 
-      {/* Bottom save/print buttons - no print */}
-      <div className="flex gap-2 justify-end pb-6 no-print print:hidden">
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-1" /> {saving ? "Salvando..." : "Salvar Projeto"}
-        </Button>
-        <Button variant="outline" onClick={handlePrint}>
-          <Printer className="h-4 w-4 mr-1" /> Imprimir Projeto
-        </Button>
+        <PrintSection title="Módulos Complementares | Gerar Valor">
+          <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
+        </PrintSection>
       </div>
     </div>
   );
