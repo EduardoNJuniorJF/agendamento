@@ -299,6 +299,91 @@ const TRAINING_OPTIONS = [
   "Cash Back",
   "Coletor Zaal",
 ];
+
+// Staged training items when conversion = NO
+const ETAPAS_SEM_CONVERSAO: { label: string; items: Array<{ text: string; header?: boolean }> }[] = [
+  {
+    label: "Primeira Etapa",
+    items: [
+      { text: "Incluir e clonar" },
+      { text: "Emissão de Etiquetas - Modelo do cliente:" },
+      { text: "Consulta" },
+      { text: "Alteração e reajuste" },
+    ],
+  },
+  {
+    label: "Segunda Etapa",
+    items: [
+      { text: "Exportar Produtos Balança e/ou Busca Preço" },
+      { text: "Quiosque" },
+      { text: "Operações de Vendas" },
+      { text: "Cadastro de pessoas" },
+      { text: "Emissão de NFCE." },
+      { text: "Configuração de Plano de Contas (simples)" },
+      { text: "Despesas de caixa" },
+      { text: "Consulta de vendas e exclusão" },
+      { text: "Fechamento de caixa" },
+      { text: "Permissões de acesso [Alinhar com Proprietário]" },
+      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      { text: "Plataforma do Contador" },
+      { text: "Backup" },
+    ],
+  },
+  {
+    label: "Terceira Etapa",
+    items: [
+      { text: "Importação de XML e entrada manual (usará para cadastrar produtos novos e reposição)" },
+      { text: "Esclarecimento de dúvidas" },
+      { text: "Balanço" },
+      { text: "App de Resultados" },
+      { text: "Contas a Pagar" },
+    ],
+  },
+];
+
+// Staged training items when conversion = YES
+const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header?: boolean }> }[] = [
+  {
+    label: "Primeira Etapa",
+    items: [
+      { text: "Estoque", header: true },
+      { text: "Incluir e clonar" },
+      { text: "Emissão de Etiquetas - Modelo do cliente:" },
+      { text: "Consulta" },
+      { text: "Alteração e reajuste" },
+      { text: "Exportar Produtos Balança e/ou Busca Preço" },
+      { text: "Vendas", header: true },
+      { text: "Quiosque" },
+      { text: "Operações de Vendas" },
+      { text: "Cadastro de pessoas" },
+      { text: "Emissão de NFCE." },
+      { text: "Configuração de Plano de Contas (simples)" },
+      { text: "Despesas de caixa" },
+      { text: "Consulta de vendas e exclusão" },
+      { text: "Fechamento de caixa" },
+      { text: "Permissões de acesso [Alinhar com Proprietário]" },
+      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      { text: "Plataforma do Contador" },
+      { text: "Backup" },
+    ],
+  },
+  {
+    label: "Segunda Etapa",
+    items: [
+      { text: "Dúvidas e reciclagem" },
+      { text: "Importação de XML e entrada manual (usará para cadastrar produtos novos e reposição)" },
+    ],
+  },
+  {
+    label: "Terceira Etapa",
+    items: [
+      { text: "Esclarecimento de dúvidas" },
+      { text: "Balanço" },
+      { text: "App de Resultados" },
+      { text: "Contas a Pagar" },
+    ],
+  },
+];
 const MODULOS_OPTIONS = [
   "App de Resultados",
   "Caixa central e Contas Bancárias",
@@ -316,6 +401,12 @@ const DEFAULT_CRONOGRAMA = [
   { item: "Segundo Atendimento", data: "" },
   { item: "Terceiro Atendimento", data: "" },
 ];
+
+interface EtapaData {
+  items: string[];
+  data: string;
+  dataFim?: string;
+}
 
 interface ProjectData {
   numLojas: string;
@@ -339,7 +430,18 @@ interface ProjectData {
   planoTreinamento: string[];
   rotinasBasicas: string[];
   modulosComplementares: string[];
+  treinamentoEtapas: {
+    etapa1: EtapaData;
+    etapa2: EtapaData;
+    etapa3: EtapaData;
+  };
 }
+
+const DEFAULT_ETAPAS = {
+  etapa1: { items: [] as string[], data: "", dataFim: "" },
+  etapa2: { items: [] as string[], data: "" },
+  etapa3: { items: [] as string[], data: "" },
+};
 
 const DEFAULT_DATA: ProjectData = {
   numLojas: "",
@@ -363,6 +465,7 @@ const DEFAULT_DATA: ProjectData = {
   planoTreinamento: [],
   rotinasBasicas: [],
   modulosComplementares: [],
+  treinamentoEtapas: { ...DEFAULT_ETAPAS },
 };
 
 // Client search component
@@ -532,7 +635,27 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
     updateField("cronograma", updated);
   };
 
-  // Checkbox group helper
+  const toggleEtapaItem = (etapaKey: "etapa1" | "etapa2" | "etapa3", item: string) => {
+    const etapas = { ...data.treinamentoEtapas };
+    const etapa = { ...etapas[etapaKey] };
+    if (etapa.items.includes(item)) {
+      etapa.items = etapa.items.filter((v) => v !== item);
+    } else {
+      etapa.items = [...etapa.items, item];
+    }
+    etapas[etapaKey] = etapa;
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const updateEtapaDate = (etapaKey: "etapa1" | "etapa2" | "etapa3", field: "data" | "dataFim", value: string) => {
+    const etapas = { ...data.treinamentoEtapas };
+    etapas[etapaKey] = { ...etapas[etapaKey], [field]: value };
+    updateField("treinamentoEtapas", etapas);
+  };
+
+  const currentEtapas = data.conversao === "sim" ? ETAPAS_COM_CONVERSAO : ETAPAS_SEM_CONVERSAO;
+  const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
+
   const CheckboxGroup = ({
     options,
     selected,
@@ -964,20 +1087,74 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Plano de Treinamento | Rotinas Básicas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <CheckboxGroup
-              options={TRAINING_OPTIONS}
-              selected={data.planoTreinamento}
-              fieldKey="planoTreinamento"
-              columns={3}
-            />
-            <div className="mt-4 p-3 bg-muted/50 border border-border rounded-md text-sm text-muted-foreground no-print space-y-1">
-              <p className="font-medium text-foreground">Observação:</p>
-              <p>Em caso se conversão, as 2 primeiras etapas são realizadas em 2 dias seguidos de treinamento.</p>
-              <p>Venda e estoque são realizados na etapa 1.</p>
-              <p>Etapa 2: Dúvidas e retorno.</p>
-              <p>Etapa 3: Processos complementares, podendo haver etapa 4.</p>
-            </div>
+          <CardContent className="space-y-6">
+            {!data.conversao && (
+              <p className="text-sm text-muted-foreground italic">
+                Selecione Sim ou Não no campo Conversão para exibir as etapas do treinamento.
+              </p>
+            )}
+            {data.conversao && currentEtapas.map((etapa, idx) => {
+              const etapaKey = etapaKeys[idx];
+              const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
+              const showDateRange = data.conversao === "sim" && idx === 0;
+
+              return (
+                <div key={etapaKey} className="border border-border rounded-md p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <h4 className="font-semibold text-sm">{etapa.label}</h4>
+                    <div className="flex items-center gap-2">
+                      {showDateRange ? (
+                        <>
+                          <div className="flex items-center gap-1">
+                            <Label className="text-xs whitespace-nowrap">Início:</Label>
+                            <Input
+                              type="date"
+                              value={etapaData.data}
+                              onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                              className="w-[150px] h-8 text-xs"
+                            />
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Label className="text-xs whitespace-nowrap">Fim:</Label>
+                            <Input
+                              type="date"
+                              value={etapaData.dataFim || ""}
+                              onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
+                              className="w-[150px] h-8 text-xs"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Label className="text-xs whitespace-nowrap">Data:</Label>
+                          <Input
+                            type="date"
+                            value={etapaData.data}
+                            onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                            className="w-[150px] h-8 text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {etapa.items.map((item) =>
+                      item.header ? (
+                        <p key={item.text} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
+                      ) : (
+                        <label key={item.text} className="flex items-center gap-2 cursor-pointer text-sm">
+                          <Checkbox
+                            checked={etapaData.items.includes(item.text)}
+                            onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
+                          />
+                          <span>{item.text}</span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -1088,8 +1265,38 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           />
         </PrintSection>
 
-        <PrintSection title="Plano de Treinamento">
-          <p>{data.planoTreinamento.length > 0 ? data.planoTreinamento.join(", ") : "—"}</p>
+        <PrintSection title="Plano de Treinamento | Rotinas Básicas">
+          {data.conversao ? (
+            <>
+              {currentEtapas.map((etapa, idx) => {
+                const etapaKey = etapaKeys[idx];
+                const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
+                const showDateRange = data.conversao === "sim" && idx === 0;
+                const formatDate = (d: string) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+                return (
+                  <div key={etapaKey} className="mb-2">
+                    <p className="font-semibold">
+                      {etapa.label}
+                      {showDateRange
+                        ? ` — ${formatDate(etapaData.data)} a ${formatDate(etapaData.dataFim || "")}`
+                        : ` — ${formatDate(etapaData.data)}`}
+                    </p>
+                    {etapaData.items.length > 0 ? (
+                      <ul className="list-disc ml-6">
+                        {etapaData.items.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="ml-4 text-muted-foreground">Nenhum item marcado</p>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            <p>—</p>
+          )}
         </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
