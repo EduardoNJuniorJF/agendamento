@@ -100,8 +100,9 @@ const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
           <HelpCircle className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" side="right" align="start">
-        <ScrollArea className="max-h-[70vh] p-4">
+      <PopoverContent className="w-96 p-0 max-h-[70vh] overflow-hidden" side="right" align="start">
+        <ScrollArea className="h-full max-h-[70vh]">
+          <div className="p-4">
           <h4 className="font-bold text-sm mb-3">{profileName}</h4>
           <Section title="Características" items={info.caracteristicas} />
           <Section title="Pontos Positivos" items={info.positivos} />
