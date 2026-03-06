@@ -1244,7 +1244,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardContent>
         </Card>
 
-        {/* 9-11. Training sections */}
+        {/* 9-11. Training sections with drag and drop */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Plano de Treinamento | Rotinas Básicas</CardTitle>
@@ -1255,68 +1255,100 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 Selecione Sim ou Não no campo Conversão para exibir as etapas do treinamento.
               </p>
             )}
-            {data.conversao && currentEtapas.map((etapa, idx) => {
-              const etapaKey = etapaKeys[idx];
-              const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
-              const showDateRange = data.conversao === "sim" && idx === 0;
+            {data.conversao && (
+              <>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <GripVertical className="h-3 w-3" /> Arraste os itens entre as etapas para reorganizar.
+                </p>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                >
+                  {currentEtapas.map((etapa, idx) => {
+                    const etapaKey = etapaKeys[idx];
+                    const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "", displayItems: [] };
+                    const displayItems = etapaData.displayItems || etapa.items;
+                    const showDateRange = data.conversao === "sim" && idx === 0;
+                    const sortableIds = displayItems.filter((di) => !di.header).map((di) => `${etapaKey}-${di.text}`);
 
-              return (
-                <div key={etapaKey} className="border border-border rounded-md p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <h4 className="font-semibold text-sm">{etapa.label}</h4>
-                    <div className="flex items-center gap-2">
-                      {showDateRange ? (
-                        <>
-                          <div className="flex items-center gap-1">
-                            <Label className="text-xs whitespace-nowrap">Início:</Label>
-                            <Input
-                              type="date"
-                              value={etapaData.data}
-                              onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
-                              className="w-[150px] h-8 text-xs"
-                            />
+                    return (
+                      <DroppableEtapa key={etapaKey} id={etapaKey}>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                          <h4 className="font-semibold text-sm">{etapa.label}</h4>
+                          <div className="flex items-center gap-2">
+                            {showDateRange ? (
+                              <>
+                                <div className="flex items-center gap-1">
+                                  <Label className="text-xs whitespace-nowrap">Início:</Label>
+                                  <Input
+                                    type="date"
+                                    value={etapaData.data}
+                                    onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                                    className="w-[150px] h-8 text-xs"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Label className="text-xs whitespace-nowrap">Fim:</Label>
+                                  <Input
+                                    type="date"
+                                    value={etapaData.dataFim || ""}
+                                    onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
+                                    className="w-[150px] h-8 text-xs"
+                                  />
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Label className="text-xs whitespace-nowrap">Data:</Label>
+                                <Input
+                                  type="date"
+                                  value={etapaData.data}
+                                  onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
+                                  className="w-[150px] h-8 text-xs"
+                                />
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Label className="text-xs whitespace-nowrap">Fim:</Label>
-                            <Input
-                              type="date"
-                              value={etapaData.dataFim || ""}
-                              onChange={(e) => updateEtapaDate(etapaKey, "dataFim", e.target.value)}
-                              className="w-[150px] h-8 text-xs"
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <Label className="text-xs whitespace-nowrap">Data:</Label>
-                          <Input
-                            type="date"
-                            value={etapaData.data}
-                            onChange={(e) => updateEtapaDate(etapaKey, "data", e.target.value)}
-                            className="w-[150px] h-8 text-xs"
-                          />
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    {etapa.items.map((item) =>
-                      item.header ? (
-                        <p key={item.text} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
-                      ) : (
-                        <label key={item.text} className="flex items-center gap-2 cursor-pointer text-sm">
-                          <Checkbox
-                            checked={etapaData.items.includes(item.text)}
-                            onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
-                          />
-                          <span>{item.text}</span>
-                        </label>
-                      )
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                        <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-1">
+                            {displayItems.map((item) =>
+                              item.header ? (
+                                <p key={`header-${item.text}`} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
+                              ) : (
+                                <SortableEtapaItem
+                                  key={`${etapaKey}-${item.text}`}
+                                  id={`${etapaKey}-${item.text}`}
+                                  text={item.text}
+                                  checked={etapaData.items.includes(item.text)}
+                                  onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
+                                />
+                              )
+                            )}
+                            {displayItems.filter((di) => !di.header).length === 0 && (
+                              <p className="text-xs text-muted-foreground italic py-2">
+                                Arraste itens para esta etapa
+                              </p>
+                            )}
+                          </div>
+                        </SortableContext>
+                      </DroppableEtapa>
+                    );
+                  })}
+                  <DragOverlay>
+                    {activeItemText ? (
+                      <div className="flex items-center gap-2 text-sm bg-background border border-primary/50 rounded-md px-3 py-2 shadow-lg">
+                        <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>{activeItemText}</span>
+                      </div>
+                    ) : null}
+                  </DragOverlay>
+                </DndContext>
+              </>
+            )}
           </CardContent>
         </Card>
 
