@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2, ArrowLeft, FolderOpen } from "lucide-react";
+import { Plus, Search, Edit, ArrowLeft, FolderOpen } from "lucide-react";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import ProjectForm from "@/components/implantation/ProjectForm";
 

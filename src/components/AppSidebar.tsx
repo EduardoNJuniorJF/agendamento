@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User } from "lucide-react";
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User, Rocket } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +45,7 @@ export function AppSidebar() {
     { title: "Férias e Folgas", url: "/vacations", icon: Umbrella, show: true },
     { title: "Bonificação", url: "/bonus", icon: Receipt, show: canAccessBonus() },
     { title: "Celebrações", url: "/celebrations", icon: PartyPopper, show: true },
+    { title: "Implantação", url: "/implantation", icon: Rocket, show: role === "dev" },
   ];
 
   return (
