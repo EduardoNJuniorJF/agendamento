@@ -800,8 +800,8 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
               columns={3}
             />
             <div className="mt-4 p-3 bg-muted/50 border border-border rounded-md text-sm text-muted-foreground no-print space-y-1">
-              <p className="font-medium text-foreground">Observação (conversão):</p>
-              <p>As 2 primeiras etapas são realizadas em 2 dias seguidos de treinamento.</p>
+              <p className="font-medium text-foreground">Observação:</p>
+              <p>Em caso se conversão, as 2 primeiras etapas são realizadas em 2 dias seguidos de treinamento.</p>
               <p>Venda e estoque são realizados na etapa 1.</p>
               <p>Etapa 2: Dúvidas e retorno.</p>
               <p>Etapa 3: Processos complementares, podendo haver etapa 4.</p>
