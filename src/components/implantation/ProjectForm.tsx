@@ -460,7 +460,7 @@ interface ProjectData {
     etapa3: EtapaData;
   };
   ferramentasAvancadas: {
-    bi: { gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+    bi: { enabled: boolean; gerarConta: boolean; instalacao: boolean; treinamentoData: string };
   };
 }
 
@@ -494,7 +494,7 @@ const DEFAULT_DATA: ProjectData = {
   modulosComplementares: [],
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
   ferramentasAvancadas: {
-    bi: { gerarConta: false, instalacao: false, treinamentoData: "" },
+    bi: { enabled: false, gerarConta: false, instalacao: false, treinamentoData: "" },
   },
 };
 
@@ -1430,44 +1430,56 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
               </p>
               <Separator />
               <div className="border border-border rounded-md p-4 space-y-3">
-                <h4 className="font-semibold text-sm">BI</h4>
-                <div className="space-y-2 ml-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <Checkbox
-                      checked={data.ferramentasAvancadas?.bi?.gerarConta || false}
-                      onCheckedChange={(checked) => {
-                        const fa = { ...data.ferramentasAvancadas };
-                        fa.bi = { ...fa.bi, gerarConta: !!checked };
-                        updateField("ferramentasAvancadas", fa);
-                      }}
-                    />
-                    <span>Gerar Conta (Mauro)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <Checkbox
-                      checked={data.ferramentasAvancadas?.bi?.instalacao || false}
-                      onCheckedChange={(checked) => {
-                        const fa = { ...data.ferramentasAvancadas };
-                        fa.bi = { ...fa.bi, instalacao: !!checked };
-                        updateField("ferramentasAvancadas", fa);
-                      }}
-                    />
-                    <span>Instalação e configurações</span>
-                  </label>
-                  <div className="flex items-center gap-2 ml-0">
-                    <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
-                    <Input
-                      type="date"
-                      value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
-                      onChange={(e) => {
-                        const fa = { ...data.ferramentasAvancadas };
-                        fa.bi = { ...fa.bi, treinamentoData: e.target.value };
-                        updateField("ferramentasAvancadas", fa);
-                      }}
-                      className="w-[180px] h-8 text-sm"
-                    />
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
+                  <Checkbox
+                    checked={data.ferramentasAvancadas?.bi?.enabled || false}
+                    onCheckedChange={(checked) => {
+                      const fa = { ...data.ferramentasAvancadas };
+                      fa.bi = { ...fa.bi, enabled: !!checked };
+                      updateField("ferramentasAvancadas", fa);
+                    }}
+                  />
+                  <span>BI</span>
+                </label>
+                {data.ferramentasAvancadas?.bi?.enabled && (
+                  <div className="space-y-2 ml-6">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={data.ferramentasAvancadas?.bi?.gerarConta || false}
+                        onCheckedChange={(checked) => {
+                          const fa = { ...data.ferramentasAvancadas };
+                          fa.bi = { ...fa.bi, gerarConta: !!checked };
+                          updateField("ferramentasAvancadas", fa);
+                        }}
+                      />
+                      <span>Gerar Conta (Mauro)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={data.ferramentasAvancadas?.bi?.instalacao || false}
+                        onCheckedChange={(checked) => {
+                          const fa = { ...data.ferramentasAvancadas };
+                          fa.bi = { ...fa.bi, instalacao: !!checked };
+                          updateField("ferramentasAvancadas", fa);
+                        }}
+                      />
+                      <span>Instalação e configurações</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
+                      <Input
+                        type="date"
+                        value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
+                        onChange={(e) => {
+                          const fa = { ...data.ferramentasAvancadas };
+                          fa.bi = { ...fa.bi, treinamentoData: e.target.value };
+                          updateField("ferramentasAvancadas", fa);
+                        }}
+                        className="w-[180px] h-8 text-sm"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
