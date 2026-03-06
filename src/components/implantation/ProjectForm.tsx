@@ -299,6 +299,91 @@ const TRAINING_OPTIONS = [
   "Cash Back",
   "Coletor Zaal",
 ];
+
+// Staged training items when conversion = NO
+const ETAPAS_SEM_CONVERSAO: { label: string; items: Array<{ text: string; header?: boolean }> }[] = [
+  {
+    label: "Primeira Etapa",
+    items: [
+      { text: "Incluir e clonar" },
+      { text: "Emissão de Etiquetas - Modelo do cliente:" },
+      { text: "Consulta" },
+      { text: "Alteração e reajuste" },
+    ],
+  },
+  {
+    label: "Segunda Etapa",
+    items: [
+      { text: "Exportar Produtos Balança e/ou Busca Preço" },
+      { text: "Quiosque" },
+      { text: "Operações de Vendas" },
+      { text: "Cadastro de pessoas" },
+      { text: "Emissão de NFCE." },
+      { text: "Configuração de Plano de Contas (simples)" },
+      { text: "Despesas de caixa" },
+      { text: "Consulta de vendas e exclusão" },
+      { text: "Fechamento de caixa" },
+      { text: "Permissões de acesso [Alinhar com Proprietário]" },
+      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      { text: "Plataforma do Contador" },
+      { text: "Backup" },
+    ],
+  },
+  {
+    label: "Terceira Etapa",
+    items: [
+      { text: "Importação de XML e entrada manual (usará para cadastrar produtos novos e reposição)" },
+      { text: "Esclarecimento de dúvidas" },
+      { text: "Balanço" },
+      { text: "App de Resultados" },
+      { text: "Contas a Pagar" },
+    ],
+  },
+];
+
+// Staged training items when conversion = YES
+const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header?: boolean }> }[] = [
+  {
+    label: "Primeira Etapa",
+    items: [
+      { text: "Estoque", header: true },
+      { text: "Incluir e clonar" },
+      { text: "Emissão de Etiquetas - Modelo do cliente:" },
+      { text: "Consulta" },
+      { text: "Alteração e reajuste" },
+      { text: "Exportar Produtos Balança e/ou Busca Preço" },
+      { text: "Vendas", header: true },
+      { text: "Quiosque" },
+      { text: "Operações de Vendas" },
+      { text: "Cadastro de pessoas" },
+      { text: "Emissão de NFCE." },
+      { text: "Configuração de Plano de Contas (simples)" },
+      { text: "Despesas de caixa" },
+      { text: "Consulta de vendas e exclusão" },
+      { text: "Fechamento de caixa" },
+      { text: "Permissões de acesso [Alinhar com Proprietário]" },
+      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      { text: "Plataforma do Contador" },
+      { text: "Backup" },
+    ],
+  },
+  {
+    label: "Segunda Etapa",
+    items: [
+      { text: "Dúvidas e reciclagem" },
+      { text: "Importação de XML e entrada manual (usará para cadastrar produtos novos e reposição)" },
+    ],
+  },
+  {
+    label: "Terceira Etapa",
+    items: [
+      { text: "Esclarecimento de dúvidas" },
+      { text: "Balanço" },
+      { text: "App de Resultados" },
+      { text: "Contas a Pagar" },
+    ],
+  },
+];
 const MODULOS_OPTIONS = [
   "App de Resultados",
   "Caixa central e Contas Bancárias",
