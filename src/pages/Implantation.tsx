@@ -253,9 +253,14 @@ export default function Implantation() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Projetos</h1>
-        <Button onClick={handleCreateProject}>
-          <Plus className="h-4 w-4 mr-1" /> Novo Projeto
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={openCreateClientDialog} variant="outline">
+            <Plus className="h-4 w-4 mr-1" /> Cadastrar Cliente
+          </Button>
+          <Button onClick={handleCreateProject}>
+            <Plus className="h-4 w-4 mr-1" /> Novo Projeto
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -331,19 +336,14 @@ export default function Implantation() {
 
         {/* Clients Tab */}
         <TabsContent value="clients" className="space-y-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, código ou grupo..."
-                value={clientSearch}
-                onChange={(e) => setClientSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button onClick={openCreateClientDialog} variant="outline">
-              <Plus className="h-4 w-4 mr-1" /> Cadastrar Cliente
-            </Button>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, código ou grupo..."
+              value={clientSearch}
+              onChange={(e) => setClientSearch(e.target.value)}
+              className="pl-10"
+            />
           </div>
 
           {filteredClients.length === 0 ? (
