@@ -799,6 +799,10 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
               fieldKey="planoTreinamento"
               columns={3}
             />
+            <div className="mt-4 p-3 bg-muted/50 border border-border rounded-md text-sm text-muted-foreground no-print">
+              <p className="font-medium text-foreground mb-1">Observação (conversão):</p>
+              <p>As 2 primeiras etapas são realizadas em 2 dias seguidos de treinamento. Venda e estoque são realizados na etapa 1. Etapa 2: Dúvidas e retorno. Etapa 3: processos complementares, podendo haver etapa 4.</p>
+            </div>
           </CardContent>
         </Card>
 
