@@ -119,12 +119,27 @@ export default function Implantation() {
   }, [clients, clientSearch]);
 
   const filteredProjects = useMemo(() => {
-    if (!projectSearch.trim()) return projects;
+    let list = projects;
+    if (showOnlyCompleted) {
+      list = list.filter(p => p.project_data?.concluido === true);
+    }
+    if (!projectSearch.trim()) return list;
     const q = projectSearch.toLowerCase();
-    return projects.filter(
+    return list.filter(
       p => p.name.toLowerCase().includes(q) || p.client_name?.toLowerCase().includes(q) || p.client_code?.toLowerCase().includes(q)
     );
-  }, [projects, projectSearch]);
+  }, [projects, projectSearch, showOnlyCompleted]);
+
+  const handleToggleConcluido = async (project: ImplantationProject, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newVal = !(project.project_data?.concluido === true);
+    const newData = { ...(project.project_data || {}), concluido: newVal };
+    await supabase
+      .from("implantation_projects" as any)
+      .update({ project_data: newData, updated_at: new Date().toISOString() } as any)
+      .eq("id", project.id);
+    loadProjects();
+  };
 
   // Client CRUD
   const openCreateClientDialog = () => {
