@@ -96,7 +96,7 @@ const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 border border-muted-foreground/40 text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+        <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 border border-green-500 text-green-600 hover:text-green-700 hover:border-green-600 transition-colors">
           <HelpCircle className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
