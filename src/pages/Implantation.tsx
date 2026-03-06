@@ -56,6 +56,7 @@ export default function Implantation() {
   const [selectedProject, setSelectedProject] = useState<ImplantationProject | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnlyCompleted, setShowOnlyCompleted] = useState(false);
 
   const loadClients = async () => {
     const { data } = await supabase.from("implantation_clients").select("*").order("name");
