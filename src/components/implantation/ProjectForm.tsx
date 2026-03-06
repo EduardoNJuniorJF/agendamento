@@ -117,6 +117,7 @@ const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
             <p className="font-semibold text-xs text-primary">Dica-Chave de Identificação</p>
             <p className="text-xs ml-1">{info.dicaChave}</p>
           </div>
+          </div>
         </ScrollArea>
       </PopoverContent>
     </Popover>
