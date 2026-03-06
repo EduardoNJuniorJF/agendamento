@@ -460,7 +460,7 @@ interface ProjectData {
     etapa3: EtapaData;
   };
   ferramentasAvancadas: {
-    bi: { gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+    bi: { enabled: boolean; gerarConta: boolean; instalacao: boolean; treinamentoData: string };
   };
 }
 
