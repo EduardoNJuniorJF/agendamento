@@ -436,6 +436,7 @@ interface ProjectData {
   numLojas: string;
   isGrupo: string;
   grupoNome: string;
+  agentesResponsaveis: string[];
   regimeTributario: string[];
   porte: string[];
   estrutura: string[];
