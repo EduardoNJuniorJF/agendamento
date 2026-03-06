@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { useToast } from "@/hooks/use-toast";
 import { Save, Printer, Plus, Trash2, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-bonus-report.png";
@@ -100,25 +100,21 @@ const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
           <HelpCircle className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 max-h-[70vh] overflow-hidden" side="right" align="start">
-        <ScrollArea className="h-full max-h-[70vh]">
-          <div className="p-4">
-          <h4 className="font-bold text-sm mb-3">{profileName}</h4>
-          <Section title="Características" items={info.caracteristicas} />
-          <Section title="Pontos Positivos" items={info.positivos} />
-          <Section title="Pontos Negativos" items={info.negativos} />
-          <Section title="Atendimento" items={info.atendimento} />
-          <Section title="Negociação" items={info.negociacao} />
-          <div className="mb-2">
-            <p className="font-semibold text-xs text-primary">Recuperar Oportunidade</p>
-            <p className="text-xs italic ml-1">{info.recuperar}</p>
-          </div>
-          <div className="mb-1">
-            <p className="font-semibold text-xs text-primary">Dica-Chave de Identificação</p>
-            <p className="text-xs ml-1">{info.dicaChave}</p>
-          </div>
-          </div>
-        </ScrollArea>
+      <PopoverContent className="w-[min(92vw,32rem)] max-h-[75vh] overflow-y-auto p-4" side="right" align="start" sideOffset={8}>
+        <h4 className="font-bold text-sm mb-3">{profileName}</h4>
+        <Section title="Características" items={info.caracteristicas} />
+        <Section title="Pontos Positivos" items={info.positivos} />
+        <Section title="Pontos Negativos" items={info.negativos} />
+        <Section title="Atendimento" items={info.atendimento} />
+        <Section title="Negociação" items={info.negociacao} />
+        <div className="mb-2">
+          <p className="font-semibold text-xs text-primary">Recuperar Oportunidade</p>
+          <p className="text-xs italic ml-1">{info.recuperar}</p>
+        </div>
+        <div className="mb-2 pr-2">
+          <p className="font-semibold text-xs text-primary">Dica-Chave de Identificação</p>
+          <p className="text-xs ml-1">{info.dicaChave}</p>
+        </div>
       </PopoverContent>
     </Popover>
   );
