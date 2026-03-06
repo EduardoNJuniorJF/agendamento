@@ -317,6 +317,12 @@ const DEFAULT_CRONOGRAMA = [
   { item: "Terceiro Atendimento", data: "" },
 ];
 
+interface EtapaData {
+  items: string[];
+  data: string;
+  dataFim?: string;
+}
+
 interface ProjectData {
   numLojas: string;
   isGrupo: string;
@@ -339,6 +345,11 @@ interface ProjectData {
   planoTreinamento: string[];
   rotinasBasicas: string[];
   modulosComplementares: string[];
+  treinamentoEtapas: {
+    etapa1: EtapaData;
+    etapa2: EtapaData;
+    etapa3: EtapaData;
+  };
 }
 
 const DEFAULT_DATA: ProjectData = {
