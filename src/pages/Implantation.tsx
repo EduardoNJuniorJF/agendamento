@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, ArrowLeft, FolderOpen } from "lucide-react";
+import { Plus, Search, Edit, ArrowLeft, FolderOpen, Link, Check } from "lucide-react";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import ProjectForm from "@/components/implantation/ProjectForm";
 
@@ -23,10 +24,13 @@ interface ImplantationClient {
 
 export default function Implantation() {
   const { toast } = useToast();
+  const { clientId } = useParams();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<ImplantationClient[]>([]);
   const [search, setSearch] = useState("");
   const [selectedClient, setSelectedClient] = useState<ImplantationClient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Client dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,7 +44,13 @@ export default function Implantation() {
     const { data, error } = await supabase.from("implantation_clients").select("*").order("name");
 
     if (!error && data) {
-      setClients(data as unknown as ImplantationClient[]);
+      const clientsData = data as unknown as ImplantationClient[];
+      setClients(clientsData);
+      // Auto-select client from URL param
+      if (clientId && !selectedClient) {
+        const found = clientsData.find((c) => c.id === clientId);
+        if (found) setSelectedClient(found);
+      }
     }
     setLoading(false);
   };
@@ -133,6 +143,21 @@ export default function Implantation() {
 
   const handleSelectClient = (client: ImplantationClient) => {
     setSelectedClient(client);
+    navigate(`/implantation/${client.id}`, { replace: true });
+  };
+
+  const handleBack = () => {
+    setSelectedClient(null);
+    navigate("/implantation", { replace: true });
+  };
+
+  const handleCopyLink = (clientId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const link = `${window.location.origin}/implantation/${clientId}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(clientId);
+    toast({ title: "Link copiado!" });
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleProjectSaved = () => {
@@ -144,7 +169,7 @@ export default function Implantation() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 no-print">
-          <Button variant="outline" size="sm" onClick={() => setSelectedClient(null)}>
+          <Button variant="outline" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
           </Button>
           <div>
@@ -165,7 +190,7 @@ export default function Implantation() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Porjetos</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">Gestão de Projetos</h1>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-1" /> Cadastrar Novo Cliente
         </Button>
@@ -209,6 +234,14 @@ export default function Implantation() {
                 <div className="flex gap-1 pt-2" onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="sm" onClick={() => openEditDialog(client)}>
                     <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => handleCopyLink(client.id, e)}
+                    title="Copiar link de acesso"
+                  >
+                    {copiedId === client.id ? <Check className="h-3.5 w-3.5 text-primary" /> : <Link className="h-3.5 w-3.5" />}
                   </Button>
                   <ConfirmDeleteDialog
                     onConfirm={() => handleDeleteClient(client.id)}
