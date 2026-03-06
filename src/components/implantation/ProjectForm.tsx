@@ -352,6 +352,12 @@ interface ProjectData {
   };
 }
 
+const DEFAULT_ETAPAS = {
+  etapa1: { items: [] as string[], data: "", dataFim: "" },
+  etapa2: { items: [] as string[], data: "" },
+  etapa3: { items: [] as string[], data: "" },
+};
+
 const DEFAULT_DATA: ProjectData = {
   numLojas: "",
   isGrupo: "",
@@ -374,6 +380,7 @@ const DEFAULT_DATA: ProjectData = {
   planoTreinamento: [],
   rotinasBasicas: [],
   modulosComplementares: [],
+  treinamentoEtapas: { ...DEFAULT_ETAPAS },
 };
 
 // Client search component
