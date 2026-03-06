@@ -494,7 +494,7 @@ const DEFAULT_DATA: ProjectData = {
   modulosComplementares: [],
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
   ferramentasAvancadas: {
-    bi: { gerarConta: false, instalacao: false, treinamentoData: "" },
+    bi: { enabled: false, gerarConta: false, instalacao: false, treinamentoData: "" },
   },
 };
 
