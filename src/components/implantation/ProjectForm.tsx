@@ -1587,46 +1587,52 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
         <PrintSection title="Plano de Treinamento | Rotinas Básicas">
           {data.conversao ? (
             <>
-              {currentEtapas.map((etapa, idx) => {
-                const etapaKey = etapaKeys[idx];
-                const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "" };
+              {etapaKeys.map((etapaKey, idx) => {
+                const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "", displayItems: [] };
+                const displayItems = etapaData.displayItems && etapaData.displayItems.length > 0
+                  ? etapaData.displayItems
+                  : currentEtapas[idx]?.items || [];
                 const showDateRange = data.conversao === "sim" && idx === 0;
                 const formatDate = (d: string) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+                const etapaLabel = currentEtapas[idx]?.label || `Etapa ${idx + 1}`;
                 return (
                   <div key={etapaKey} className="mb-2">
                     <p className="font-semibold">
-                      {etapa.label}
+                      {etapaLabel}
                       {showDateRange
                         ? ` — ${formatDate(etapaData.data)} a ${formatDate(etapaData.dataFim || "")}`
                         : ` — ${formatDate(etapaData.data)}`}
                     </p>
-                    {etapaData.items.length > 0 ? (
-                      <ul className="list-disc ml-6">
-                        {etapaData.items.map((item, i) => (
-                          <li key={i}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="ml-4 text-muted-foreground">Nenhum item marcado</p>
-                    )}
+                    {(() => {
+                      const checkedItems = displayItems.filter((di) => !di.header && etapaData.items.includes(di.text));
+                      return checkedItems.length > 0 ? (
+                        <ul className="list-disc ml-6">
+                          {checkedItems.map((item, i) => (
+                            <li key={i}>{item.text}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="ml-4 text-muted-foreground">Nenhum item marcado</p>
+                      );
+                    })()}
                   </div>
                 );
               })}
+
+              {/* Novas Ferramentas inside training print */}
+              <div className="mt-3 pt-2 border-t border-gray-300">
+                <p className="font-semibold mb-1">Novas Ferramentas | Rotinas Avançadas</p>
+                <ul className="list-disc ml-6">
+                  {data.ferramentasAvancadas?.bi?.enabled && <li>BI ✓</li>}
+                  {data.ferramentasAvancadas?.bi?.gerarConta && <li>Gerar Conta (Mauro) ✓</li>}
+                  {data.ferramentasAvancadas?.bi?.instalacao && <li>Instalação e configurações ✓</li>}
+                  <li>Treinamento agendado para: {data.ferramentasAvancadas?.bi?.treinamentoData ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
+                </ul>
+              </div>
             </>
           ) : (
             <p>—</p>
           )}
-        </PrintSection>
-
-        <PrintSection title="Novas Ferramentas | Rotinas Avançadas">
-          <div className="mb-1">
-            <span className="font-semibold">BI:</span>
-            <ul className="list-disc ml-6">
-              <li>Gerar Conta (Mauro): {data.ferramentasAvancadas?.bi?.gerarConta ? "✓" : "—"}</li>
-              <li>Instalação e configurações: {data.ferramentasAvancadas?.bi?.instalacao ? "✓" : "—"}</li>
-              <li>Treinamento agendado para: {data.ferramentasAvancadas?.bi?.treinamentoData ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
-            </ul>
-          </div>
         </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
