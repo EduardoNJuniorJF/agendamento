@@ -658,6 +658,19 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const [saving, setSaving] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Fetch agents
+  const [agents, setAgents] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    supabase
+      .from("agents")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data: agentsData }) => {
+        if (agentsData) setAgents(agentsData);
+      });
+  }, []);
+
   const selectedClient = clients.find((c) => c.id === clientId);
 
   // Auto-fill group info when client changes
