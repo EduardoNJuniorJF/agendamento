@@ -580,9 +580,6 @@ export default function ProjectForm({ client, onSaved }: ProjectFormProps) {
           <p>{data.planoTreinamento.length > 0 ? data.planoTreinamento.join(", ") : "—"}</p>
         </PrintSection>
 
-        <PrintSection title="Rotinas Básicas">
-          <p>{data.rotinasBasicas.length > 0 ? data.rotinasBasicas.join(", ") : "—"}</p>
-        </PrintSection>
 
         <PrintSection title="Módulos Complementares | Gerar Valor">
           <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
