@@ -418,6 +418,71 @@ export default function NewAppointment() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            {/* Project selector - Dev only */}
+            {role === "dev" && projects.length > 0 && (
+              <div>
+                <Label className="flex items-center gap-1.5">
+                  <FolderOpen className="h-4 w-4" />
+                  Projeto de Implantação (opcional)
+                </Label>
+                <Popover open={projectOpen} onOpenChange={setProjectOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between font-normal"
+                    >
+                      {selectedProjectId
+                        ? projects.find((p) => p.id === selectedProjectId)?.name || "Projeto selecionado"
+                        : "Selecione um projeto..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar projeto..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum projeto encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value="__none__"
+                            onSelect={() => {
+                              setSelectedProjectId(null);
+                              setProjectOpen(false);
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", !selectedProjectId ? "opacity-100" : "opacity-0")} />
+                            Nenhum (manual)
+                          </CommandItem>
+                          {projects.map((project) => (
+                            <CommandItem
+                              key={project.id}
+                              value={`${project.name} ${project.implantation_clients?.name || ""} ${project.implantation_clients?.code || ""}`}
+                              onSelect={() => {
+                                handleProjectSelect(project.id);
+                                setProjectOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", selectedProjectId === project.id ? "opacity-100" : "opacity-0")} />
+                              <div className="flex flex-col">
+                                <span>{project.name}</span>
+                                {project.implantation_clients && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {[project.implantation_clients.code, project.implantation_clients.name].filter(Boolean).join(" - ")}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
             <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="title">Cliente / Ticket *</Label>
