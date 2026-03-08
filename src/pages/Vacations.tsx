@@ -862,8 +862,29 @@ export default function Vacations() {
                 </div>
               </div>
 
-              {/* Filters */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Ano</Label>
+                  <Select value={vacationFilterYear} onValueChange={setVacationFilterYear}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {(() => {
+                        const currentYear = new Date().getFullYear();
+                        const years = [];
+                        for (let y = currentYear + 2; y >= currentYear - 3; y--) {
+                          years.push(y);
+                        }
+                        return years.map((y) => (
+                          <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1 block">Funcionário</Label>
                   <Select value={vacationFilterUser} onValueChange={setVacationFilterUser}>
