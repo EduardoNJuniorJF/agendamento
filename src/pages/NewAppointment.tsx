@@ -300,10 +300,11 @@ export default function NewAppointment() {
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
             appointment_type: formData.appointment_type,
+            project_id: selectedProjectId,
             updated_by_name: currentUserName,
             last_action: "updated",
             last_action_at: new Date().toISOString(),
-          })
+          } as any)
           .eq("id", editingId);
 
         if (error) throw error;
