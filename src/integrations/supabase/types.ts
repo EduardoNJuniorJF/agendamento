@@ -104,6 +104,7 @@ export type Database = {
           is_penalized: boolean | null
           last_action: string | null
           last_action_at: string | null
+          project_id: string | null
           status: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -125,6 +126,7 @@ export type Database = {
           is_penalized?: boolean | null
           last_action?: string | null
           last_action_at?: string | null
+          project_id?: string | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -146,6 +148,7 @@ export type Database = {
           is_penalized?: boolean | null
           last_action?: string | null
           last_action_at?: string | null
+          project_id?: string | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time?: string
           title?: string
@@ -159,6 +162,13 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "implantation_projects"
             referencedColumns: ["id"]
           },
           {

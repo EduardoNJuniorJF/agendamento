@@ -16,9 +16,23 @@ import { ArrowLeft, X, Check, ChevronsUpDown, Umbrella, Calendar } from "lucide-
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { FolderOpen } from "lucide-react";
 
 type Agent = Database["public"]["Tables"]["agents"]["Row"] & { user_id?: string | null };
 type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
+
+interface ImplantationProject {
+  id: string;
+  name: string;
+  client_id: string | null;
+  project_data: any;
+  implantation_clients?: {
+    name: string;
+    code: string | null;
+    group_name: string | null;
+    group_code: string | null;
+  } | null;
+}
 
 interface FormData {
   title: string;
@@ -34,6 +48,9 @@ interface FormData {
 }
 
 export default function NewAppointment() {
+  const [projects, setProjects] = useState<ImplantationProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [projectOpen, setProjectOpen] = useState(false);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [cities, setCities] = useState<string[]>([]);
@@ -102,6 +119,33 @@ export default function NewAppointment() {
     if (agentsRes.data) setAgents(agentsRes.data);
     if (vehiclesRes.data) setVehicles(vehiclesRes.data);
     if (citiesRes.data) setCities(citiesRes.data.map((c) => c.city_name));
+
+    // Load projects for Dev users
+    if (role === "dev") {
+      const { data: projectsData } = await supabase
+        .from("implantation_projects")
+        .select("id, name, client_id, project_data, implantation_clients(name, code, group_name, group_code)")
+        .order("name");
+      if (projectsData) setProjects(projectsData as unknown as ImplantationProject[]);
+    }
+  };
+
+  const handleProjectSelect = (projectId: string | null) => {
+    setSelectedProjectId(projectId);
+    if (!projectId) return;
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) return;
+    const client = project.implantation_clients;
+    const titleParts = [client?.code, client?.name].filter(Boolean).join(" - ");
+    const descParts = [
+      client?.group_name ? `Grupo: ${client.group_name}` : null,
+      client?.group_code ? `Cód. Grupo: ${client.group_code}` : null,
+    ].filter(Boolean).join(" | ");
+    setFormData((prev) => ({
+      ...prev,
+      title: titleParts || project.name,
+      description: descParts || prev.description,
+    }));
   };
 
   const loadAppointment = async (id: string) => {
@@ -138,6 +182,11 @@ export default function NewAppointment() {
       is_penalized: data.is_penalized || false,
       appointment_type: data.appointment_type || null,
     });
+
+    // Load project_id if exists (for Dev)
+    if ((data as any).project_id) {
+      setSelectedProjectId((data as any).project_id);
+    }
   };
 
   const checkVacation = async (agentId: string, date: string): Promise<boolean> => {
@@ -251,10 +300,11 @@ export default function NewAppointment() {
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
             appointment_type: formData.appointment_type,
+            project_id: selectedProjectId,
             updated_by_name: currentUserName,
             last_action: "updated",
             last_action_at: new Date().toISOString(),
-          })
+          } as any)
           .eq("id", editingId);
 
         if (error) throw error;
@@ -290,10 +340,11 @@ export default function NewAppointment() {
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
             appointment_type: formData.appointment_type,
+            project_id: selectedProjectId,
             created_by_name: currentUserName,
             last_action: "created",
             last_action_at: new Date().toISOString(),
-          })
+          } as any)
           .select()
           .single();
 
@@ -367,6 +418,71 @@ export default function NewAppointment() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            {/* Project selector - Dev only */}
+            {role === "dev" && projects.length > 0 && (
+              <div>
+                <Label className="flex items-center gap-1.5">
+                  <FolderOpen className="h-4 w-4" />
+                  Projeto de Implantação (opcional)
+                </Label>
+                <Popover open={projectOpen} onOpenChange={setProjectOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between font-normal"
+                    >
+                      {selectedProjectId
+                        ? projects.find((p) => p.id === selectedProjectId)?.name || "Projeto selecionado"
+                        : "Selecione um projeto..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar projeto..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum projeto encontrado.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value="__none__"
+                            onSelect={() => {
+                              setSelectedProjectId(null);
+                              setProjectOpen(false);
+                            }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", !selectedProjectId ? "opacity-100" : "opacity-0")} />
+                            Nenhum (manual)
+                          </CommandItem>
+                          {projects.map((project) => (
+                            <CommandItem
+                              key={project.id}
+                              value={`${project.name} ${project.implantation_clients?.name || ""} ${project.implantation_clients?.code || ""}`}
+                              onSelect={() => {
+                                handleProjectSelect(project.id);
+                                setProjectOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", selectedProjectId === project.id ? "opacity-100" : "opacity-0")} />
+                              <div className="flex flex-col">
+                                <span>{project.name}</span>
+                                {project.implantation_clients && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {[project.implantation_clients.code, project.implantation_clients.name].filter(Boolean).join(" - ")}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
             <div className="grid gap-3 md:gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="title">Cliente / Ticket *</Label>

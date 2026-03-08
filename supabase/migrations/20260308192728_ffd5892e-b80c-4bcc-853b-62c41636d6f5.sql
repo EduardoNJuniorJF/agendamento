@@ -1,0 +1,1 @@
+ALTER TABLE public.appointments ADD COLUMN project_id UUID REFERENCES public.implantation_projects(id) ON DELETE SET NULL;
