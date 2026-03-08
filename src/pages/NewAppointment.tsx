@@ -130,7 +130,26 @@ export default function NewAppointment() {
     }
   };
 
-    if (error || !data) {
+  const handleProjectSelect = (projectId: string | null) => {
+    setSelectedProjectId(projectId);
+    if (!projectId) return;
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) return;
+    const client = project.implantation_clients;
+    const titleParts = [client?.code, client?.name].filter(Boolean).join(" - ");
+    const descParts = [
+      client?.group_name ? `Grupo: ${client.group_name}` : null,
+      client?.group_code ? `Cód. Grupo: ${client.group_code}` : null,
+    ].filter(Boolean).join(" | ");
+    setFormData((prev) => ({
+      ...prev,
+      title: titleParts || project.name,
+      description: descParts || prev.description,
+    }));
+  };
+
+  const loadAppointment = async (id: string) => {
+    const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single();
       toast({ title: "Erro ao carregar agendamento", variant: "destructive" });
       navigate("/calendar");
       return;
