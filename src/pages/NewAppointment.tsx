@@ -16,9 +16,23 @@ import { ArrowLeft, X, Check, ChevronsUpDown, Umbrella, Calendar } from "lucide-
 import type { Database } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { FolderOpen } from "lucide-react";
 
 type Agent = Database["public"]["Tables"]["agents"]["Row"] & { user_id?: string | null };
 type Vehicle = Database["public"]["Tables"]["vehicles"]["Row"];
+
+interface ImplantationProject {
+  id: string;
+  name: string;
+  client_id: string | null;
+  project_data: any;
+  implantation_clients?: {
+    name: string;
+    code: string | null;
+    group_name: string | null;
+    group_code: string | null;
+  } | null;
+}
 
 interface FormData {
   title: string;
