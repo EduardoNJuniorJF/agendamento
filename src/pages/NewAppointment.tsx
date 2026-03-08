@@ -182,6 +182,11 @@ export default function NewAppointment() {
       is_penalized: data.is_penalized || false,
       appointment_type: data.appointment_type || null,
     });
+
+    // Load project_id if exists (for Dev)
+    if ((data as any).project_id) {
+      setSelectedProjectId((data as any).project_id);
+    }
   };
 
   const checkVacation = async (agentId: string, date: string): Promise<boolean> => {
