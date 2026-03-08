@@ -150,6 +150,8 @@ export default function NewAppointment() {
 
   const loadAppointment = async (id: string) => {
     const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single();
+
+    if (error || !data) {
       toast({ title: "Erro ao carregar agendamento", variant: "destructive" });
       navigate("/calendar");
       return;
