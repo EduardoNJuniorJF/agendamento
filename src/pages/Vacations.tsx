@@ -143,6 +143,7 @@ export default function Vacations() {
   const [vacationFilterUser, setVacationFilterUser] = useState<string>("");
   const [vacationFilterPeriod, setVacationFilterPeriod] = useState<string>("");
   const [vacationFilterStatus, setVacationFilterStatus] = useState<string>("");
+  const [vacationFilterYear, setVacationFilterYear] = useState<string>(new Date().getFullYear().toString());
 
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
