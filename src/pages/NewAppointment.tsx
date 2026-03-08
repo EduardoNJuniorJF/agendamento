@@ -340,10 +340,11 @@ export default function NewAppointment() {
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
             appointment_type: formData.appointment_type,
+            project_id: selectedProjectId,
             created_by_name: currentUserName,
             last_action: "created",
             last_action_at: new Date().toISOString(),
-          })
+          } as any)
           .select()
           .single();
 
