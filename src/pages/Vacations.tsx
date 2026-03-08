@@ -141,6 +141,7 @@ export default function Vacations() {
   // Vacation list filters and pagination
   const [vacationMonth, setVacationMonth] = useState<Date>(new Date());
   const [vacationFilterUser, setVacationFilterUser] = useState<string>("");
+  const [vacationFilterUserOpen, setVacationFilterUserOpen] = useState(false);
   const [vacationFilterPeriod, setVacationFilterPeriod] = useState<string>("");
   const [vacationFilterStatus, setVacationFilterStatus] = useState<string>("");
   const [vacationFilterYear, setVacationFilterYear] = useState<string>(new Date().getFullYear().toString());
