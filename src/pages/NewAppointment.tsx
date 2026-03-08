@@ -48,6 +48,9 @@ interface FormData {
 }
 
 export default function NewAppointment() {
+  const [projects, setProjects] = useState<ImplantationProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [projectOpen, setProjectOpen] = useState(false);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [cities, setCities] = useState<string[]>([]);
