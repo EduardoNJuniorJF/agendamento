@@ -949,7 +949,7 @@ export default function Vacations() {
               </div>
 
               {/* Clear Filters */}
-              {(vacationFilterUser || vacationFilterPeriod || vacationFilterStatus) && (
+              {(vacationFilterUser || vacationFilterPeriod || vacationFilterStatus || (vacationFilterYear && vacationFilterYear !== new Date().getFullYear().toString())) && (
                 <div className="flex justify-end">
                   <Button
                     variant="ghost"
@@ -959,6 +959,7 @@ export default function Vacations() {
                       setVacationFilterUser("");
                       setVacationFilterPeriod("");
                       setVacationFilterStatus("");
+                      setVacationFilterYear(new Date().getFullYear().toString());
                     }}
                   >
                     <X className="h-4 w-4 mr-1" />
