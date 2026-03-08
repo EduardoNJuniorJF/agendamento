@@ -119,10 +119,16 @@ export default function NewAppointment() {
     if (agentsRes.data) setAgents(agentsRes.data);
     if (vehiclesRes.data) setVehicles(vehiclesRes.data);
     if (citiesRes.data) setCities(citiesRes.data.map((c) => c.city_name));
-  };
 
-  const loadAppointment = async (id: string) => {
-    const { data, error } = await supabase.from("appointments").select("*").eq("id", id).single();
+    // Load projects for Dev users
+    if (role === "dev") {
+      const { data: projectsData } = await supabase
+        .from("implantation_projects")
+        .select("id, name, client_id, project_data, implantation_clients(name, code, group_name, group_code)")
+        .order("name");
+      if (projectsData) setProjects(projectsData as unknown as ImplantationProject[]);
+    }
+  };
 
     if (error || !data) {
       toast({ title: "Erro ao carregar agendamento", variant: "destructive" });
