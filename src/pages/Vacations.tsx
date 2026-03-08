@@ -141,6 +141,7 @@ export default function Vacations() {
   // Vacation list filters and pagination
   const [vacationMonth, setVacationMonth] = useState<Date>(new Date());
   const [vacationFilterUser, setVacationFilterUser] = useState<string>("");
+  const [vacationFilterUserOpen, setVacationFilterUserOpen] = useState(false);
   const [vacationFilterPeriod, setVacationFilterPeriod] = useState<string>("");
   const [vacationFilterStatus, setVacationFilterStatus] = useState<string>("");
   const [vacationFilterYear, setVacationFilterYear] = useState<string>(new Date().getFullYear().toString());
@@ -887,19 +888,49 @@ export default function Vacations() {
 
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1 block">Funcionário</Label>
-                  <Select value={vacationFilterUser} onValueChange={setVacationFilterUser}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {profiles.map((profile) => (
-                        <SelectItem key={profile.id} value={profile.id}>
-                          {profile.full_name || profile.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={vacationFilterUserOpen} onOpenChange={setVacationFilterUserOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between h-9 font-normal">
+                        {vacationFilterUser && vacationFilterUser !== "all"
+                          ? profiles.find((p) => p.id === vacationFilterUser)?.full_name || profiles.find((p) => p.id === vacationFilterUser)?.email || "Todos"
+                          : "Todos"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[220px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Buscar funcionário..." />
+                        <CommandList>
+                          <CommandEmpty>Nenhum encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            <CommandItem
+                              value="__todos__"
+                              onSelect={() => {
+                                setVacationFilterUser("all");
+                                setVacationFilterUserOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", (!vacationFilterUser || vacationFilterUser === "all") ? "opacity-100" : "opacity-0")} />
+                              Todos
+                            </CommandItem>
+                            {profiles.map((profile) => (
+                              <CommandItem
+                                key={profile.id}
+                                value={profile.full_name || profile.email}
+                                onSelect={() => {
+                                  setVacationFilterUser(profile.id);
+                                  setVacationFilterUserOpen(false);
+                                }}
+                              >
+                                <Check className={cn("mr-2 h-4 w-4", vacationFilterUser === profile.id ? "opacity-100" : "opacity-0")} />
+                                {profile.full_name || profile.email}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div>
