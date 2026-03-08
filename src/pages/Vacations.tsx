@@ -1004,13 +1004,24 @@ export default function Vacations() {
                         const vacationStart = parseISO(vacation.start_date);
                         const vacationEnd = parseISO(vacation.end_date);
 
-                        // Check if the vacation overlaps with the selected month
-                        const isInMonth =
-                          (vacationStart >= monthStart && vacationStart <= monthEnd) ||
-                          (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
-                          (vacationStart <= monthStart && vacationEnd >= monthEnd);
-
-                        if (!isInMonth) return false;
+                        // Filter by year or month
+                        if (vacationFilterYear && vacationFilterYear !== "all") {
+                          const year = parseInt(vacationFilterYear);
+                          const yearStart = new Date(year, 0, 1);
+                          const yearEnd = new Date(year, 11, 31);
+                          const isInYear =
+                            (vacationStart >= yearStart && vacationStart <= yearEnd) ||
+                            (vacationEnd >= yearStart && vacationEnd <= yearEnd) ||
+                            (vacationStart <= yearStart && vacationEnd >= yearEnd);
+                          if (!isInYear) return false;
+                        } else {
+                          // Fallback to month filter
+                          const isInMonth =
+                            (vacationStart >= monthStart && vacationStart <= monthEnd) ||
+                            (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
+                            (vacationStart <= monthStart && vacationEnd >= monthEnd);
+                          if (!isInMonth) return false;
+                        }
 
                         // Filter by user
                         if (
