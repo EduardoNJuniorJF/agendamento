@@ -143,6 +143,7 @@ export default function Vacations() {
   const [vacationFilterUser, setVacationFilterUser] = useState<string>("");
   const [vacationFilterPeriod, setVacationFilterPeriod] = useState<string>("");
   const [vacationFilterStatus, setVacationFilterStatus] = useState<string>("");
+  const [vacationFilterYear, setVacationFilterYear] = useState<string>(new Date().getFullYear().toString());
 
   // Time off form
   const [timeOffForm, setTimeOffForm] = useState({
@@ -861,8 +862,29 @@ export default function Vacations() {
                 </div>
               </div>
 
-              {/* Filters */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Ano</Label>
+                  <Select value={vacationFilterYear} onValueChange={setVacationFilterYear}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {(() => {
+                        const currentYear = new Date().getFullYear();
+                        const years = [];
+                        for (let y = currentYear + 2; y >= currentYear - 3; y--) {
+                          years.push(y);
+                        }
+                        return years.map((y) => (
+                          <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1 block">Funcionário</Label>
                   <Select value={vacationFilterUser} onValueChange={setVacationFilterUser}>
@@ -927,7 +949,7 @@ export default function Vacations() {
               </div>
 
               {/* Clear Filters */}
-              {(vacationFilterUser || vacationFilterPeriod || vacationFilterStatus) && (
+              {(vacationFilterUser || vacationFilterPeriod || vacationFilterStatus || (vacationFilterYear && vacationFilterYear !== new Date().getFullYear().toString())) && (
                 <div className="flex justify-end">
                   <Button
                     variant="ghost"
@@ -937,6 +959,7 @@ export default function Vacations() {
                       setVacationFilterUser("");
                       setVacationFilterPeriod("");
                       setVacationFilterStatus("");
+                      setVacationFilterYear(new Date().getFullYear().toString());
                     }}
                   >
                     <X className="h-4 w-4 mr-1" />
@@ -981,13 +1004,24 @@ export default function Vacations() {
                         const vacationStart = parseISO(vacation.start_date);
                         const vacationEnd = parseISO(vacation.end_date);
 
-                        // Check if the vacation overlaps with the selected month
-                        const isInMonth =
-                          (vacationStart >= monthStart && vacationStart <= monthEnd) ||
-                          (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
-                          (vacationStart <= monthStart && vacationEnd >= monthEnd);
-
-                        if (!isInMonth) return false;
+                        // Filter by year or month
+                        if (vacationFilterYear && vacationFilterYear !== "all") {
+                          const year = parseInt(vacationFilterYear);
+                          const yearStart = new Date(year, 0, 1);
+                          const yearEnd = new Date(year, 11, 31);
+                          const isInYear =
+                            (vacationStart >= yearStart && vacationStart <= yearEnd) ||
+                            (vacationEnd >= yearStart && vacationEnd <= yearEnd) ||
+                            (vacationStart <= yearStart && vacationEnd >= yearEnd);
+                          if (!isInYear) return false;
+                        } else {
+                          // Fallback to month filter
+                          const isInMonth =
+                            (vacationStart >= monthStart && vacationStart <= monthEnd) ||
+                            (vacationEnd >= monthStart && vacationEnd <= monthEnd) ||
+                            (vacationStart <= monthStart && vacationEnd >= monthEnd);
+                          if (!isInMonth) return false;
+                        }
 
                         // Filter by user
                         if (
