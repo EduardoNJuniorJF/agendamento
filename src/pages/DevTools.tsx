@@ -114,9 +114,9 @@ export default function DevTools() {
   const getActionBadge = (action: string) => {
     switch (action) {
       case "INSERT":
-        return <Badge className="bg-green-600 text-white">INSERT</Badge>;
+        return <Badge className="bg-primary text-primary-foreground">INSERT</Badge>;
       case "UPDATE":
-        return <Badge className="bg-yellow-600 text-white">UPDATE</Badge>;
+        return <Badge className="bg-accent text-accent-foreground">UPDATE</Badge>;
       case "DELETE":
         return <Badge variant="destructive">DELETE</Badge>;
       default:
