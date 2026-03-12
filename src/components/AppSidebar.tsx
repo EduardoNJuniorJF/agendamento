@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User, Rocket } from "lucide-react";
+import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User, Rocket, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
