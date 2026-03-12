@@ -18,6 +18,7 @@ import UserManagement from "./pages/UserManagement";
 import Bonus from "./pages/Bonus";
 import Celebrations from "./pages/Celebrations";
 import Implantation from "./pages/Implantation";
+import DevTools from "./pages/DevTools";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
