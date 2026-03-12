@@ -1,7 +1,25 @@
-Retenção,Backups Retidos,Banco Pequeno (~100KB/backup),Banco Médio (~1MB/backup),Banco Grande (~10MB/backup),Cabe no Free (Pequeno),Cabe no Free (Médio),Cabe no Free (Grande)
-7 dias,7,700 KB,7 MB,70 MB,Sim,Sim,Sim
-3 meses,90,9 MB,90 MB,900 MB,Sim,Sim,Quase no limite
-6 meses,180,18 MB,180 MB,1.8 GB,Sim,Sim,Não
-1 ano,365,36 MB,365 MB,3.6 GB,Sim,Quase no limite,Não
-2 anos,730,73 MB,730 MB,7.3 GB,Sim,Não,Não
-3 anos,1095,109 MB,1 GB,10.9 GB,Sim,Não,Não
+Retenção,Periodicidade,Backups Retidos,Banco Pequeno (~100KB),Banco Médio (~1MB),Banco Grande (~10MB),Cabe no Free (Pequeno),Cabe no Free (Médio),Cabe no Free (Grande)
+7 dias,Diário,7,700 KB,7 MB,70 MB,Sim,Sim,Sim
+7 dias,Semanal,1,100 KB,1 MB,10 MB,Sim,Sim,Sim
+7 dias,Quinzenal,1,100 KB,1 MB,10 MB,Sim,Sim,Sim
+7 dias,Mensal,1,100 KB,1 MB,10 MB,Sim,Sim,Sim
+3 meses,Diário,90,9 MB,90 MB,900 MB,Sim,Sim,Quase no limite
+3 meses,Semanal,13,1.3 MB,13 MB,130 MB,Sim,Sim,Sim
+3 meses,Quinzenal,6,600 KB,6 MB,60 MB,Sim,Sim,Sim
+3 meses,Mensal,3,300 KB,3 MB,30 MB,Sim,Sim,Sim
+6 meses,Diário,180,18 MB,180 MB,1.8 GB,Sim,Sim,Não
+6 meses,Semanal,26,2.6 MB,26 MB,260 MB,Sim,Sim,Sim
+6 meses,Quinzenal,12,1.2 MB,12 MB,120 MB,Sim,Sim,Sim
+6 meses,Mensal,6,600 KB,6 MB,60 MB,Sim,Sim,Sim
+1 ano,Diário,365,36 MB,365 MB,3.6 GB,Sim,Quase no limite,Não
+1 ano,Semanal,52,5.2 MB,52 MB,520 MB,Sim,Sim,Sim
+1 ano,Quinzenal,24,2.4 MB,24 MB,240 MB,Sim,Sim,Sim
+1 ano,Mensal,12,1.2 MB,12 MB,120 MB,Sim,Sim,Sim
+2 anos,Diário,730,73 MB,730 MB,7.3 GB,Sim,Não,Não
+2 anos,Semanal,104,10.4 MB,104 MB,1 GB,Sim,Sim,Quase no limite
+2 anos,Quinzenal,48,4.8 MB,48 MB,480 MB,Sim,Sim,Sim
+2 anos,Mensal,24,2.4 MB,24 MB,240 MB,Sim,Sim,Sim
+3 anos,Diário,1095,109 MB,1 GB,10.9 GB,Sim,Não,Não
+3 anos,Semanal,156,15.6 MB,156 MB,1.5 GB,Sim,Sim,Não
+3 anos,Quinzenal,72,7.2 MB,72 MB,720 MB,Sim,Sim,Sim
+3 anos,Mensal,36,3.6 MB,36 MB,360 MB,Sim,Sim,Sim
