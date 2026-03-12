@@ -69,7 +69,7 @@ export default function DevTools() {
         sortBy: { column: "created_at", order: "desc" },
       });
       if (error) throw error;
-      return (data as BackupFile[]) || [];
+      return (data as unknown as BackupFile[]) || [];
     },
   });
 
