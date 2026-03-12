@@ -46,6 +46,7 @@ export function AppSidebar() {
     { title: "Bonificação", url: "/bonus", icon: Receipt, show: canAccessBonus() },
     { title: "Celebrações", url: "/celebrations", icon: PartyPopper, show: true },
     { title: "Implantação", url: "/implantation", icon: Rocket, show: role === "dev" },
+    { title: "Ferramentas Dev", url: "/dev-tools", icon: Shield, show: role === "dev" },
   ];
 
   return (

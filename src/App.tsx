@@ -128,6 +128,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/dev-tools"
+              element={
+                <ProtectedRoute>
+                  <Layout><DevTools /></Layout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

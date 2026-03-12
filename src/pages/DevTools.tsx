@@ -297,7 +297,7 @@ export default function DevTools() {
                                         <div key={key} className="text-xs">
                                           <span className="font-medium">{key}:</span>{" "}
                                           <span className="text-destructive line-through">{String(oldVal ?? "null")}</span>{" "}
-                                          → <span className="text-green-600">{String(newVal ?? "null")}</span>
+                                          → <span className="text-primary">{String(newVal ?? "null")}</span>
                                         </div>
                                       );
                                     }
