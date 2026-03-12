@@ -1,0 +1,7 @@
+Retenção,Backups Retidos,Banco Pequeno (~100KB/backup),Banco Médio (~1MB/backup),Banco Grande (~10MB/backup),Cabe no Free (Pequeno),Cabe no Free (Médio),Cabe no Free (Grande)
+7 dias,7,700 KB,7 MB,70 MB,Sim,Sim,Sim
+3 meses,90,9 MB,90 MB,900 MB,Sim,Sim,Quase no limite
+6 meses,180,18 MB,180 MB,1.8 GB,Sim,Sim,Não
+1 ano,365,36 MB,365 MB,3.6 GB,Sim,Quase no limite,Não
+2 anos,730,73 MB,730 MB,7.3 GB,Sim,Não,Não
+3 anos,1095,109 MB,1 GB,10.9 GB,Sim,Não,Não
