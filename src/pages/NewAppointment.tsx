@@ -44,6 +44,7 @@ interface FormData {
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
   expense_status: "não_separar" | "separar_dinheiro" | "separar_dia_anterior";
   is_penalized: boolean;
+  is_route_appointment: boolean;
   appointment_type: string | null;
 }
 
