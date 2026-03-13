@@ -236,7 +236,7 @@ export default function Bonus() {
         // Lógica de Cálculo de Bônus Monetário (Apenas para agendamentos CONCLUÍDOS OU AGENDADOS, E NÃO PENALIZADOS)
         // Isso garante que agendamentos penalizados (is_penalized: true) não recebam bônus,
         // e que agendamentos agendados (scheduled) também sejam elegíveis se não penalizados.
-        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized) {
+        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized && !apt.is_route_appointment) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
           // Agendamentos Online não geram bônus (R$0)
