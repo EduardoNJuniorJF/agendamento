@@ -181,7 +181,7 @@ export default function Bonus() {
 
       const { data: appointments } = await supabase
         .from("appointments")
-        .select("id, title, city, date, status, is_penalized")
+        .select("id, title, city, date, status, is_penalized, is_route_appointment")
         .in("id", appointmentIds)
         .gte("date", monthStart)
         .lte("date", monthEnd);
