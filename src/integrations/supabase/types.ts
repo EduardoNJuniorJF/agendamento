@@ -102,6 +102,7 @@ export type Database = {
           expense_status: Database["public"]["Enums"]["expense_status"] | null
           id: string
           is_penalized: boolean | null
+          is_route_appointment: boolean | null
           last_action: string | null
           last_action_at: string | null
           project_id: string | null
@@ -124,6 +125,7 @@ export type Database = {
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
           is_penalized?: boolean | null
+          is_route_appointment?: boolean | null
           last_action?: string | null
           last_action_at?: string | null
           project_id?: string | null
@@ -146,6 +148,7 @@ export type Database = {
           expense_status?: Database["public"]["Enums"]["expense_status"] | null
           id?: string
           is_penalized?: boolean | null
+          is_route_appointment?: boolean | null
           last_action?: string | null
           last_action_at?: string | null
           project_id?: string | null
