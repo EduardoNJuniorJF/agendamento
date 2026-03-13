@@ -983,6 +983,9 @@ export default function Bonus() {
                                                 {apt.is_penalized && (
                                                   <span className="text-xs text-red-500">(Penalizado)</span>
                                                 )}
+                                                {apt.is_route_appointment && (
+                                                  <span className="text-xs text-amber-600 font-semibold">(Em Rota)</span>
+                                                )}
                                               </div>
                                               <span
                                                 className={`font-bold ${apt.bonusValue === 0 ? "text-gray-500" : "text-green-600"}`}
