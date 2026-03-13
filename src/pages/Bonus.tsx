@@ -396,7 +396,7 @@ export default function Bonus() {
       if (appointmentIds.length > 0) {
         const { data } = await supabase
           .from("appointments")
-          .select("id, city, date, status, is_penalized")
+          .select("id, city, date, status, is_penalized, is_route_appointment")
           .in("id", appointmentIds)
           .gte("date", format(monthStart, "yyyy-MM-dd"))
           .lte("date", format(monthEnd, "yyyy-MM-dd"))
