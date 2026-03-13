@@ -69,6 +69,7 @@ interface Appointment {
   description?: string;
   expense_status: string;
   is_penalized?: boolean;
+  is_route_appointment?: boolean;
   created_by_name?: string;
   updated_by_name?: string;
   last_action?: string;
