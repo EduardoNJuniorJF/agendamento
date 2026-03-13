@@ -515,6 +515,26 @@ export default function CalendarView() {
     }
   };
 
+  const handleToggleRouteAppointment = async (id: string, isRoute: boolean) => {
+    const { error } = await supabase
+      .from("appointments")
+      .update({ 
+        is_route_appointment: !isRoute, 
+        updated_at: new Date().toISOString(),
+        updated_by_name: userName,
+        last_action: "updated",
+        last_action_at: new Date().toISOString()
+      })
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Erro ao atualizar status de rota", variant: "destructive" });
+    } else {
+      toast({ title: `Atendimento em Rota ${!isRoute ? "marcado" : "removido"} com sucesso!` });
+      loadAppointments();
+    }
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };

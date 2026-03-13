@@ -753,6 +753,33 @@ export default function NewAppointment() {
               </div>
             </div>
 
+            {/* Route Appointment Checkbox - visible to all, editable only by admins */}
+            <div className="flex items-center space-x-2 p-3 border rounded-lg bg-amber-50 dark:bg-amber-950/20">
+              <Checkbox
+                id="is_route_appointment"
+                checked={formData.is_route_appointment}
+                onCheckedChange={(checked) => {
+                  if (isAdmin) {
+                    setFormData({ ...formData, is_route_appointment: checked === true });
+                  }
+                }}
+                disabled={!isAdmin}
+              />
+              <div className="flex-1">
+                <Label
+                  htmlFor="is_route_appointment"
+                  className={`font-medium ${!isAdmin ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                >
+                  Atendimento em Rota
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {isAdmin
+                    ? "Marcar como atendimento em rota (não será computado na bonificação)"
+                    : "Somente administradores podem alterar este campo"}
+                </p>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row justify-end gap-2">
               <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => navigate(-1)}>
                 Cancelar
