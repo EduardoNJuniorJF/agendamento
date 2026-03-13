@@ -423,7 +423,7 @@ export default function Bonus() {
 
               let bonusValue = 0;
               // O cálculo de bônus já exclui online e penalizados
-              if (!apt.is_penalized && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
+              if (!apt.is_penalized && !apt.is_route_appointment && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
                 switch (cityConfig.level) {
                   case 1:
                     bonusValue = Number(bonusSettings.level_1_value) || 0;
