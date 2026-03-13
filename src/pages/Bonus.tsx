@@ -110,7 +110,7 @@ export default function Bonus() {
 
   const isAdmin = canEditBonus();
   // Administrativo pode apenas visualizar e imprimir
-  const isReadOnly = sector === 'Administrativo' && role !== 'dev';
+  const isReadOnly = sector === "Administrativo" && role !== "dev";
 
   useEffect(() => {
     loadData();
@@ -143,10 +143,9 @@ export default function Bonus() {
   };
 
   // Realtime: refresh automático
-  useRealtimeRefresh(
-    ['appointments', 'appointment_agents', 'agents', 'bonus_settings', 'city_bonus_levels'],
-    () => { loadData(); }
-  );
+  useRealtimeRefresh(["appointments", "appointment_agents", "agents", "bonus_settings", "city_bonus_levels"], () => {
+    loadData();
+  });
 
   const calculateBonuses = async (agentsList: Agent[], settings: BonusSettings | null, cities: CityLevel[]) => {
     const monthStart = format(startOfMonth(currentDate), "yyyy-MM-dd");
@@ -236,7 +235,11 @@ export default function Bonus() {
         // Lógica de Cálculo de Bônus Monetário (Apenas para agendamentos CONCLUÍDOS OU AGENDADOS, E NÃO PENALIZADOS)
         // Isso garante que agendamentos penalizados (is_penalized: true) não recebam bônus,
         // e que agendamentos agendados (scheduled) também sejam elegíveis se não penalizados.
-        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized && !apt.is_route_appointment) {
+        if (
+          (apt.status === "completed" || apt.status === "scheduled") &&
+          !apt.is_penalized &&
+          !apt.is_route_appointment
+        ) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
           // Agendamentos Online não geram bônus (R$0)
@@ -423,7 +426,13 @@ export default function Bonus() {
 
               let bonusValue = 0;
               // O cálculo de bônus já exclui online e penalizados
-              if (!apt.is_penalized && !apt.is_route_appointment && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
+              if (
+                !apt.is_penalized &&
+                !apt.is_route_appointment &&
+                !cityUpper.includes("ONLINE") &&
+                bonusSettings &&
+                cityConfig
+              ) {
                 switch (cityConfig.level) {
                   case 1:
                     bonusValue = Number(bonusSettings.level_1_value) || 0;
@@ -480,7 +489,7 @@ export default function Bonus() {
     if (!printWindow) return;
 
     const today = new Date();
-    
+
     // Converter o caminho do logo para URL absoluta
     const logoUrl = new URL(logoReport, window.location.origin).href;
 
@@ -520,7 +529,7 @@ export default function Bonus() {
               <div>Data de impressão: ${format(today, "dd/MM/yyyy")}</div>
               <div>Mês de referência: ${format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</div>
               <div class="agent-name">Agente: ${detailedReportAgent.name}</div>
-              ${detailedReportAgent.pix_key ? `<div style="font-size: 10px; margin-top: 2px; font-weight: bold;">PIX: ${detailedReportAgent.pix_key}</div>` : ''}
+              ${detailedReportAgent.pix_key ? `<div style="font-size: 10px; margin-top: 2px; font-weight: bold;">PIX: ${detailedReportAgent.pix_key}</div>` : ""}
             </div>
           </div>
 
@@ -542,7 +551,7 @@ export default function Bonus() {
                           <span><strong>${apt.city}</strong></span>
                           <span>Nível ${apt.level || "N/A"}</span>
                           <span>Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
-                          ${apt.is_route_appointment ? '<span style="color: #b45309; font-weight: bold;">EM ROTA</span>' : ''}
+                          ${apt.is_route_appointment ? '<span style="color: #b45309; font-weight: bold;">ATENDIMENTO EM ROTA</span>' : ""}
                         </div>
                         <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
                       </div>
@@ -580,7 +589,6 @@ export default function Bonus() {
   };
 
   const handlePrint = () => {
-
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
