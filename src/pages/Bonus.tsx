@@ -984,7 +984,9 @@ export default function Bonus() {
                                                   <span className="text-xs text-red-500">(Penalizado)</span>
                                                 )}
                                                 {apt.is_route_appointment && (
-                                                  <span className="text-xs text-amber-600 font-semibold">(Em Rota)</span>
+                                                  <span className="text-xs text-amber-600 font-semibold">
+                                                    (Atendimento em Rota)
+                                                  </span>
                                                 )}
                                               </div>
                                               <span
