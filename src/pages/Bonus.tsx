@@ -81,6 +81,7 @@ interface DetailedAppointment {
   date: string;
   level: number;
   is_penalized: boolean;
+  is_route_appointment: boolean;
   bonusValue: number;
 }
 
