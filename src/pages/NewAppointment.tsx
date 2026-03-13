@@ -182,6 +182,7 @@ export default function NewAppointment() {
       status: data.status,
       expense_status: data.expense_status,
       is_penalized: data.is_penalized || false,
+      is_route_appointment: data.is_route_appointment || false,
       appointment_type: data.appointment_type || null,
     });
 
