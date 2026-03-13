@@ -331,6 +331,11 @@ export default function CalendarView() {
               Penalizado
             </Badge>
           )}
+          {apt.is_route_appointment && (
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-800 border-amber-300">
+              Em Rota
+            </Badge>
+          )}
         </div>
         <div className="pt-1">
           <div className="font-medium text-[9px] text-muted-foreground mb-1">Despesas:</div>
