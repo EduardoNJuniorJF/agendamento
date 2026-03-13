@@ -542,6 +542,7 @@ export default function Bonus() {
                           <span><strong>${apt.city}</strong></span>
                           <span>Nível ${apt.level || "N/A"}</span>
                           <span>Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
+                          ${apt.is_route_appointment ? '<span style="color: #b45309; font-weight: bold;">EM ROTA</span>' : ''}
                         </div>
                         <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
                       </div>
