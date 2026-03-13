@@ -443,6 +443,7 @@ export default function Bonus() {
                 date: apt.date,
                 level,
                 is_penalized: apt.is_penalized || false,
+                is_route_appointment: apt.is_route_appointment || false,
                 bonusValue,
               };
             });
