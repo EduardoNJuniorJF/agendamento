@@ -69,6 +69,7 @@ interface Appointment {
   description?: string;
   expense_status: string;
   is_penalized?: boolean;
+  is_route_appointment?: boolean;
   created_by_name?: string;
   updated_by_name?: string;
   last_action?: string;
@@ -330,6 +331,11 @@ export default function CalendarView() {
               Penalizado
             </Badge>
           )}
+          {apt.is_route_appointment && (
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-800 border-amber-300">
+              Em Rota
+            </Badge>
+          )}
         </div>
         <div className="pt-1">
           <div className="font-medium text-[9px] text-muted-foreground mb-1">Despesas:</div>
@@ -400,6 +406,20 @@ export default function CalendarView() {
               <AlertTriangle
                 className={`h-3 w-3 ${apt.is_penalized ? "text-destructive-foreground" : "text-destructive"}`}
               />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-5 w-5 ${apt.is_route_appointment ? "bg-amber-500/80 hover:bg-amber-600" : "hover:bg-amber-200"}`}
+              title={apt.is_route_appointment ? "Remover Em Rota" : "Marcar como Em Rota"}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleRouteAppointment(apt.id, apt.is_route_appointment || false);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-3 w-3 ${apt.is_route_appointment ? "text-white" : "text-amber-600"}`}>
+                <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" /><circle cx="12" cy="10" r="3" />
+              </svg>
             </Button>
           </div>
         )}
@@ -491,6 +511,26 @@ export default function CalendarView() {
       toast({ title: "Erro ao atualizar penalidade", variant: "destructive" });
     } else {
       toast({ title: `Penalidade ${!isPenalized ? "aplicada" : "removida"} com sucesso!` });
+      loadAppointments();
+    }
+  };
+
+  const handleToggleRouteAppointment = async (id: string, isRoute: boolean) => {
+    const { error } = await supabase
+      .from("appointments")
+      .update({ 
+        is_route_appointment: !isRoute, 
+        updated_at: new Date().toISOString(),
+        updated_by_name: userName,
+        last_action: "updated",
+        last_action_at: new Date().toISOString()
+      })
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Erro ao atualizar status de rota", variant: "destructive" });
+    } else {
+      toast({ title: `Atendimento em Rota ${!isRoute ? "marcado" : "removido"} com sucesso!` });
       loadAppointments();
     }
   };

@@ -44,6 +44,7 @@ interface FormData {
   status: "scheduled" | "in_progress" | "completed" | "cancelled";
   expense_status: "não_separar" | "separar_dinheiro" | "separar_dia_anterior";
   is_penalized: boolean;
+  is_route_appointment: boolean;
   appointment_type: string | null;
 }
 
@@ -69,6 +70,7 @@ export default function NewAppointment() {
     status: "scheduled",
     expense_status: "não_separar",
     is_penalized: false,
+    is_route_appointment: false,
     appointment_type: null,
   });
   const [loading, setLoading] = useState(false);
@@ -180,6 +182,7 @@ export default function NewAppointment() {
       status: data.status,
       expense_status: data.expense_status,
       is_penalized: data.is_penalized || false,
+      is_route_appointment: data.is_route_appointment || false,
       appointment_type: data.appointment_type || null,
     });
 
@@ -299,6 +302,7 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            is_route_appointment: formData.is_route_appointment,
             appointment_type: formData.appointment_type,
             project_id: selectedProjectId,
             updated_by_name: currentUserName,
@@ -339,6 +343,7 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            is_route_appointment: formData.is_route_appointment,
             appointment_type: formData.appointment_type,
             project_id: selectedProjectId,
             created_by_name: currentUserName,
@@ -743,6 +748,33 @@ export default function NewAppointment() {
                 <p className="text-xs text-muted-foreground">
                   {isAdmin
                     ? "Marcar este agendamento como penalizado (não gerará bonificação)"
+                    : "Somente administradores podem alterar este campo"}
+                </p>
+              </div>
+            </div>
+
+            {/* Route Appointment Checkbox - visible to all, editable only by admins */}
+            <div className="flex items-center space-x-2 p-3 border rounded-lg bg-amber-50 dark:bg-amber-950/20">
+              <Checkbox
+                id="is_route_appointment"
+                checked={formData.is_route_appointment}
+                onCheckedChange={(checked) => {
+                  if (isAdmin) {
+                    setFormData({ ...formData, is_route_appointment: checked === true });
+                  }
+                }}
+                disabled={!isAdmin}
+              />
+              <div className="flex-1">
+                <Label
+                  htmlFor="is_route_appointment"
+                  className={`font-medium ${!isAdmin ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                >
+                  Atendimento em Rota
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {isAdmin
+                    ? "Marcar como atendimento em rota (não será computado na bonificação)"
                     : "Somente administradores podem alterar este campo"}
                 </p>
               </div>

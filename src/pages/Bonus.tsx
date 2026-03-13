@@ -39,6 +39,7 @@ interface Appointment {
   date: string;
   status: string;
   is_penalized: boolean;
+  is_route_appointment: boolean;
 }
 
 interface AgentAppointment {
@@ -80,6 +81,7 @@ interface DetailedAppointment {
   date: string;
   level: number;
   is_penalized: boolean;
+  is_route_appointment: boolean;
   bonusValue: number;
 }
 
@@ -179,7 +181,7 @@ export default function Bonus() {
 
       const { data: appointments } = await supabase
         .from("appointments")
-        .select("id, title, city, date, status, is_penalized")
+        .select("id, title, city, date, status, is_penalized, is_route_appointment")
         .in("id", appointmentIds)
         .gte("date", monthStart)
         .lte("date", monthEnd);
@@ -234,7 +236,7 @@ export default function Bonus() {
         // Lógica de Cálculo de Bônus Monetário (Apenas para agendamentos CONCLUÍDOS OU AGENDADOS, E NÃO PENALIZADOS)
         // Isso garante que agendamentos penalizados (is_penalized: true) não recebam bônus,
         // e que agendamentos agendados (scheduled) também sejam elegíveis se não penalizados.
-        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized) {
+        if ((apt.status === "completed" || apt.status === "scheduled") && !apt.is_penalized && !apt.is_route_appointment) {
           const cityUpper = apt.city?.toUpperCase() || "";
 
           // Agendamentos Online não geram bônus (R$0)
@@ -394,7 +396,7 @@ export default function Bonus() {
       if (appointmentIds.length > 0) {
         const { data } = await supabase
           .from("appointments")
-          .select("id, city, date, status, is_penalized")
+          .select("id, city, date, status, is_penalized, is_route_appointment")
           .in("id", appointmentIds)
           .gte("date", format(monthStart, "yyyy-MM-dd"))
           .lte("date", format(monthEnd, "yyyy-MM-dd"))
@@ -421,7 +423,7 @@ export default function Bonus() {
 
               let bonusValue = 0;
               // O cálculo de bônus já exclui online e penalizados
-              if (!apt.is_penalized && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
+              if (!apt.is_penalized && !apt.is_route_appointment && !cityUpper.includes("ONLINE") && bonusSettings && cityConfig) {
                 switch (cityConfig.level) {
                   case 1:
                     bonusValue = Number(bonusSettings.level_1_value) || 0;
@@ -441,6 +443,7 @@ export default function Bonus() {
                 date: apt.date,
                 level,
                 is_penalized: apt.is_penalized || false,
+                is_route_appointment: apt.is_route_appointment || false,
                 bonusValue,
               };
             });
@@ -539,6 +542,7 @@ export default function Bonus() {
                           <span><strong>${apt.city}</strong></span>
                           <span>Nível ${apt.level || "N/A"}</span>
                           <span>Penalidade: ${apt.is_penalized ? "SIM" : "NÃO"}</span>
+                          ${apt.is_route_appointment ? '<span style="color: #b45309; font-weight: bold;">EM ROTA</span>' : ''}
                         </div>
                         <span class="bonus">R$ ${apt.bonusValue.toFixed(2)}</span>
                       </div>
