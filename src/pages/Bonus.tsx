@@ -39,6 +39,7 @@ interface Appointment {
   date: string;
   status: string;
   is_penalized: boolean;
+  is_route_appointment: boolean;
 }
 
 interface AgentAppointment {
