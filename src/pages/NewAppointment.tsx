@@ -302,6 +302,7 @@ export default function NewAppointment() {
             status: formData.status,
             expense_status: formData.expense_status,
             is_penalized: formData.is_penalized,
+            is_route_appointment: formData.is_route_appointment,
             appointment_type: formData.appointment_type,
             project_id: selectedProjectId,
             updated_by_name: currentUserName,
