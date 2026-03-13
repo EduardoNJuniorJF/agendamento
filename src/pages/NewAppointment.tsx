@@ -70,6 +70,7 @@ export default function NewAppointment() {
     status: "scheduled",
     expense_status: "não_separar",
     is_penalized: false,
+    is_route_appointment: false,
     appointment_type: null,
   });
   const [loading, setLoading] = useState(false);
