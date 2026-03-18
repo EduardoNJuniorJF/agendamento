@@ -288,7 +288,7 @@ export default function Implantation() {
             )}
           </div>
         </div>
-        <ProjectForm project={selectedProject} clients={clients} onSaved={handleProjectSaved} />
+        <ProjectForm project={selectedProject} clients={clients} onSaved={handleProjectSaved} isNew={isNewProject} />
       </div>
     );
   }
