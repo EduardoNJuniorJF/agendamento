@@ -1613,7 +1613,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           />
           <PrintLine label="Regime Tributário" value={data.regimeTributario.join(", ")} />
           <PrintLine label="Porte" value={data.porte.join(", ")} />
-          <PrintLine label="Estrutura" value={data.estrutura.join(", ")} />
+          <PrintLine label="Estrutura" value={data.estrutura.map(e => `${e.item} (${e.quantidade})`).join(", ")} />
         </PrintSection>
 
         <PrintSection title="Conexão">
