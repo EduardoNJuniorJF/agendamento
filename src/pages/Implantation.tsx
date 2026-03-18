@@ -220,6 +220,7 @@ export default function Implantation() {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+    setIsNewProject(true);
     setSelectedProject(tempProject);
     navigate(`/implantation/${tempProject.id}`, { replace: true });
   };
