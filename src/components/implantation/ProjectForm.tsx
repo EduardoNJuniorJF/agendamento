@@ -651,7 +651,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const [data, setData] = useState<ProjectData>(() => {
     const saved = project.project_data;
     if (saved && Object.keys(saved).length > 0) {
-      return { ...DEFAULT_DATA, ...saved };
+      const merged = { ...DEFAULT_DATA, ...saved };
+      // Migrate old string[] estrutura to new format
+      if (Array.isArray(merged.estrutura) && merged.estrutura.length > 0 && typeof merged.estrutura[0] === "string") {
+        merged.estrutura = (merged.estrutura as unknown as string[]).map((item: string) => ({ item, quantidade: 1 }));
+      }
+      return merged;
     }
     return { ...DEFAULT_DATA };
   });
