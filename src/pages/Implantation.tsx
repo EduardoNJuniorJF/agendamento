@@ -232,6 +232,7 @@ export default function Implantation() {
 
   const handleBack = () => {
     setSelectedProject(null);
+    setIsNewProject(false);
     navigate("/implantation", { replace: true });
   };
 
