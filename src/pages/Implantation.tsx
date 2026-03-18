@@ -262,7 +262,11 @@ export default function Implantation() {
     }
   };
 
-  const handleProjectSaved = () => {
+  const handleProjectSaved = (savedProject?: ImplantationProject) => {
+    if (isNewProject && savedProject) {
+      setIsNewProject(false);
+      setSelectedProject(savedProject);
+    }
     loadProjects();
   };
 
