@@ -710,22 +710,39 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("implantation_projects" as any)
-      .update({
-        name: projectName.trim() || "Sem nome",
-        client_id: clientId,
-        profile: profile || null,
-        project_data: JSON.parse(JSON.stringify(data)),
-        updated_at: new Date().toISOString(),
-      } as any)
-      .eq("id", project.id);
+    const payload = {
+      name: projectName.trim() || "Sem nome",
+      client_id: clientId,
+      profile: profile || null,
+      project_data: JSON.parse(JSON.stringify(data)),
+      updated_at: new Date().toISOString(),
+    };
 
-    if (error) {
-      toast({ title: "Erro ao salvar projeto", variant: "destructive" });
+    if (isNew) {
+      const { data: inserted, error } = await supabase
+        .from("implantation_projects" as any)
+        .insert({ ...payload, id: project.id } as any)
+        .select()
+        .single();
+
+      if (error) {
+        toast({ title: "Erro ao criar projeto", variant: "destructive" });
+      } else {
+        toast({ title: "Projeto criado e salvo!" });
+        onSaved(inserted as unknown as ImplantationProject);
+      }
     } else {
-      toast({ title: "Projeto salvo com sucesso!" });
-      onSaved();
+      const { error } = await supabase
+        .from("implantation_projects" as any)
+        .update(payload as any)
+        .eq("id", project.id);
+
+      if (error) {
+        toast({ title: "Erro ao salvar projeto", variant: "destructive" });
+      } else {
+        toast({ title: "Projeto salvo com sucesso!" });
+        onSaved();
+      }
     }
     setSaving(false);
   };
