@@ -531,8 +531,7 @@ function ClientSearch({
     return (
       <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
         <div className="flex-1">
-          <p className="text-sm font-medium">{selectedClient.name}</p>
-          {selectedClient.code && <p className="text-xs text-muted-foreground">Código: {selectedClient.code}</p>}
+          <p className="text-sm font-medium">{selectedClient.code || "Sem código"}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
           <X className="h-3.5 w-3.5" />
