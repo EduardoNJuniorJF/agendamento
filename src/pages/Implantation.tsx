@@ -72,21 +72,18 @@ export default function Implantation() {
 
     if (data) {
       // Fetch client names for each project
-      const clientIds = [...new Set((data as any[]).filter(p => p.client_id).map(p => p.client_id))];
+      const clientIds = [...new Set((data as any[]).filter((p) => p.client_id).map((p) => p.client_id))];
       let clientMap: Record<string, ImplantationClient> = {};
       if (clientIds.length > 0) {
-        const { data: clientsData } = await supabase
-          .from("implantation_clients")
-          .select("*")
-          .in("id", clientIds);
+        const { data: clientsData } = await supabase.from("implantation_clients").select("*").in("id", clientIds);
         if (clientsData) {
-          (clientsData as unknown as ImplantationClient[]).forEach(c => {
+          (clientsData as unknown as ImplantationClient[]).forEach((c) => {
             clientMap[c.id] = c;
           });
         }
       }
 
-      const projectsWithClients = (data as any[]).map(p => ({
+      const projectsWithClients = (data as any[]).map((p) => ({
         ...p,
         client_name: p.client_id ? clientMap[p.client_id]?.name : undefined,
         client_code: p.client_id ? clientMap[p.client_id]?.code : undefined,
@@ -97,7 +94,7 @@ export default function Implantation() {
 
       // Auto-select project from URL
       if (projectId && !selectedProject) {
-        const found = projectsWithClients.find(p => p.id === projectId);
+        const found = projectsWithClients.find((p) => p.id === projectId);
         if (found) setSelectedProject(found);
       }
     }
@@ -114,19 +111,25 @@ export default function Implantation() {
     if (!clientSearch.trim()) return clients;
     const q = clientSearch.toLowerCase();
     return clients.filter(
-      c => c.name.toLowerCase().includes(q) || c.code?.toLowerCase().includes(q) || c.group_name?.toLowerCase().includes(q)
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.code?.toLowerCase().includes(q) ||
+        c.group_name?.toLowerCase().includes(q),
     );
   }, [clients, clientSearch]);
 
   const filteredProjects = useMemo(() => {
     let list = projects;
     if (showOnlyCompleted) {
-      list = list.filter(p => p.project_data?.concluido === true);
+      list = list.filter((p) => p.project_data?.concluido === true);
     }
     if (!projectSearch.trim()) return list;
     const q = projectSearch.toLowerCase();
     return list.filter(
-      p => p.name.toLowerCase().includes(q) || p.client_name?.toLowerCase().includes(q) || p.client_code?.toLowerCase().includes(q)
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.client_name?.toLowerCase().includes(q) ||
+        p.client_code?.toLowerCase().includes(q),
     );
   }, [projects, projectSearch, showOnlyCompleted]);
 
@@ -150,7 +153,12 @@ export default function Implantation() {
 
   const openEditClientDialog = (client: ImplantationClient) => {
     setEditingClient(client);
-    setClientForm({ code: client.code || "", name: client.name, group_name: client.group_name || "", group_code: (client as any).group_code || "" });
+    setClientForm({
+      code: client.code || "",
+      name: client.name,
+      group_name: client.group_name || "",
+      group_code: (client as any).group_code || "",
+    });
     setClientDialogOpen(true);
   };
 
@@ -170,11 +178,17 @@ export default function Implantation() {
         .from("implantation_clients")
         .update({ ...payload, updated_at: new Date().toISOString() })
         .eq("id", editingClient.id);
-      if (error) { toast({ title: "Erro ao atualizar cliente", variant: "destructive" }); return; }
+      if (error) {
+        toast({ title: "Erro ao atualizar cliente", variant: "destructive" });
+        return;
+      }
       toast({ title: "Cliente atualizado com sucesso!" });
     } else {
       const { error } = await supabase.from("implantation_clients").insert(payload);
-      if (error) { toast({ title: "Erro ao cadastrar cliente", variant: "destructive" }); return; }
+      if (error) {
+        toast({ title: "Erro ao cadastrar cliente", variant: "destructive" });
+        return;
+      }
       toast({ title: "Cliente cadastrado com sucesso!" });
     }
     setClientDialogOpen(false);
@@ -230,12 +244,18 @@ export default function Implantation() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    const { error } = await supabase.from("implantation_projects" as any).delete().eq("id", id);
+    const { error } = await supabase
+      .from("implantation_projects" as any)
+      .delete()
+      .eq("id", id);
     if (error) {
       toast({ title: "Erro ao excluir projeto", variant: "destructive" });
     } else {
       toast({ title: "Projeto excluído!" });
-      if (selectedProject?.id === id) { setSelectedProject(null); navigate("/implantation", { replace: true }); }
+      if (selectedProject?.id === id) {
+        setSelectedProject(null);
+        navigate("/implantation", { replace: true });
+      }
       loadProjects();
     }
   };
@@ -316,7 +336,9 @@ export default function Implantation() {
           ) : filteredProjects.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                {projectSearch ? "Nenhum projeto encontrado." : "Nenhum projeto cadastrado ainda. Clique em \"Novo Projeto\" para começar."}
+                {projectSearch
+                  ? "Nenhum projeto encontrado."
+                  : 'Nenhum projeto cadastrado ainda. Clique em "Novo Projeto" para começar.'}
               </CardContent>
             </Card>
           ) : (
@@ -324,7 +346,7 @@ export default function Implantation() {
               {filteredProjects.map((project) => (
                 <Card
                   key={project.id}
-                  className={`hover:border-primary/50 transition-colors cursor-pointer ${project.project_data?.concluido ? 'border-primary/30 bg-primary/5' : ''}`}
+                  className={`hover:border-primary/50 transition-colors cursor-pointer ${project.project_data?.concluido ? "border-primary/30 bg-primary/5" : ""}`}
                   onClick={() => handleSelectProject(project)}
                 >
                   <CardHeader className="pb-2">
@@ -333,7 +355,10 @@ export default function Implantation() {
                         <FileText className="h-4 w-4 text-primary" />
                         {project.name}
                       </span>
-                      <label onClick={(e) => handleToggleConcluido(project, e)} className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground font-normal">
+                      <label
+                        onClick={(e) => handleToggleConcluido(project, e)}
+                        className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground font-normal"
+                      >
                         <Checkbox checked={project.project_data?.concluido === true} />
                         Concluído
                       </label>
@@ -345,7 +370,9 @@ export default function Implantation() {
                     ) : (
                       <p className="text-sm text-muted-foreground italic">Sem cliente associado</p>
                     )}
-                    {project.client_code && <p className="text-sm text-muted-foreground">Código: {project.client_code}</p>}
+                    {project.client_code && (
+                      <p className="text-sm text-muted-foreground">Código: {project.client_code}</p>
+                    )}
                     <div className="flex gap-1 pt-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="ghost"
@@ -353,7 +380,11 @@ export default function Implantation() {
                         onClick={(e) => handleCopyLink(project.id, e)}
                         title="Copiar link de acesso"
                       >
-                        {copiedId === project.id ? <Check className="h-3.5 w-3.5 text-primary" /> : <Link className="h-3.5 w-3.5" />}
+                        {copiedId === project.id ? (
+                          <Check className="h-3.5 w-3.5 text-primary" />
+                        ) : (
+                          <Link className="h-3.5 w-3.5" />
+                        )}
                       </Button>
                       <ConfirmDeleteDialog
                         onConfirm={() => handleDeleteProject(project.id)}
@@ -437,11 +468,11 @@ export default function Implantation() {
               />
             </div>
             <div>
-              <Label>Nome *</Label>
+              <Label>Nome da Loja*</Label>
               <Input
                 value={clientForm.name}
                 onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
-                placeholder="Nome do cliente"
+                placeholder="Nome da Loja"
               />
             </div>
             <div>
