@@ -531,7 +531,7 @@ function ClientSearch({
     return (
       <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
         <div className="flex-1">
-          <p className="text-sm font-medium">{selectedClient.code || "Sem código"}</p>
+          <p className="text-sm font-medium">Código do cliente: {selectedClient.code || "N/A"}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
           <X className="h-3.5 w-3.5" />
