@@ -158,6 +158,7 @@ export default function Implantation() {
       name: client.name,
       group_name: client.group_name || "",
       group_code: (client as any).group_code || "",
+      profile: client.profile || "",
     });
     setClientDialogOpen(true);
   };
