@@ -493,6 +493,14 @@ export default function Implantation() {
                 placeholder="Ex: GRP001"
               />
             </div>
+            <div>
+              <Label>Responsável (opcional)</Label>
+              <Input
+                value={clientForm.profile}
+                onChange={(e) => setClientForm({ ...clientForm, profile: e.target.value })}
+                placeholder="Nome do proprietário ou responsável"
+              />
+            </div>
             <Button onClick={handleSaveClient} className="w-full">
               {editingClient ? "Salvar Alterações" : "Cadastrar"}
             </Button>
