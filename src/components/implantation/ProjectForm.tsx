@@ -1680,11 +1680,14 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
         <PrintSection title="Conversão de Dados">
           <PrintLine
             label="Conversão"
-            value={data.conversao === "sim" ? "Sim" : data.conversao === "nao" ? "Não" : ""}
+            value={
+              data.conversao === "sim"
+                ? "Sim — Prazo para conversão de até 20 dias"
+                : data.conversao === "nao"
+                ? "Não"
+                : ""
+            }
           />
-          {data.conversao === "sim" && (
-            <p className="text-sm font-semibold mt-1">Prazo para conversão de até 20 dias</p>
-          )}
         </PrintSection>
 
         <PrintSection title="Plano de Treinamento | Rotinas Básicas">
