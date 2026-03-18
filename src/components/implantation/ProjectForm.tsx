@@ -1003,6 +1003,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
+              <Label>Cliente Associado</Label>
+              <div className="mt-1">
+                <ClientSearch clients={clients} selectedClientId={clientId} onSelect={setClientId} />
+              </div>
+            </div>
+            <div>
               <Label>Nome do Projeto *</Label>
               <Input
                 value={projectName}
@@ -1011,10 +1017,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
               />
             </div>
             <div>
-              <Label>Cliente Associado</Label>
-              <div className="mt-1">
-                <ClientSearch clients={clients} selectedClientId={clientId} onSelect={setClientId} />
-              </div>
+              <Label>Nome do Responsável</Label>
+              <Input
+                value={responsavel}
+                onChange={(e) => setResponsavel(e.target.value)}
+                placeholder="Responsável pela loja"
+              />
             </div>
             <div>
               <Label>Agente(s) Responsável(is)</Label>
