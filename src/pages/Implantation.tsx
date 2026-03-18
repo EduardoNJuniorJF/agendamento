@@ -48,7 +48,7 @@ export default function Implantation() {
   const [clientSearch, setClientSearch] = useState("");
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ImplantationClient | null>(null);
-  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "", group_code: "" });
+  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "", group_code: "", profile: "" });
 
   // Projects state
   const [projects, setProjects] = useState<ImplantationProject[]>([]);
