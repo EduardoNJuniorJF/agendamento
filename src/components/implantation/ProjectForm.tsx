@@ -641,7 +641,7 @@ function DroppableEtapa({ id, children }: { id: string; children: React.ReactNod
   );
 }
 
-export default function ProjectForm({ project, clients, onSaved }: ProjectFormProps) {
+export default function ProjectForm({ project, clients, onSaved, isNew = false }: ProjectFormProps) {
   const { toast } = useToast();
   const [projectName, setProjectName] = useState(project.name);
   const [clientId, setClientId] = useState<string | null>(project.client_id);
