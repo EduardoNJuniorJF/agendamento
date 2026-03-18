@@ -147,7 +147,7 @@ export default function Implantation() {
   // Client CRUD
   const openCreateClientDialog = () => {
     setEditingClient(null);
-    setClientForm({ code: "", name: "", group_name: "", group_code: "" });
+    setClientForm({ code: "", name: "", group_name: "", group_code: "", profile: "" });
     setClientDialogOpen(true);
   };
 
