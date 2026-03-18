@@ -19,6 +19,7 @@ interface ImplantationClient {
   name: string;
   group_name: string | null;
   group_code: string | null;
+  profile: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -48,7 +49,7 @@ export default function Implantation() {
   const [clientSearch, setClientSearch] = useState("");
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ImplantationClient | null>(null);
-  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "", group_code: "" });
+  const [clientForm, setClientForm] = useState({ code: "", name: "", group_name: "", group_code: "", profile: "" });
 
   // Projects state
   const [projects, setProjects] = useState<ImplantationProject[]>([]);
@@ -147,7 +148,7 @@ export default function Implantation() {
   // Client CRUD
   const openCreateClientDialog = () => {
     setEditingClient(null);
-    setClientForm({ code: "", name: "", group_name: "", group_code: "" });
+    setClientForm({ code: "", name: "", group_name: "", group_code: "", profile: "" });
     setClientDialogOpen(true);
   };
 
@@ -158,6 +159,7 @@ export default function Implantation() {
       name: client.name,
       group_name: client.group_name || "",
       group_code: (client as any).group_code || "",
+      profile: client.profile || "",
     });
     setClientDialogOpen(true);
   };
@@ -172,6 +174,7 @@ export default function Implantation() {
       name: clientForm.name.trim(),
       group_name: clientForm.group_name.trim() || null,
       group_code: clientForm.group_code.trim() || null,
+      profile: clientForm.profile.trim() || null,
     };
     if (editingClient) {
       const { error } = await supabase
@@ -489,6 +492,14 @@ export default function Implantation() {
                 value={clientForm.group_code}
                 onChange={(e) => setClientForm({ ...clientForm, group_code: e.target.value })}
                 placeholder="Ex: GRP001"
+              />
+            </div>
+            <div>
+              <Label>Responsável (opcional)</Label>
+              <Input
+                value={clientForm.profile}
+                onChange={(e) => setClientForm({ ...clientForm, profile: e.target.value })}
+                placeholder="Nome do proprietário ou responsável"
               />
             </div>
             <Button onClick={handleSaveClient} className="w-full">
