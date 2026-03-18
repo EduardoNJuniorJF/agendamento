@@ -173,6 +173,7 @@ export default function Implantation() {
       name: clientForm.name.trim(),
       group_name: clientForm.group_name.trim() || null,
       group_code: clientForm.group_code.trim() || null,
+      profile: clientForm.profile.trim() || null,
     };
     if (editingClient) {
       const { error } = await supabase
