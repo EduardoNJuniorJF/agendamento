@@ -644,7 +644,10 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const { toast } = useToast();
   const [projectName, setProjectName] = useState(project.name);
   const [clientId, setClientId] = useState<string | null>(project.client_id);
-  const [responsavel, setResponsavel] = useState<string>("");
+  const [responsavel, setResponsavel] = useState<string>(() => {
+    const client = clients.find((c) => c.id === project.client_id);
+    return client?.profile || "";
+  });
   const [profile, setProfile] = useState<string>(project.profile || "");
   const [data, setData] = useState<ProjectData>(() => {
     const saved = project.project_data;
