@@ -31,6 +31,7 @@ interface ImplantationClient {
   code: string | null;
   name: string;
   group_name: string | null;
+  profile: string | null;
 }
 
 interface ImplantationProject {
