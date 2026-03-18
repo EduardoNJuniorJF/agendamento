@@ -209,22 +209,18 @@ export default function Implantation() {
   };
 
   // Project CRUD
-  const handleCreateProject = async () => {
-    const { data, error } = await supabase
-      .from("implantation_projects" as any)
-      .insert({ name: "Novo Projeto" } as any)
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Erro ao criar projeto", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Projeto criado!" });
-    const project = data as unknown as ImplantationProject;
-    setSelectedProject(project);
-    navigate(`/implantation/${project.id}`, { replace: true });
-    loadProjects();
+  const handleCreateProject = () => {
+    const tempProject: ImplantationProject = {
+      id: crypto.randomUUID(),
+      client_id: null,
+      name: "Novo Projeto",
+      profile: null,
+      project_data: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setSelectedProject(tempProject);
+    navigate(`/implantation/${tempProject.id}`, { replace: true });
   };
 
   const handleSelectProject = (project: ImplantationProject) => {

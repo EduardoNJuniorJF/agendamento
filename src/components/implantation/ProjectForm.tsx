@@ -48,7 +48,8 @@ interface ImplantationProject {
 interface ProjectFormProps {
   project: ImplantationProject;
   clients: ImplantationClient[];
-  onSaved: () => void;
+  onSaved: (savedProject?: ImplantationProject) => void;
+  isNew?: boolean;
 }
 
 const PROFILES = [
