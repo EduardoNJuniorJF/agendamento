@@ -56,6 +56,7 @@ export default function Implantation() {
   const [projectSearch, setProjectSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState<ImplantationProject | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isNewProject, setIsNewProject] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOnlyCompleted, setShowOnlyCompleted] = useState(false);
 
