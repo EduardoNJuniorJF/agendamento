@@ -439,7 +439,7 @@ interface ProjectData {
   agentesResponsaveis: string[];
   regimeTributario: string[];
   porte: string[];
-  estrutura: string[];
+  estrutura: Array<{item: string, quantidade: number}>;
   servidor: string[];
   baseDados: string[];
   ramo: string;
@@ -651,7 +651,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const [data, setData] = useState<ProjectData>(() => {
     const saved = project.project_data;
     if (saved && Object.keys(saved).length > 0) {
-      return { ...DEFAULT_DATA, ...saved };
+      const merged = { ...DEFAULT_DATA, ...saved };
+      // Migrate old string[] estrutura to new format
+      if (Array.isArray(merged.estrutura) && merged.estrutura.length > 0 && typeof merged.estrutura[0] === "string") {
+        merged.estrutura = (merged.estrutura as unknown as string[]).map((item: string) => ({ item, quantidade: 1 }));
+      }
+      return merged;
     }
     return { ...DEFAULT_DATA };
   });
@@ -1123,8 +1128,51 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             </div>
             <div>
               <Label>Estrutura</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={ESTRUTURA_OPTIONS} selected={data.estrutura} fieldKey="estrutura" columns={3} />
+              <div className="mt-2 space-y-2">
+                <div className="flex gap-2 items-end">
+                  <Select
+                    value=""
+                    onValueChange={(value) => {
+                      if (!data.estrutura.some(e => e.item === value)) {
+                        updateField("estrutura", [...data.estrutura, { item: value, quantidade: 1 }]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecione um item..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESTRUTURA_OPTIONS.filter(opt => !data.estrutura.some(e => e.item === opt)).map(opt => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {data.estrutura.map((est, idx) => (
+                  <div key={est.item} className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+                    <span className="flex-1 text-sm">{est.item}</span>
+                    <Label className="text-xs text-muted-foreground">Qtd:</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={est.quantidade}
+                      onChange={(e) => {
+                        const updated = [...data.estrutura];
+                        updated[idx] = { ...updated[idx], quantidade: Number(e.target.value) || 1 };
+                        updateField("estrutura", updated);
+                      }}
+                      className="w-20 h-8"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateField("estrutura", data.estrutura.filter((_, i) => i !== idx))}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
@@ -1570,7 +1618,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           />
           <PrintLine label="Regime Tributário" value={data.regimeTributario.join(", ")} />
           <PrintLine label="Porte" value={data.porte.join(", ")} />
-          <PrintLine label="Estrutura" value={data.estrutura.join(", ")} />
+          <PrintLine label="Estrutura" value={data.estrutura.map(e => `${e.item} (${e.quantidade})`).join(", ")} />
         </PrintSection>
 
         <PrintSection title="Conexão">
@@ -1634,6 +1682,9 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             label="Conversão"
             value={data.conversao === "sim" ? "Sim" : data.conversao === "nao" ? "Não" : ""}
           />
+          {data.conversao === "sim" && (
+            <p className="text-sm font-semibold mt-1">Prazo para conversão de até 20 dias</p>
+          )}
         </PrintSection>
 
         <PrintSection title="Plano de Treinamento | Rotinas Básicas">
