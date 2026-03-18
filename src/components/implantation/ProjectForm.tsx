@@ -31,6 +31,7 @@ interface ImplantationClient {
   code: string | null;
   name: string;
   group_name: string | null;
+  profile: string | null;
 }
 
 interface ImplantationProject {
@@ -530,8 +531,7 @@ function ClientSearch({
     return (
       <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
         <div className="flex-1">
-          <p className="text-sm font-medium">{selectedClient.name}</p>
-          {selectedClient.code && <p className="text-xs text-muted-foreground">Código: {selectedClient.code}</p>}
+          <p className="text-sm font-medium">{selectedClient.code || "Sem código"}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
           <X className="h-3.5 w-3.5" />
@@ -644,6 +644,10 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const { toast } = useToast();
   const [projectName, setProjectName] = useState(project.name);
   const [clientId, setClientId] = useState<string | null>(project.client_id);
+  const [responsavel, setResponsavel] = useState<string>(() => {
+    const client = clients.find((c) => c.id === project.client_id);
+    return client?.profile || "";
+  });
   const [profile, setProfile] = useState<string>(project.profile || "");
   const [data, setData] = useState<ProjectData>(() => {
     const saved = project.project_data;
@@ -675,14 +679,18 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
-  // Auto-fill group info when client changes
+  // Auto-fill from client when client changes
   useEffect(() => {
-    if (selectedClient?.group_name) {
-      setData((prev) => ({
-        ...prev,
-        isGrupo: "sim",
-        grupoNome: prev.grupoNome || selectedClient.group_name || "",
-      }));
+    if (selectedClient) {
+      setProjectName(selectedClient.name);
+      setResponsavel(selectedClient.profile || "");
+      if (selectedClient.group_name) {
+        setData((prev) => ({
+          ...prev,
+          isGrupo: "sim",
+          grupoNome: prev.grupoNome || selectedClient.group_name || "",
+        }));
+      }
     }
   }, [clientId]);
 
@@ -998,6 +1006,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
+              <Label>Cliente Associado</Label>
+              <div className="mt-1">
+                <ClientSearch clients={clients} selectedClientId={clientId} onSelect={setClientId} />
+              </div>
+            </div>
+            <div>
               <Label>Nome do Projeto *</Label>
               <Input
                 value={projectName}
@@ -1006,10 +1020,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
               />
             </div>
             <div>
-              <Label>Cliente Associado</Label>
-              <div className="mt-1">
-                <ClientSearch clients={clients} selectedClientId={clientId} onSelect={setClientId} />
-              </div>
+              <Label>Nome do Responsável</Label>
+              <Input
+                value={responsavel}
+                onChange={(e) => setResponsavel(e.target.value)}
+                placeholder="Responsável pela loja"
+              />
             </div>
             <div>
               <Label>Agente(s) Responsável(is)</Label>
