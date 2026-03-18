@@ -19,12 +19,7 @@ import {
   type DragEndEvent,
   type DragOverEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable";
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { useToast } from "@/hooks/use-toast";
@@ -342,7 +337,9 @@ const ETAPAS_SEM_CONVERSAO: { label: string; items: Array<{ text: string; header
       { text: "Consulta de vendas e exclusão" },
       { text: "Fechamento de caixa" },
       { text: "Permissões de acesso [Alinhar com Proprietário]" },
-      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      {
+        text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar.",
+      },
       { text: "Plataforma do Contador" },
       { text: "Backup" },
     ],
@@ -380,7 +377,9 @@ const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header
       { text: "Consulta de vendas e exclusão" },
       { text: "Fechamento de caixa" },
       { text: "Permissões de acesso [Alinhar com Proprietário]" },
-      { text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar." },
+      {
+        text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar.",
+      },
       { text: "Plataforma do Contador" },
       { text: "Backup" },
     ],
@@ -439,7 +438,7 @@ interface ProjectData {
   agentesResponsaveis: string[];
   regimeTributario: string[];
   porte: string[];
-  estrutura: Array<{item: string, quantidade: number}>;
+  estrutura: Array<{ item: string; quantidade: number }>;
   servidor: string[];
   baseDados: string[];
   ramo: string;
@@ -523,7 +522,7 @@ function ClientSearch({
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.code?.toLowerCase().includes(q) ||
-        c.group_name?.toLowerCase().includes(q)
+        c.group_name?.toLowerCase().includes(q),
     );
   }, [clients, search]);
 
@@ -532,9 +531,7 @@ function ClientSearch({
       <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
         <div className="flex-1">
           <p className="text-sm font-medium">{selectedClient.name}</p>
-          {selectedClient.code && (
-            <p className="text-xs text-muted-foreground">Código: {selectedClient.code}</p>
-          )}
+          {selectedClient.code && <p className="text-xs text-muted-foreground">Código: {selectedClient.code}</p>}
         </div>
         <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
           <X className="h-3.5 w-3.5" />
@@ -775,13 +772,16 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
   const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
 
   // Build the display items per etapa: use saved displayItems or fall back to template
-  const getEtapaDisplayItems = useCallback((etapaKey: "etapa1" | "etapa2" | "etapa3", idx: number) => {
-    const etapaData = data.treinamentoEtapas?.[etapaKey];
-    if (etapaData?.displayItems && etapaData.displayItems.length > 0) {
-      return etapaData.displayItems;
-    }
-    return currentEtapas[idx]?.items || [];
-  }, [data.treinamentoEtapas, currentEtapas]);
+  const getEtapaDisplayItems = useCallback(
+    (etapaKey: "etapa1" | "etapa2" | "etapa3", idx: number) => {
+      const etapaData = data.treinamentoEtapas?.[etapaKey];
+      if (etapaData?.displayItems && etapaData.displayItems.length > 0) {
+        return etapaData.displayItems;
+      }
+      return currentEtapas[idx]?.items || [];
+    },
+    [data.treinamentoEtapas, currentEtapas],
+  );
 
   // Initialize displayItems when conversao changes
   useEffect(() => {
@@ -802,9 +802,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
 
   // DnD state
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const findEtapaByItemId = (itemId: string): "etapa1" | "etapa2" | "etapa3" | null => {
     for (const key of etapaKeys) {
@@ -908,9 +906,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
     }
   };
 
-  const activeItemText = activeItemId
-    ? activeItemId.replace(/^etapa\d-/, "")
-    : null;
+  const activeItemText = activeItemId ? activeItemId.replace(/^etapa\d-/, "") : null;
 
   const CheckboxGroup = ({
     options,
@@ -970,7 +966,13 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             )}
             {(data.agentesResponsaveis || []).length > 0 && (
               <p className="text-sm">
-                Responsável: <strong>{(data.agentesResponsaveis || []).map((id) => agents.find((a) => a.id === id)?.name).filter(Boolean).join(", ")}</strong>
+                Responsável:{" "}
+                <strong>
+                  {(data.agentesResponsaveis || [])
+                    .map((id) => agents.find((a) => a.id === id)?.name)
+                    .filter(Boolean)
+                    .join(", ")}
+                </strong>
               </p>
             )}
           </div>
@@ -1006,11 +1008,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             <div>
               <Label>Cliente Associado</Label>
               <div className="mt-1">
-                <ClientSearch
-                  clients={clients}
-                  selectedClientId={clientId}
-                  onSelect={setClientId}
-                />
+                <ClientSearch clients={clients} selectedClientId={clientId} onSelect={setClientId} />
               </div>
             </div>
             <div>
@@ -1023,7 +1021,10 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                       onCheckedChange={() => {
                         const current = data.agentesResponsaveis || [];
                         if (current.includes(agent.id)) {
-                          updateField("agentesResponsaveis", current.filter((id) => id !== agent.id));
+                          updateField(
+                            "agentesResponsaveis",
+                            current.filter((id) => id !== agent.id),
+                          );
                         } else {
                           updateField("agentesResponsaveis", [...current, agent.id]);
                         }
@@ -1104,24 +1105,29 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 value={data.regimeTributario[0] || ""}
                 onValueChange={(v) => updateField("regimeTributario", [v])}
               >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   {REGIME_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Porte</Label>
-              <Select
-                value={data.porte[0] || ""}
-                onValueChange={(v) => updateField("porte", [v])}
-              >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <Select value={data.porte[0] || ""} onValueChange={(v) => updateField("porte", [v])}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   {PORTE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1133,7 +1139,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                   <Select
                     value=""
                     onValueChange={(value) => {
-                      if (!data.estrutura.some(e => e.item === value)) {
+                      if (!data.estrutura.some((e) => e.item === value)) {
                         updateField("estrutura", [...data.estrutura, { item: value, quantidade: 1 }]);
                       }
                     }}
@@ -1142,8 +1148,10 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                       <SelectValue placeholder="Selecione um item..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {ESTRUTURA_OPTIONS.filter(opt => !data.estrutura.some(e => e.item === opt)).map(opt => (
-                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      {ESTRUTURA_OPTIONS.filter((opt) => !data.estrutura.some((e) => e.item === opt)).map((opt) => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1166,7 +1174,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => updateField("estrutura", data.estrutura.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        updateField(
+                          "estrutura",
+                          data.estrutura.filter((_, i) => i !== idx),
+                        )
+                      }
                       className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -1186,28 +1199,30 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardContent className="space-y-4">
             <div>
               <Label>Servidor</Label>
-              <Select
-                value={data.servidor[0] || ""}
-                onValueChange={(v) => updateField("servidor", [v])}
-              >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <Select value={data.servidor[0] || ""} onValueChange={(v) => updateField("servidor", [v])}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   {SERVIDOR_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Base de Dados</Label>
-              <Select
-                value={data.baseDados[0] || ""}
-                onValueChange={(v) => updateField("baseDados", [v])}
-              >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <Select value={data.baseDados[0] || ""} onValueChange={(v) => updateField("baseDados", [v])}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   {BASE_DADOS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1258,7 +1273,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label>Funcionários e Funções</Label>
+                <Label>Funções</Label>
                 <Button variant="outline" size="sm" onClick={addFuncionario}>
                   <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar
                 </Button>
@@ -1355,14 +1370,15 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <CardContent className="space-y-4">
             <div>
               <Label>Sistema</Label>
-              <Select
-                value={data.sistema[0] || ""}
-                onValueChange={(v) => updateField("sistema", [v])}
-              >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <Select value={data.sistema[0] || ""} onValueChange={(v) => updateField("sistema", [v])}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   {SISTEMA_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1432,7 +1448,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 >
                   {currentEtapas.map((etapa, idx) => {
                     const etapaKey = etapaKeys[idx];
-                    const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "", displayItems: [] };
+                    const etapaData = data.treinamentoEtapas?.[etapaKey] || {
+                      items: [],
+                      data: "",
+                      dataFim: "",
+                      displayItems: [],
+                    };
                     const displayItems = etapaData.displayItems || etapa.items;
                     const showDateRange = data.conversao === "sim" && idx === 0;
                     const sortableIds = displayItems.filter((di) => !di.header).map((di) => `${etapaKey}-${di.text}`);
@@ -1480,7 +1501,9 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                           <div className="space-y-1">
                             {displayItems.map((item) =>
                               item.header ? (
-                                <p key={`header-${item.text}`} className="font-semibold text-xs text-primary mt-3 mb-1">{item.text}</p>
+                                <p key={`header-${item.text}`} className="font-semibold text-xs text-primary mt-3 mb-1">
+                                  {item.text}
+                                </p>
                               ) : (
                                 <SortableEtapaItem
                                   key={`${etapaKey}-${item.text}`}
@@ -1489,12 +1512,10 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                                   checked={etapaData.items.includes(item.text)}
                                   onCheckedChange={() => toggleEtapaItem(etapaKey, item.text)}
                                 />
-                              )
+                              ),
                             )}
                             {displayItems.filter((di) => !di.header).length === 0 && (
-                              <p className="text-xs text-muted-foreground italic py-2">
-                                Arraste itens para esta etapa
-                              </p>
+                              <p className="text-xs text-muted-foreground italic py-2">Arraste itens para esta etapa</p>
                             )}
                           </div>
                         </SortableContext>
@@ -1519,10 +1540,11 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                 <div className="border border-border rounded-md p-4 space-y-4">
                   <h4 className="font-semibold text-sm">Novas Ferramentas | Rotinas Avançadas</h4>
                   <p className="text-sm text-muted-foreground">
-                    Chegando nesse ponto significa que as rotinas básicas da implantação foram concluídas com sucesso. 
-                    A partir de agora, os atendimentos serão isolados, com o mesmo compromisso, mas focados em rotinas avançadas, 
-                    que cancelam cronogramas separados conforme a ferramenta. Para implementar essas rotinas, será necessário 
-                    abrir novos protocolos usando as ferramentas abaixo. Analisar a possibilidade de agendar mais de um processo para o mesmo dia.
+                    Chegando nesse ponto significa que as rotinas básicas da implantação foram concluídas com sucesso. A
+                    partir de agora, os atendimentos serão isolados, com o mesmo compromisso, mas focados em rotinas
+                    avançadas, que cancelam cronogramas separados conforme a ferramenta. Para implementar essas rotinas,
+                    será necessário abrir novos protocolos usando as ferramentas abaixo. Analisar a possibilidade de
+                    agendar mais de um processo para o mesmo dia.
                   </p>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 cursor-pointer text-sm">
@@ -1618,7 +1640,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           />
           <PrintLine label="Regime Tributário" value={data.regimeTributario.join(", ")} />
           <PrintLine label="Porte" value={data.porte.join(", ")} />
-          <PrintLine label="Estrutura" value={data.estrutura.map(e => `${e.item} (${e.quantidade})`).join(", ")} />
+          <PrintLine label="Estrutura" value={data.estrutura.map((e) => `${e.item} (${e.quantidade})`).join(", ")} />
         </PrintSection>
 
         <PrintSection title="Conexão">
@@ -1635,7 +1657,7 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
           <PrintLine label="Proprietário" value={data.proprietario} />
           {data.funcionarios.length > 0 && (
             <div className="mt-1">
-              <span className="font-semibold">Funcionários e Funções:</span>
+              <span className="font-semibold">Funções:</span>
               <ul className="list-disc ml-6 mt-1">
                 {data.funcionarios.map((f, i) => (
                   <li key={i}>
@@ -1680,26 +1702,29 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
         <PrintSection title="Conversão de Dados">
           <PrintLine
             label="Conversão"
-            value={
-              data.conversao === "sim"
-                ? "Sim — Prazo para conversão de até 20 dias"
-                : data.conversao === "nao"
-                ? "Não"
-                : ""
-            }
+            value={data.conversao === "sim" ? "Sim" : data.conversao === "nao" ? "Não" : ""}
           />
+          {data.conversao === "sim" && (
+            <p className="text-sm font-semibold mt-1">Prazo para conversão de até 20 dias</p>
+          )}
         </PrintSection>
 
         <PrintSection title="Plano de Treinamento | Rotinas Básicas">
           {data.conversao ? (
             <>
               {etapaKeys.map((etapaKey, idx) => {
-                const etapaData = data.treinamentoEtapas?.[etapaKey] || { items: [], data: "", dataFim: "", displayItems: [] };
-                const displayItems = etapaData.displayItems && etapaData.displayItems.length > 0
-                  ? etapaData.displayItems
-                  : currentEtapas[idx]?.items || [];
+                const etapaData = data.treinamentoEtapas?.[etapaKey] || {
+                  items: [],
+                  data: "",
+                  dataFim: "",
+                  displayItems: [],
+                };
+                const displayItems =
+                  etapaData.displayItems && etapaData.displayItems.length > 0
+                    ? etapaData.displayItems
+                    : currentEtapas[idx]?.items || [];
                 const showDateRange = data.conversao === "sim" && idx === 0;
-                const formatDate = (d: string) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+                const formatDate = (d: string) => (d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR") : "—");
                 const etapaLabel = currentEtapas[idx]?.label || `Etapa ${idx + 1}`;
                 return (
                   <div key={etapaKey} className="mb-2">
@@ -1732,7 +1757,12 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
                   {data.ferramentasAvancadas?.bi?.enabled && <li>BI ✓</li>}
                   {data.ferramentasAvancadas?.bi?.gerarConta && <li>Gerar Conta (Mauro) ✓</li>}
                   {data.ferramentasAvancadas?.bi?.instalacao && <li>Instalação e configurações ✓</li>}
-                  <li>Treinamento agendado para: {data.ferramentasAvancadas?.bi?.treinamentoData ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</li>
+                  <li>
+                    Treinamento agendado para:{" "}
+                    {data.ferramentasAvancadas?.bi?.treinamentoData
+                      ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR")
+                      : "—"}
+                  </li>
                 </ul>
               </div>
             </>
