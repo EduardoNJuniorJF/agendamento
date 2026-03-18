@@ -19,6 +19,7 @@ interface ImplantationClient {
   name: string;
   group_name: string | null;
   group_code: string | null;
+  profile: string | null;
   created_at: string;
   updated_at: string;
 }
