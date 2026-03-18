@@ -1123,8 +1123,51 @@ export default function ProjectForm({ project, clients, onSaved }: ProjectFormPr
             </div>
             <div>
               <Label>Estrutura</Label>
-              <div className="mt-1">
-                <CheckboxGroup options={ESTRUTURA_OPTIONS} selected={data.estrutura} fieldKey="estrutura" columns={3} />
+              <div className="mt-2 space-y-2">
+                <div className="flex gap-2 items-end">
+                  <Select
+                    value=""
+                    onValueChange={(value) => {
+                      if (!data.estrutura.some(e => e.item === value)) {
+                        updateField("estrutura", [...data.estrutura, { item: value, quantidade: 1 }]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecione um item..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ESTRUTURA_OPTIONS.filter(opt => !data.estrutura.some(e => e.item === opt)).map(opt => (
+                        <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {data.estrutura.map((est, idx) => (
+                  <div key={est.item} className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+                    <span className="flex-1 text-sm">{est.item}</span>
+                    <Label className="text-xs text-muted-foreground">Qtd:</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={est.quantidade}
+                      onChange={(e) => {
+                        const updated = [...data.estrutura];
+                        updated[idx] = { ...updated[idx], quantidade: Number(e.target.value) || 1 };
+                        updateField("estrutura", updated);
+                      }}
+                      className="w-20 h-8"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateField("estrutura", data.estrutura.filter((_, i) => i !== idx))}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
