@@ -56,6 +56,7 @@ export default function Implantation() {
   const [projectSearch, setProjectSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState<ImplantationProject | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isNewProject, setIsNewProject] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOnlyCompleted, setShowOnlyCompleted] = useState(false);
 
@@ -209,22 +210,19 @@ export default function Implantation() {
   };
 
   // Project CRUD
-  const handleCreateProject = async () => {
-    const { data, error } = await supabase
-      .from("implantation_projects" as any)
-      .insert({ name: "Novo Projeto" } as any)
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Erro ao criar projeto", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Projeto criado!" });
-    const project = data as unknown as ImplantationProject;
-    setSelectedProject(project);
-    navigate(`/implantation/${project.id}`, { replace: true });
-    loadProjects();
+  const handleCreateProject = () => {
+    const tempProject: ImplantationProject = {
+      id: crypto.randomUUID(),
+      client_id: null,
+      name: "Novo Projeto",
+      profile: null,
+      project_data: {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setIsNewProject(true);
+    setSelectedProject(tempProject);
+    navigate(`/implantation/${tempProject.id}`, { replace: true });
   };
 
   const handleSelectProject = (project: ImplantationProject) => {
@@ -234,6 +232,7 @@ export default function Implantation() {
 
   const handleBack = () => {
     setSelectedProject(null);
+    setIsNewProject(false);
     navigate("/implantation", { replace: true });
   };
 
@@ -263,7 +262,11 @@ export default function Implantation() {
     }
   };
 
-  const handleProjectSaved = () => {
+  const handleProjectSaved = (savedProject?: ImplantationProject) => {
+    if (isNewProject && savedProject) {
+      setIsNewProject(false);
+      setSelectedProject(savedProject);
+    }
     loadProjects();
   };
 
@@ -285,7 +288,7 @@ export default function Implantation() {
             )}
           </div>
         </div>
-        <ProjectForm project={selectedProject} clients={clients} onSaved={handleProjectSaved} />
+        <ProjectForm project={selectedProject} clients={clients} onSaved={handleProjectSaved} isNew={isNewProject} />
       </div>
     );
   }
