@@ -439,7 +439,7 @@ interface ProjectData {
   agentesResponsaveis: string[];
   regimeTributario: string[];
   porte: string[];
-  estrutura: string[];
+  estrutura: Array<{item: string, quantidade: number}>;
   servidor: string[];
   baseDados: string[];
   ramo: string;
