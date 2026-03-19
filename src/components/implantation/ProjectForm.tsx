@@ -405,7 +405,9 @@ const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header
     ],
   },
 ];
-const MODULOS_OPTIONS = [
+const MODULOS_OPTIONS: string[] = [];
+
+const FERRAMENTAS_AVANCADAS_ITEMS = [
   "Caixa central e Contas Bancárias",
   "BI",
   "Plugtoo ou Tray Commerce",
@@ -462,6 +464,7 @@ interface ProjectData {
   };
   ferramentasAvancadas: {
     bi: { enabled: boolean; gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+    selectedItems: string[];
   };
 }
 
@@ -497,6 +500,7 @@ const DEFAULT_DATA: ProjectData = {
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
   ferramentasAvancadas: {
     bi: { enabled: false, gerarConta: false, instalacao: false, treinamentoData: "" },
+    selectedItems: [],
   },
 };
 
@@ -1655,23 +1659,27 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                         className="w-[180px] h-8 text-sm"
                       />
                     </div>
+                    <Separator className="my-2" />
+                    {FERRAMENTAS_AVANCADAS_ITEMS.map((item) => (
+                      <label key={item} className="flex items-center gap-2 cursor-pointer text-sm">
+                        <Checkbox
+                          checked={(data.ferramentasAvancadas?.selectedItems || []).includes(item)}
+                          onCheckedChange={(checked) => {
+                            const fa = { ...data.ferramentasAvancadas };
+                            const current = fa.selectedItems || [];
+                            fa.selectedItems = checked
+                              ? [...current, item]
+                              : current.filter((i) => i !== item);
+                            updateField("ferramentasAvancadas", fa);
+                          }}
+                        />
+                        <span>{item}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CheckboxGroup
-              options={MODULOS_OPTIONS}
-              selected={data.modulosComplementares}
-              fieldKey="modulosComplementares"
-              columns={3}
-            />
           </CardContent>
         </Card>
 
@@ -1825,16 +1833,15 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                       ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR")
                       : "—"}
                   </li>
+                  {(data.ferramentasAvancadas?.selectedItems || []).map((item) => (
+                    <li key={item}>{item} ✓</li>
+                  ))}
                 </ul>
               </div>
             </>
           ) : (
             <p>—</p>
           )}
-        </PrintSection>
-
-        <PrintSection title="Módulos Complementares | Gerar Valor">
-          <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
         </PrintSection>
       </div>
     </div>
