@@ -1659,6 +1659,23 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                         className="w-[180px] h-8 text-sm"
                       />
                     </div>
+                    <Separator className="my-2" />
+                    {FERRAMENTAS_AVANCADAS_ITEMS.map((item) => (
+                      <label key={item} className="flex items-center gap-2 cursor-pointer text-sm">
+                        <Checkbox
+                          checked={(data.ferramentasAvancadas?.selectedItems || []).includes(item)}
+                          onCheckedChange={(checked) => {
+                            const fa = { ...data.ferramentasAvancadas };
+                            const current = fa.selectedItems || [];
+                            fa.selectedItems = checked
+                              ? [...current, item]
+                              : current.filter((i) => i !== item);
+                            updateField("ferramentasAvancadas", fa);
+                          }}
+                        />
+                        <span>{item}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               </>
