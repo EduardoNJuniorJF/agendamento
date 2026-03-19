@@ -353,6 +353,8 @@ const ETAPAS_SEM_CONVERSAO: { label: string; items: Array<{ text: string; header
       { text: "Esclarecimento de dúvidas" },
       { text: "Balanço" },
       { text: "App de Resultados" },
+      { text: "Plataforma do Contador" },
+      { text: "Cash Back" },
       { text: "Contas a Pagar" },
     ],
   },
