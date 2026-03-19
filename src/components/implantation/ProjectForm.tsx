@@ -405,7 +405,9 @@ const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header
     ],
   },
 ];
-const MODULOS_OPTIONS = [
+const MODULOS_OPTIONS: string[] = [];
+
+const FERRAMENTAS_AVANCADAS_ITEMS = [
   "Caixa central e Contas Bancárias",
   "BI",
   "Plugtoo ou Tray Commerce",
