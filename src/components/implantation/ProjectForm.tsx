@@ -1612,7 +1612,7 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                     será necessário abrir novos protocolos usando as ferramentas abaixo. Analisar a possibilidade de
                     agendar mais de um processo para o mesmo dia.
                   </p>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <label className="flex items-center gap-2 cursor-pointer text-sm">
                       <Checkbox
                         checked={data.ferramentasAvancadas?.bi?.enabled || false}
@@ -1646,20 +1646,6 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                       />
                       <span>Instalação e configurações</span>
                     </label>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
-                      <Input
-                        type="date"
-                        value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
-                        onChange={(e) => {
-                          const fa = { ...data.ferramentasAvancadas };
-                          fa.bi = { ...fa.bi, treinamentoData: e.target.value };
-                          updateField("ferramentasAvancadas", fa);
-                        }}
-                        className="w-[180px] h-8 text-sm"
-                      />
-                    </div>
-                    <Separator className="my-2" />
                     {FERRAMENTAS_AVANCADAS_ITEMS.map((item) => (
                       <label key={item} className="flex items-center gap-2 cursor-pointer text-sm">
                         <Checkbox
@@ -1676,6 +1662,19 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                         <span>{item}</span>
                       </label>
                     ))}
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t border-border">
+                    <Label className="text-sm whitespace-nowrap">Treinamento agendado para:</Label>
+                    <Input
+                      type="date"
+                      value={data.ferramentasAvancadas?.bi?.treinamentoData || ""}
+                      onChange={(e) => {
+                        const fa = { ...data.ferramentasAvancadas };
+                        fa.bi = { ...fa.bi, treinamentoData: e.target.value };
+                        updateField("ferramentasAvancadas", fa);
+                      }}
+                      className="w-[180px] h-8 text-sm"
+                    />
                   </div>
                 </div>
               </>
