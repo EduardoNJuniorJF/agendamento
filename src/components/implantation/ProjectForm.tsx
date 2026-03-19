@@ -383,7 +383,6 @@ const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header
       {
         text: "Relatório de Resumo de Vendas, Ranking, Saída montado, Movimentação e demais relatórios que o cliente solicitar.",
       },
-      { text: "Plataforma do Contador" },
       { text: "Backup" },
     ],
   },
