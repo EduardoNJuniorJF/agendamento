@@ -1599,12 +1599,12 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                 </DndContext>
               </>
             )}
-            {/* Novas Ferramentas | Rotinas Avançadas - inside training card */}
+            {/* Módulos Complementares | Rotinas Avançadas - inside training card */}
             {data.conversao && (
               <>
                 <Separator />
                 <div className="border border-border rounded-md p-4 space-y-4">
-                  <h4 className="font-semibold text-sm">Novas Ferramentas | Rotinas Avançadas</h4>
+                  <h4 className="font-semibold text-sm">Módulos Complementares | Rotinas Avançadas</h4>
                   <p className="text-sm text-muted-foreground">
                     Chegando nesse ponto significa que as rotinas básicas da implantação foram concluídas com sucesso. A
                     partir de agora, os atendimentos serão isolados, com o mesmo compromisso, mas focados em rotinas
@@ -1653,9 +1653,7 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                           onCheckedChange={(checked) => {
                             const fa = { ...data.ferramentasAvancadas };
                             const current = fa.selectedItems || [];
-                            fa.selectedItems = checked
-                              ? [...current, item]
-                              : current.filter((i) => i !== item);
+                            fa.selectedItems = checked ? [...current, item] : current.filter((i) => i !== item);
                             updateField("ferramentasAvancadas", fa);
                           }}
                         />
