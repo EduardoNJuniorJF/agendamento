@@ -797,13 +797,25 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
   const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
 
   // Merge saved displayItems with template to include any newly added items
+  // All valid item texts across all etapas for current conversion mode
+  const allValidTexts = useMemo(() => {
+    const texts = new Set<string>();
+    currentEtapas.forEach((etapa) => etapa.items.forEach((item) => texts.add(item.text)));
+    return texts;
+  }, [currentEtapas]);
+
+  // Merge saved displayItems with template: add missing, remove obsolete
   const mergeDisplayItems = useCallback(
     (saved: Array<{ text: string; header?: boolean }>, template: Array<{ text: string; header?: boolean }>) => {
-      const savedTexts = new Set(saved.map((s) => s.text));
+      // Remove items no longer in any template etapa
+      const filtered = saved.filter((s) => allValidTexts.has(s.text));
+      // Add missing items from this etapa's template
+      const savedTexts = new Set(filtered.map((s) => s.text));
       const missing = template.filter((t) => !savedTexts.has(t.text));
-      return missing.length > 0 ? [...saved, ...missing] : saved;
+      const result = missing.length > 0 ? [...filtered, ...missing] : filtered;
+      return result;
     },
-    [],
+    [allValidTexts],
   );
 
   // Build the display items per etapa: use saved displayItems or fall back to template
