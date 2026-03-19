@@ -464,6 +464,7 @@ interface ProjectData {
   };
   ferramentasAvancadas: {
     bi: { enabled: boolean; gerarConta: boolean; instalacao: boolean; treinamentoData: string };
+    selectedItems: string[];
   };
 }
 
