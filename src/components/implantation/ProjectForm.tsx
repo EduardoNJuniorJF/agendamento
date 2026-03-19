@@ -401,19 +401,18 @@ const ETAPAS_COM_CONVERSAO: { label: string; items: Array<{ text: string; header
       { text: "Esclarecimento de dúvidas" },
       { text: "Balanço" },
       { text: "App de Resultados" },
+      { text: "Plataforma do Contador" },
+      { text: "Cash Back" },
       { text: "Contas a Pagar" },
     ],
   },
 ];
 const MODULOS_OPTIONS = [
-  "App de Resultados",
   "Caixa central e Contas Bancárias",
   "BI",
   "Plugtoo ou Tray Commerce",
-  "Plataforma do contador",
   "CRM",
   "Meta",
-  "Cash Back",
   "Coletor Zaal",
 ];
 
