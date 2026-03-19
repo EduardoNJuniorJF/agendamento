@@ -1833,16 +1833,15 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
                       ? new Date(data.ferramentasAvancadas.bi.treinamentoData + "T12:00:00").toLocaleDateString("pt-BR")
                       : "—"}
                   </li>
+                  {(data.ferramentasAvancadas?.selectedItems || []).map((item) => (
+                    <li key={item}>{item} ✓</li>
+                  ))}
                 </ul>
               </div>
             </>
           ) : (
             <p>—</p>
           )}
-        </PrintSection>
-
-        <PrintSection title="Módulos Complementares | Gerar Valor">
-          <p>{data.modulosComplementares.length > 0 ? data.modulosComplementares.join(", ") : "—"}</p>
         </PrintSection>
       </div>
     </div>
