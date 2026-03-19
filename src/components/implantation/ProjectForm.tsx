@@ -797,28 +797,45 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
   const currentEtapas = data.conversao === "sim" ? ETAPAS_COM_CONVERSAO : ETAPAS_SEM_CONVERSAO;
   const etapaKeys: Array<"etapa1" | "etapa2" | "etapa3"> = ["etapa1", "etapa2", "etapa3"];
 
+  // Merge saved displayItems with template to include any newly added items
+  const mergeDisplayItems = useCallback(
+    (saved: Array<{ text: string; header?: boolean }>, template: Array<{ text: string; header?: boolean }>) => {
+      const savedTexts = new Set(saved.map((s) => s.text));
+      const missing = template.filter((t) => !savedTexts.has(t.text));
+      return missing.length > 0 ? [...saved, ...missing] : saved;
+    },
+    [],
+  );
+
   // Build the display items per etapa: use saved displayItems or fall back to template
   const getEtapaDisplayItems = useCallback(
     (etapaKey: "etapa1" | "etapa2" | "etapa3", idx: number) => {
       const etapaData = data.treinamentoEtapas?.[etapaKey];
+      const templateItems = currentEtapas[idx]?.items || [];
       if (etapaData?.displayItems && etapaData.displayItems.length > 0) {
-        return etapaData.displayItems;
+        return mergeDisplayItems(etapaData.displayItems, templateItems);
       }
-      return currentEtapas[idx]?.items || [];
+      return templateItems;
     },
-    [data.treinamentoEtapas, currentEtapas],
+    [data.treinamentoEtapas, currentEtapas, mergeDisplayItems],
   );
 
-  // Initialize displayItems when conversao changes
+  // Initialize/update displayItems when conversao changes or template changes
   useEffect(() => {
     if (!data.conversao) return;
     const etapas = { ...data.treinamentoEtapas };
     let changed = false;
     etapaKeys.forEach((key, idx) => {
+      const templateItems = currentEtapas[idx]?.items || [];
       if (!etapas[key]?.displayItems || etapas[key].displayItems!.length === 0) {
-        const templateItems = currentEtapas[idx]?.items || [];
         etapas[key] = { ...etapas[key], displayItems: [...templateItems] };
         changed = true;
+      } else {
+        const merged = mergeDisplayItems(etapas[key].displayItems!, templateItems);
+        if (merged.length !== etapas[key].displayItems!.length) {
+          etapas[key] = { ...etapas[key], displayItems: merged };
+          changed = true;
+        }
       }
     });
     if (changed) {
