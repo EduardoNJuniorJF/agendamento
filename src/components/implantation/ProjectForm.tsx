@@ -1682,19 +1682,6 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Módulos Complementares | Gerar Valor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CheckboxGroup
-              options={MODULOS_OPTIONS}
-              selected={data.modulosComplementares}
-              fieldKey="modulosComplementares"
-              columns={3}
-            />
-          </CardContent>
-        </Card>
 
         {/* Bottom save/print buttons */}
         <div className="flex gap-2 justify-end pb-6">
