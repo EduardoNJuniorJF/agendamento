@@ -500,6 +500,7 @@ const DEFAULT_DATA: ProjectData = {
   treinamentoEtapas: { ...DEFAULT_ETAPAS },
   ferramentasAvancadas: {
     bi: { enabled: false, gerarConta: false, instalacao: false, treinamentoData: "" },
+    selectedItems: [],
   },
 };
 
