@@ -132,8 +132,18 @@ export default function CalendarView() {
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      const monthStart = startOfMonth(currentMonth);
-      const monthEnd = endOfMonth(currentMonth);
+      let rangeStart: Date;
+      let rangeEnd: Date;
+
+      if (viewMode === "week") {
+        rangeStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(currentMonth, { weekStartsOn: 1 });
+      } else {
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(currentMonth);
+        rangeStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+      }
 
       const { data, error } = await supabase
         .from("appointments")
@@ -143,8 +153,8 @@ export default function CalendarView() {
           vehicles(model, plate)
         `,
         )
-        .gte("date", format(monthStart, "yyyy-MM-dd"))
-        .lte("date", format(monthEnd, "yyyy-MM-dd"))
+        .gte("date", format(rangeStart, "yyyy-MM-dd"))
+        .lte("date", format(rangeEnd, "yyyy-MM-dd"))
         .order("date")
         .order("time");
 
