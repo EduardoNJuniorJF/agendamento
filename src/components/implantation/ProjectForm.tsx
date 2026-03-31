@@ -284,7 +284,7 @@ const ProfileInfoPopover = ({ profileName }: { profileName: string }) => {
 const REGIME_OPTIONS = ["MEI", "Simples Nacional", "Lucro Presumido", "Lucro Real"];
 const PORTE_OPTIONS = ["Pequeno", "Médio", "Grande"];
 const ESTRUTURA_OPTIONS = ["Máquinas", "Impressora de Cupom", "Impressora de Etiquetas", "Balanças", "Consulta Preços"];
-const SERVIDOR_OPTIONS = ["Local na filial", "Online Pirata", "Servidor Online Cliente", "Sem conexão"];
+const SERVIDOR_OPTIONS = ["Nuvem Zaal", "Nuvem Cliente", "Servidor Local", "Sem conexão"];
 const BASE_DADOS_OPTIONS = ["Unificada", "Separada Central de Cadastro", "Totalmente Separada"];
 const ATENDIMENTO_OPTIONS = ["Apenas Online", "Online e Presencial"];
 const SISTEMA_OPTIONS = ["MultiPDV", "ERP"];
