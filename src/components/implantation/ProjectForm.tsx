@@ -743,8 +743,9 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
       if (error) {
         toast({ title: "Erro ao criar projeto", variant: "destructive" });
       } else {
-        toast({ title: "Projeto criado e salvo!" });
-        onSaved(inserted as unknown as ImplantationProject);
+        const savedProj = inserted as unknown as ImplantationProject;
+        setSavedProjectRef(savedProj);
+        setShowAppointmentDialog(true);
       }
     } else {
       const { error } = await supabase
@@ -760,6 +761,65 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
       }
     }
     setSaving(false);
+  };
+
+  const handleCreateAppointment = async () => {
+    setShowAppointmentDialog(false);
+    const primeiroAtendimento = data.cronograma?.[0]?.data;
+    
+    try {
+      // Get current user name
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      let currentUserName = "Usuário";
+      if (currentUser?.id) {
+        const { data: profileData } = await supabase.from("profiles").select("full_name, username").eq("id", currentUser.id).single();
+        if (profileData) currentUserName = profileData.full_name || profileData.username || "Usuário";
+      }
+
+      // Create appointment
+      const { data: newAppointment, error } = await supabase
+        .from("appointments")
+        .insert({
+          title: projectName || "Sem nome",
+          date: primeiroAtendimento || new Date().toISOString().split("T")[0],
+          time: "08:00",
+          city: "",
+          project_id: project.id,
+          status: "scheduled",
+          expense_status: "não_separar",
+          created_by_name: currentUserName,
+          last_action: "created",
+          last_action_at: new Date().toISOString(),
+        } as any)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Map agentesResponsaveis to appointment_agents
+      if (data.agentesResponsaveis?.length > 0 && newAppointment) {
+        const { error: agentError } = await supabase.from("appointment_agents").insert(
+          data.agentesResponsaveis.map((agentId: string) => ({
+            appointment_id: newAppointment.id,
+            agent_id: agentId,
+          })),
+        );
+        if (agentError) console.error("Erro ao vincular agentes:", agentError);
+      }
+
+      toast({ title: "Projeto criado e agendamento inserido no calendário!" });
+    } catch (err: any) {
+      console.error("Erro ao criar agendamento:", err);
+      toast({ title: "Projeto criado, mas houve erro ao gerar agendamento", variant: "destructive" });
+    }
+
+    if (savedProjectRef) onSaved(savedProjectRef);
+  };
+
+  const handleSkipAppointment = () => {
+    setShowAppointmentDialog(false);
+    toast({ title: "Projeto criado e salvo!" });
+    if (savedProjectRef) onSaved(savedProjectRef);
   };
 
   const handlePrint = () => {
