@@ -1913,6 +1913,22 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
           )}
         </PrintSection>
       </div>
+
+      {/* Modal de confirmação para gerar agendamento */}
+      <AlertDialog open={showAppointmentDialog} onOpenChange={setShowAppointmentDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Gerar agendamento automático</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja gerar um agendamento automático para este projeto no calendário?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleSkipAppointment}>Não</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCreateAppointment}>Sim</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
