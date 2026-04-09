@@ -678,6 +678,7 @@ export default function ProjectForm({ project, clients, onSaved, isNew = false }
   const [saving, setSaving] = useState(false);
   const [showAppointmentDialog, setShowAppointmentDialog] = useState(false);
   const [savedProjectRef, setSavedProjectRef] = useState<ImplantationProject | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   // Fetch agents
   const [agents, setAgents] = useState<{ id: string; name: string }[]>([]);
