@@ -46,6 +46,7 @@ interface FormData {
   is_penalized: boolean;
   is_route_appointment: boolean;
   appointment_type: string | null;
+  show_description: boolean;
 }
 
 export default function NewAppointment() {
@@ -72,6 +73,7 @@ export default function NewAppointment() {
     is_penalized: false,
     is_route_appointment: false,
     appointment_type: null,
+    show_description: false,
   });
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -184,6 +186,7 @@ export default function NewAppointment() {
       is_penalized: data.is_penalized || false,
       is_route_appointment: data.is_route_appointment || false,
       appointment_type: data.appointment_type || null,
+      show_description: (data as any).show_description || false,
     });
 
     // Load project_id if exists (for Dev)

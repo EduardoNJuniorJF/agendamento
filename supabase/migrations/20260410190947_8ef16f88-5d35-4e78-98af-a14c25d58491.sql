@@ -1,0 +1,1 @@
+ALTER TABLE public.appointments ADD COLUMN show_description boolean DEFAULT false;
