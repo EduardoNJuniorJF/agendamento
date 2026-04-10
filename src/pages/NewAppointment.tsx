@@ -307,6 +307,7 @@ export default function NewAppointment() {
             is_penalized: formData.is_penalized,
             is_route_appointment: formData.is_route_appointment,
             appointment_type: formData.appointment_type,
+            show_description: formData.show_description,
             project_id: selectedProjectId,
             updated_by_name: currentUserName,
             last_action: "updated",
@@ -348,6 +349,7 @@ export default function NewAppointment() {
             is_penalized: formData.is_penalized,
             is_route_appointment: formData.is_route_appointment,
             appointment_type: formData.appointment_type,
+            show_description: formData.show_description,
             project_id: selectedProjectId,
             created_by_name: currentUserName,
             last_action: "created",
@@ -727,6 +729,18 @@ export default function NewAppointment() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
               />
+              <div className="flex items-center space-x-2 mt-2">
+                <Checkbox
+                  id="show_description"
+                  checked={formData.show_description}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, show_description: checked === true })
+                  }
+                />
+                <Label htmlFor="show_description" className="cursor-pointer text-sm">
+                  Exibir observação no card do calendário
+                </Label>
+              </div>
             </div>
 
             {/* Penalty Checkbox - visible to all, editable only by admins */}
