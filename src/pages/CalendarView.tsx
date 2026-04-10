@@ -70,6 +70,7 @@ interface Appointment {
   expense_status: string;
   is_penalized?: boolean;
   is_route_appointment?: boolean;
+  show_description?: boolean;
   created_by_name?: string;
   updated_by_name?: string;
   last_action?: string;
