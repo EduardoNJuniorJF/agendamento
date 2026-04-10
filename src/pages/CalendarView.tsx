@@ -70,6 +70,7 @@ interface Appointment {
   expense_status: string;
   is_penalized?: boolean;
   is_route_appointment?: boolean;
+  show_description?: boolean;
   created_by_name?: string;
   updated_by_name?: string;
   last_action?: string;
@@ -268,6 +269,12 @@ export default function CalendarView() {
               </div>
             </div>
           )}
+          {apt.show_description && apt.description && (
+            <div>
+              <div className="font-medium text-[9px] md:text-[10px]">Obs:</div>
+              <div className="text-muted-foreground text-[10px] md:text-xs whitespace-pre-line">{apt.description}</div>
+            </div>
+          )}
         </div>
       );
     }
@@ -323,6 +330,12 @@ export default function CalendarView() {
             >
               {apt.appointment_type}
             </Badge>
+          </div>
+        )}
+        {apt.show_description && apt.description && (
+          <div>
+            <div className="font-medium text-xs text-muted-foreground">Observações:</div>
+            <div className="text-muted-foreground text-sm whitespace-pre-line">{apt.description}</div>
           </div>
         )}
         <div className="flex flex-wrap gap-1 pt-1">

@@ -106,6 +106,7 @@ export type Database = {
           last_action: string | null
           last_action_at: string | null
           project_id: string | null
+          show_description: boolean | null
           status: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -129,6 +130,7 @@ export type Database = {
           last_action?: string | null
           last_action_at?: string | null
           project_id?: string | null
+          show_description?: boolean | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time: string
           title: string
@@ -152,6 +154,7 @@ export type Database = {
           last_action?: string | null
           last_action_at?: string | null
           project_id?: string | null
+          show_description?: boolean | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time?: string
           title?: string
