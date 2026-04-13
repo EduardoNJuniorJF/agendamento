@@ -1,4 +1,18 @@
-import { LayoutDashboard, Calendar, Car, Users, Umbrella, LogOut, Key, Receipt, UserPlus, PartyPopper, User, Rocket, Shield } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  Car,
+  Users,
+  Umbrella,
+  LogOut,
+  Key,
+  Receipt,
+  UserPlus,
+  PartyPopper,
+  User,
+  Rocket,
+  Shield,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,15 +36,15 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { 
-    signOut, 
-    role, 
+  const {
+    signOut,
+    role,
     sector,
     userName,
     canAccessCalendar,
     canAccessFleet,
     canAccessBonus,
-    canAccessUserManagement
+    canAccessUserManagement,
   } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
@@ -39,7 +53,7 @@ export function AppSidebar() {
   // Itens do menu filtrados por permissão
   const menuItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard, show: true },
-    { title: "Calendário", url: "/calendar", icon: Calendar, show: canAccessCalendar() },
+    { title: "Agendamento", url: "/calendar", icon: Calendar, show: canAccessCalendar() },
     { title: "Frota", url: "/fleet", icon: Car, show: canAccessFleet() },
     { title: "Equipe", url: "/team", icon: Users, show: true },
     { title: "Férias e Folgas", url: "/vacations", icon: Umbrella, show: true },
@@ -60,21 +74,23 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.filter(item => item.show).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end
-                      className="hover:bg-sidebar-accent transition-smooth"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems
+                .filter((item) => item.show)
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end
+                        className="hover:bg-sidebar-accent transition-smooth"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -103,7 +119,6 @@ export function AppSidebar() {
             </SidebarGroup>
           </>
         )}
-
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-1">
@@ -112,9 +127,7 @@ export function AppSidebar() {
         {userName && (
           <div className="flex items-center gap-2 px-2 py-0.5">
             <User className="h-4 w-4 flex-shrink-0" />
-            {!collapsed && (
-              <p className="text-sm font-medium truncate">{userName}</p>
-            )}
+            {!collapsed && <p className="text-sm font-medium truncate">{userName}</p>}
           </div>
         )}
 
