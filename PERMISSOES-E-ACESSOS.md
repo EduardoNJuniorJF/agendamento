@@ -74,6 +74,8 @@ O sistema organiza usuários em setores que determinam a visibilidade dos dados:
 | Administrativo | ✅ | Somente leitura |
 | Dev | ✅ | CRUD completo |
 
+**Nota:** O campo "Observações" pode ser exibido ou oculto no card do calendário via checkbox "Exibir observação no card", configurável no formulário de agendamento.
+
 ### 4.3 Frota (Veículos)
 
 | Setor/Role | Acesso | Permissões |
@@ -135,6 +137,18 @@ O sistema organiza usuários em setores que determinam a visibilidade dos dados:
 | Dev | ✅ | Todos os setores |
 | Users (qualquer setor) | ❌ | Sem acesso |
 
+### 4.9 Implantação (Clientes e Projetos)
+
+| Setor/Role | Acesso | Permissões |
+|------------|--------|------------|
+| Comercial (Admin) | ✅ | CRUD completo |
+| Comercial (User) | ✅ | CRUD completo |
+| Suporte/Desenvolvimento/Loja | ❌ | Sem acesso |
+| Administrativo | ❌ | Sem acesso |
+| Dev | ✅ | CRUD completo |
+
+**Funcionalidade de Integração:** Ao salvar um projeto de implantação, o sistema oferece a opção de gerar automaticamente um agendamento no calendário, vinculando os dados do projeto (título, data de primeiro atendimento, agentes responsáveis).
+
 ---
 
 ## 5. Agentes vs Usuários
@@ -172,6 +186,7 @@ get_user_sector(_user_id uuid) → text
 can_access_calendar(_user_id uuid) → boolean
 can_access_fleet(_user_id uuid) → boolean
 can_access_bonus(_user_id uuid) → boolean
+can_access_implantation(_user_id uuid) → boolean
 can_manage_celebrations(_user_id uuid) → boolean
 
 -- Verifica permissão de edição
@@ -198,6 +213,8 @@ Todas as tabelas possuem RLS habilitado. Exemplos de políticas:
 | `time_bank` | Autenticados | Dev apenas | Dev apenas | Dev apenas |
 | `bonus_settings` | Autenticados | Admin/Dev | Admin/Dev | Admin/Dev |
 | `birthdays` | Autenticados | Managers | Managers | Managers |
+| `implantation_clients` | Dev/Comercial | Dev/Comercial | Dev/Comercial | Dev/Comercial |
+| `implantation_projects` | Dev/Comercial | Dev/Comercial | Dev/Comercial | Dev/Comercial |
 
 ### 7.2 Exemplo de Política com Função
 
@@ -241,17 +258,17 @@ USING (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'dev'));
 ## 9. Resumo Visual de Acesso
 
 ```
-                    │ Calendar │ Fleet │ Bonus │ Vacations │ Celebrations │ Users │ TimeBank
-────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼─────────
-Dev                 │   ✅✏️   │  ✅✏️ │  ✅✏️ │   ✅✏️    │     ✅✏️     │  ✅✏️ │   ✅✏️
-────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼─────────
-Comercial Admin     │   ✅✏️   │  ✅✏️ │  ✅✏️ │   ✅✏️*   │     ✅✏️     │  ✅✏️ │   ❌
-Comercial User      │   ✅     │  ✅   │  ✅   │   ✅      │     ✅       │  ❌   │   ❌
-────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼─────────
-Administrativo Admin│   ✅     │  ✅   │  ✅   │   ✅✏️**  │     ✅✏️     │  ✅✏️*│   ❌
-Administrativo User │   ✅     │  ✅   │  ✅   │   ✅**    │     ✅       │  ❌   │   ❌
-────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼─────────
-Suporte/Dev/Loja    │   ❌     │  ❌   │  ❌   │   ✅✏️*   │     ✅       │  ✅✏️*│   ❌
+                    │ Calendar │ Fleet │ Bonus │ Vacations │ Celebrations │ Users │ TimeBank │ Implantation
+────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼──────────┼──────────────
+Dev                 │   ✅✏️   │  ✅✏️ │  ✅✏️ │   ✅✏️    │     ✅✏️     │  ✅✏️ │   ✅✏️   │     ✅✏️
+────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼──────────┼──────────────
+Comercial Admin     │   ✅✏️   │  ✅✏️ │  ✅✏️ │   ✅✏️*   │     ✅✏️     │  ✅✏️ │   ❌     │     ✅✏️
+Comercial User      │   ✅     │  ✅   │  ✅   │   ✅      │     ✅       │  ❌   │   ❌     │     ✅✏️
+────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼──────────┼──────────────
+Administrativo Admin│   ✅     │  ✅   │  ✅   │   ✅✏️**  │     ✅✏️     │  ✅✏️*│   ❌     │     ❌
+Administrativo User │   ✅     │  ✅   │  ✅   │   ✅**    │     ✅       │  ❌   │   ❌     │     ❌
+────────────────────┼──────────┼───────┼───────┼───────────┼──────────────┼───────┼──────────┼──────────────
+Suporte/Dev/Loja    │   ❌     │  ❌   │  ❌   │   ✅✏️*   │     ✅       │  ✅✏️*│   ❌     │     ❌
 
 ✅ = Acesso de leitura
 ✏️ = Pode editar/criar/excluir
@@ -284,5 +301,5 @@ As operações de CRUD de usuários são realizadas via Edge Functions com valid
 
 ---
 
-*Documento gerado em: Janeiro/2026*
-*Versão do Sistema: Fleet Manager v1.0*
+*Documento atualizado em: Abril/2026*
+*Versão do Sistema: Fleet Manager v1.1*
