@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sector, setSector] = useState<UserSector>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pageOverrides, setPageOverrides] = useState<Record<string, { can_access: boolean; can_edit: boolean }>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,11 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => {
             fetchUserRole(session.user.id);
             fetchUserProfile(session.user.id);
+            fetchPageOverrides(session.user.id);
           }, 0);
         } else {
           setRole(null);
           setSector(null);
           setUserName(null);
+          setPageOverrides({});
         }
       }
     );
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         fetchUserRole(session.user.id);
         fetchUserProfile(session.user.id);
+        fetchPageOverrides(session.user.id);
       } else {
         setLoading(false);
       }
@@ -112,6 +116,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchPageOverrides = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_page_permissions')
+        .select('page_name, can_access, can_edit')
+        .eq('user_id', userId);
+
+      if (!error && data) {
+        const overrides: Record<string, { can_access: boolean; can_edit: boolean }> = {};
+        data.forEach((p) => {
+          overrides[p.page_name] = { can_access: p.can_access, can_edit: p.can_edit };
+        });
+        setPageOverrides(overrides);
+      }
+    } catch (error) {
+      console.error('Error fetching page overrides:', error);
+    }
+  };
+
   const signIn = async (username: string, password: string) => {
     const { data: emailData, error: emailError } = await supabase
       .rpc('get_email_from_username', { _username: username });
@@ -147,57 +170,89 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Dev tem acesso total
   const isDev = () => role === 'dev';
 
+  // Helper: check override first, then fallback
+  const hasAccessOverride = (page: string): boolean | null => {
+    const override = pageOverrides[page];
+    if (override) return override.can_access;
+    return null;
+  };
+
+  const hasEditOverride = (page: string): boolean | null => {
+    const override = pageOverrides[page];
+    if (override) return override.can_edit;
+    return null;
+  };
+
   // Calendário/Agendamentos: Comercial (CRUD), Administrativo (apenas ver)
   const canAccessCalendar = (): boolean => {
     if (isDev()) return true;
+    const override = hasAccessOverride('calendar');
+    if (override !== null) return override;
     return sector === 'Comercial' || sector === 'Administrativo';
   };
 
   const canEditCalendar = (): boolean => {
     if (isDev()) return true;
+    const override = hasEditOverride('calendar');
+    if (override !== null) return override;
     return sector === 'Comercial';
   };
 
   // Frota: Comercial Admin (CRUD), Comercial User (ver), Administrativo (ver)
   const canAccessFleet = (): boolean => {
     if (isDev()) return true;
+    const override = hasAccessOverride('fleet');
+    if (override !== null) return override;
     return sector === 'Comercial' || sector === 'Administrativo';
   };
 
   const canEditFleet = (): boolean => {
     if (isDev()) return true;
+    const override = hasEditOverride('fleet');
+    if (override !== null) return override;
     return sector === 'Comercial' && role === 'admin';
   };
 
   // Bonificação: Comercial (admin: config, user: ver), Administrativo (ver e imprimir)
   const canAccessBonus = (): boolean => {
     if (isDev()) return true;
+    const override = hasAccessOverride('bonus');
+    if (override !== null) return override;
     return sector === 'Comercial' || sector === 'Administrativo';
   };
 
   const canEditBonus = (): boolean => {
     if (isDev()) return true;
+    const override = hasEditOverride('bonus');
+    if (override !== null) return override;
     return sector === 'Comercial' && role === 'admin';
   };
 
   // Equipe: Cada setor vê e gerencia apenas sua equipe (admin), Administrativo vê todos
   const canAccessTeam = (): boolean => {
+    const override = hasAccessOverride('team');
+    if (override !== null) return override;
     return true; // Todos podem acessar
   };
 
   const canEditTeam = (): boolean => {
     if (isDev()) return true;
+    const override = hasEditOverride('team');
+    if (override !== null) return override;
     return role === 'admin';
   };
 
-  // Férias e Folgas: Cada setor vê apenas seu setor (admin edita), Administrativo vê todos e edita todos (alteração solicitada)
+  // Férias e Folgas: Cada setor vê apenas seu setor (admin edita), Administrativo vê todos e edita todos
   const canAccessVacations = (): boolean => {
+    const override = hasAccessOverride('vacations');
+    if (override !== null) return override;
     return true; // Todos podem acessar
   };
 
   const canEditVacations = (): boolean => {
     if (isDev()) return true;
-    // Administrativo pode editar de todos os setores (alteração solicitada)
+    const override = hasEditOverride('vacations');
+    if (override !== null) return override;
     if (sector === 'Administrativo' && role === 'admin') return true;
     return role === 'admin';
   };
@@ -226,8 +281,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Legacy function para compatibilidade
   const canEdit = (page: string): boolean => {
     if (isDev()) return true;
+    
+    // Check override first
+    const editOverride = hasEditOverride(page);
+    if (editOverride !== null) return editOverride;
+    
     if (role === 'admin') {
-      // Admin tem acesso de edição baseado no setor
       switch (page) {
         case 'dashboard':
         case 'calendar':
@@ -246,7 +305,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     if (role === 'user') {
-      // User do Comercial pode editar dashboard e calendar
       if (sector === 'Comercial' && (page === 'dashboard' || page === 'calendar')) return true;
       return false;
     }
