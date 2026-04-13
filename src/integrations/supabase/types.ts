@@ -766,6 +766,7 @@ export type Database = {
       can_access_bonus: { Args: { _user_id: string }; Returns: boolean }
       can_access_calendar: { Args: { _user_id: string }; Returns: boolean }
       can_access_fleet: { Args: { _user_id: string }; Returns: boolean }
+      can_access_implantation: { Args: { _user_id: string }; Returns: boolean }
       can_edit_bonus: { Args: { _user_id: string }; Returns: boolean }
       can_edit_calendar: { Args: { _user_id: string }; Returns: boolean }
       can_edit_fleet: { Args: { _user_id: string }; Returns: boolean }

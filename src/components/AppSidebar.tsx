@@ -45,7 +45,7 @@ export function AppSidebar() {
     { title: "Férias e Folgas", url: "/vacations", icon: Umbrella, show: true },
     { title: "Bonificação", url: "/bonus", icon: Receipt, show: canAccessBonus() },
     { title: "Celebrações", url: "/celebrations", icon: PartyPopper, show: true },
-    { title: "Implantação", url: "/implantation", icon: Rocket, show: role === "dev" },
+    { title: "Implantação", url: "/implantation", icon: Rocket, show: role === "dev" || sector === "Comercial" },
     { title: "Ferramentas Dev", url: "/dev-tools", icon: Shield, show: role === "dev" },
   ];
 
