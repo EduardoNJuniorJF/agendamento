@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sector, setSector] = useState<UserSector>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pageOverrides, setPageOverrides] = useState<Record<string, { can_access: boolean; can_edit: boolean }>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,11 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => {
             fetchUserRole(session.user.id);
             fetchUserProfile(session.user.id);
+            fetchPageOverrides(session.user.id);
           }, 0);
         } else {
           setRole(null);
           setSector(null);
           setUserName(null);
+          setPageOverrides({});
         }
       }
     );
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         fetchUserRole(session.user.id);
         fetchUserProfile(session.user.id);
+        fetchPageOverrides(session.user.id);
       } else {
         setLoading(false);
       }
