@@ -35,6 +35,8 @@ import { UserPlus, Loader2, Pencil, Trash2, Users, UserCheck, Search, ShieldChec
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { Checkbox } from "@/components/ui/checkbox";
 import PermissionsMatrix from "@/components/users/PermissionsMatrix";
+import UserPermissionsEditor from "@/components/users/UserPermissionsEditor";
+import { Lock } from "lucide-react";
 
 interface Agent {
   id: string;
