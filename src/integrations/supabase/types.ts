@@ -660,6 +660,36 @@ export type Database = {
           },
         ]
       }
+      user_page_permissions: {
+        Row: {
+          can_access: boolean
+          can_edit: boolean
+          created_at: string
+          id: string
+          page_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_access?: boolean
+          can_edit?: boolean
+          created_at?: string
+          id?: string
+          page_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_access?: boolean
+          can_edit?: boolean
+          created_at?: string
+          id?: string
+          page_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -781,6 +811,13 @@ export type Database = {
         Returns: boolean
       }
       get_email_from_username: { Args: { _username: string }; Returns: string }
+      get_page_permission: {
+        Args: { _page_name: string; _user_id: string }
+        Returns: {
+          can_access: boolean
+          can_edit: boolean
+        }[]
+      }
       get_upcoming_vacation_reminders: {
         Args: never
         Returns: {
