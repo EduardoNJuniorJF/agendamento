@@ -44,7 +44,6 @@ export function AppSidebar() {
     canAccessCalendar,
     canAccessFleet,
     canAccessBonus,
-    canAccessUserManagement,
   } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
@@ -95,7 +94,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {canAccessUserManagement() && (
+        {role === "dev" && (
           <>
             <Separator className="my-2" />
             <SidebarGroup>
@@ -110,7 +109,7 @@ export function AppSidebar() {
                         activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                       >
                         <UserPlus className="h-4 w-4" />
-                        {!collapsed && <span>Criar Usuários</span>}
+                        {!collapsed && <span>Gestão de Usuários</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
