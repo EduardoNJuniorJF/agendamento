@@ -116,6 +116,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchPageOverrides = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_page_permissions')
+        .select('page_name, can_access, can_edit')
+        .eq('user_id', userId);
+
+      if (!error && data) {
+        const overrides: Record<string, { can_access: boolean; can_edit: boolean }> = {};
+        data.forEach((p) => {
+          overrides[p.page_name] = { can_access: p.can_access, can_edit: p.can_edit };
+        });
+        setPageOverrides(overrides);
+      }
+    } catch (error) {
+      console.error('Error fetching page overrides:', error);
+    }
+  };
+
   const signIn = async (username: string, password: string) => {
     const { data: emailData, error: emailError } = await supabase
       .rpc('get_email_from_username', { _username: username });
