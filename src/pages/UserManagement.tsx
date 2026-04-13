@@ -353,6 +353,10 @@ export default function UserManagement() {
             <ShieldCheck className="h-4 w-4" />
             Permissões
           </TabsTrigger>
+          <TabsTrigger value="access" className="gap-1">
+            <Lock className="h-4 w-4" />
+            Gerenciar Acessos
+          </TabsTrigger>
         </TabsList>
 
         {/* === USERS TAB === */}
@@ -599,6 +603,22 @@ export default function UserManagement() {
             </CardHeader>
             <CardContent>
               <PermissionsMatrix />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* === ACCESS MANAGEMENT TAB === */}
+        <TabsContent value="access">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Gerenciar Acessos Individuais
+              </CardTitle>
+              <CardDescription>Conceda ou retire permissões granulares por usuário e página (overrides sobre as regras padrão de setor/cargo)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UserPermissionsEditor />
             </CardContent>
           </Card>
         </TabsContent>
