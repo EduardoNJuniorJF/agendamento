@@ -428,8 +428,8 @@ export default function NewAppointment() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
-            {/* Project selector - Dev only */}
-            {role === "dev" && projects.length > 0 && (
+            {/* Project selector - visible to anyone who can edit the calendar */}
+            {canEdit("calendar") && projects.length > 0 && (
               <div>
                 <Label className="flex items-center gap-1.5">
                   <FolderOpen className="h-4 w-4" />
